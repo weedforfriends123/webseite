@@ -1,0 +1,224 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* WFF brand font */
+@font-face {
+  font-family: 'Adieu';
+  src: url('/fonts/Adieu-Bold.otf') format('opentype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* brand body + accent fonts */
+@font-face {
+  font-family: 'Ekstra';
+  src: url('/fonts/Ekstra-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Mindflow';
+  src: url('/fonts/Mindflow.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* drinksom-style display fonts */
+@font-face {
+  font-family: 'Druk';
+  src: url('/fonts/drinksom/Druk-Heavy.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Druk Wide';
+  src: url('/fonts/drinksom/DrukWide-Heavy.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'ABC Diatype';
+  src: url('/fonts/drinksom/ABCDiatype-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'ABC Diatype Mono';
+  src: url('/fonts/drinksom/ABCDiatypeMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: auto;
+  overscroll-behavior: none;
+}
+
+body {
+  background: #bcc0ca;
+  color: #35383f;
+  font-family: 'Ekstra', system-ui, sans-serif;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle dot-grain overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(188,192,202,0.015) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  z-index: 998;
+}
+
+::selection {
+  background: rgba(160, 186, 135, 0.25);
+  color: #a0ba87;
+}
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(14, 15, 17, 0.18);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(14, 15, 17, 0.35);
+}
+
+/* Utilities */
+.divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(240, 236, 228, 0.1) 50%,
+    transparent 100%
+  );
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #bcc0ca 0%, #a0ba87 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glow-lime {
+  box-shadow: 0 0 40px rgba(160, 186, 135, 0.3), 0 0 80px rgba(160, 186, 135, 0.12);
+}
+
+.glow-gold {
+  box-shadow: 0 0 40px rgba(25, 7, 88, 0.5), 0 0 80px rgba(25, 7, 88, 0.2);
+}
+
+.glow-indigo {
+  box-shadow: 0 0 50px rgba(123, 111, 212, 0.4), 0 0 100px rgba(123, 111, 212, 0.15);
+}
+
+/* Number accent style */
+.section-number {
+  font-family: var(--font-space-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: rgba(240, 236, 228, 0.2);
+}
+
+/* Shimmer — product CTA */
+@keyframes shimmer-sweep {
+  0%   { transform: translateX(-100%) skewX(-12deg); }
+  100% { transform: translateX(300%)  skewX(-12deg); }
+}
+
+.shimmer-overlay {
+  position: relative;
+  isolation: isolate;
+}
+
+/* MetalButton hover shine sweep */
+@keyframes wff-shine-sweep {
+  0%   { transform: translateX(-130%) skewX(-12deg); }
+  100% { transform: translateX(160%)  skewX(-12deg); }
+}
+
+.wff-metal-btn:hover .wff-shine,
+.wff-metal-btn:focus-visible .wff-shine {
+  animation: wff-shine-sweep 0.55s ease-in-out forwards;
+}
+
+.wff-metal-btn:active .wff-shine {
+  animation: wff-shine-sweep 0.3s ease-in-out forwards;
+}
+
+/* PodBaggie — ripple ring burst on mouse rest */
+@keyframes pod-ripple {
+  from { transform: translate(-50%, -50%) scale(0.1); opacity: 1; }
+  to   { transform: translate(-50%, -50%) scale(1);   opacity: 0; }
+}
+
+/* Hero section — animated colour blobs (pure CSS mesh-gradient effect) */
+@keyframes wff-blob-1 {
+  0%, 100% { transform: translate(0%, 0%)   scale(1);    }
+  50%      { transform: translate(5%, -4%)  scale(1.10); }
+}
+@keyframes wff-blob-2 {
+  0%, 100% { transform: translate(0%, 0%)  scale(1);    }
+  33%      { transform: translate(-6%, 3%) scale(0.92); }
+  66%      { transform: translate(4%, 7%)  scale(1.07); }
+}
+@keyframes wff-blob-3 {
+  0%, 100% { transform: translate(0%, 0%)  scale(1);    }
+  50%      { transform: translate(9%, 5%)  scale(1.08); }
+}
+@keyframes wff-blob-4 {
+  0%, 100% { transform: translate(0%, 0%)   scale(1);    }
+  40%      { transform: translate(-7%, -4%) scale(1.12); }
+  80%      { transform: translate(5%, 3%)   scale(0.95); }
+}
+
+.wff-blob-1 { animation: wff-blob-1  9s ease-in-out infinite; }
+.wff-blob-2 { animation: wff-blob-2 12s ease-in-out infinite; }
+.wff-blob-3 { animation: wff-blob-3 14s ease-in-out infinite; }
+.wff-blob-4 { animation: wff-blob-4 10s ease-in-out infinite; }
+
+
+/* UGC mobile scroll strip — hide scrollbar */
+.hide-scrollbar {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+
+.shimmer-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(201, 168, 76, 0.18) 50%,
+    rgba(201, 168, 76, 0.08) 52%,
+    transparent 65%
+  );
+  animation: shimmer-sweep 4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
