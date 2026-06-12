@@ -40,7 +40,7 @@ export function Loyalty({ user, profile }: Props) {
     <div className="space-y-8">
       <div>
         <p className="font-ekstra uppercase mb-2" style={{ fontSize: 11, letterSpacing: "0.30em", color: "rgba(53,56,63,0.40)" }}>Konto</p>
-        <h1 className="font-druk-wide uppercase leading-none" style={{ fontSize: "clamp(2rem, 5vw, 4rem)", color: TEXT }}>Treuepunkte</h1>
+        <h1 className="font-druk-wide uppercase leading-none" style={{ fontSize: "clamp(1.5rem, 5vw, 4rem)", color: TEXT }}>Treuepunkte</h1>
       </div>
 
       {/* Balance card */}
