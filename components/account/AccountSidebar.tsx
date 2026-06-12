@@ -7,7 +7,7 @@ import type { User } from "@supabase/supabase-js"
 import type { Profile } from "@/lib/hooks/useUser"
 
 const TEXT   = "#35383f"
-const MUTED  = "rgba(53,56,63,0.50)"
+const MUTED  = "rgba(53,56,63,0.45)"
 const DIM    = "rgba(53,56,63,0.10)"
 const ACCENT = "#eddc8c"
 
@@ -16,7 +16,7 @@ const NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
     id: "dashboard",
     label: "Übersicht",
     icon: (
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
         <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
         <rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
       </svg>
@@ -26,7 +26,7 @@ const NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
     id: "orders",
     label: "Bestellungen",
     icon: (
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
         <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" />
         <path d="M16 10a4 4 0 01-8 0" />
       </svg>
@@ -36,7 +36,7 @@ const NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
     id: "profile",
     label: "Profil & Adresse",
     icon: (
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
         <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" />
       </svg>
     ),
@@ -45,7 +45,7 @@ const NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
     id: "loyalty",
     label: "Treuepunkte",
     icon: (
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
       </svg>
     ),
@@ -54,7 +54,7 @@ const NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
     id: "payments",
     label: "Zahlungsmethoden",
     icon: (
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
         <rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" />
       </svg>
     ),
@@ -63,7 +63,7 @@ const NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
     id: "notifications",
     label: "Benachrichtigungen",
     icon: (
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
         <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" />
       </svg>
     ),
@@ -72,7 +72,7 @@ const NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
     id: "password",
     label: "Passwort",
     icon: (
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
         <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
       </svg>
     ),
@@ -80,18 +80,19 @@ const NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
 ]
 
 function Avatar({ initials, size = 44 }: { initials: string; size?: number }) {
-  const hasInitials = initials && initials !== "?"
+  const hasInitials = !!initials
   return (
     <div
       className="shrink-0 flex items-center justify-center overflow-hidden"
-      style={{ width: size, height: size, borderRadius: "50%", background: TEXT, color: "#e8e4dc" }}
+      style={{ width: size, height: size, borderRadius: "50%", background: TEXT }}
     >
       {hasInitials ? (
-        <span style={{ fontFamily: "var(--font-druk-wide, sans-serif)", fontSize: size * 0.32, fontWeight: 700 }}>
+        <span style={{ fontFamily: "var(--font-druk-wide, sans-serif)", fontSize: size * 0.32, fontWeight: 700, color: "#e8e4dc" }}>
           {initials}
         </span>
       ) : (
-        <Image src="/logo.webp" alt="WFF" width={size} height={size} style={{ width: size * 0.7, height: size * 0.7, objectFit: "contain", filter: "brightness(0) invert(1)", opacity: 0.85 }} />
+        <Image src="/logo.webp" alt="WFF" width={size} height={size}
+          style={{ width: size * 0.68, height: size * 0.68, objectFit: "contain", filter: "brightness(0) invert(1)", opacity: 0.85 }} />
       )}
     </div>
   )
@@ -107,9 +108,7 @@ interface Props {
 
 export function AccountSidebar({ active, setActive, onSignOut, user, profile }: Props) {
   const initials = [profile?.first_name, profile?.last_name]
-    .filter(Boolean)
-    .map(n => n![0].toUpperCase())
-    .join("") || (user?.email?.[0].toUpperCase() ?? "")
+    .filter(Boolean).map(n => n![0].toUpperCase()).join("") || (user?.email?.[0].toUpperCase() ?? "")
 
   const displayName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || "Mein Konto"
   const points      = profile?.loyalty_points ?? 0
@@ -119,64 +118,76 @@ export function AccountSidebar({ active, setActive, onSignOut, user, profile }: 
   return (
     <div>
 
-      {/* ── Mobile user info bar ── */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-        className="block md:hidden mb-4"
-        style={{ background: "rgba(255,255,255,0.48)", border: "1px solid rgba(255,255,255,0.70)", borderRadius: 18, padding: "12px 16px" }}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Avatar initials={initials} size={38} />
-            <div>
-              <p className="font-druk-wide uppercase leading-none" style={{ fontSize: "0.78rem", color: TEXT }}>{displayName}</p>
-              <p className="font-ekstra mt-0.5" style={{ fontSize: 9, color: MUTED }}>{points} WFF Punkte</p>
+      {/* ═══════════════════════════════════════════
+          MOBILE  (< md)
+      ═══════════════════════════════════════════ */}
+      <div className="block md:hidden">
+
+        {/* User header row */}
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="flex items-center gap-3 mb-4 px-1"
+        >
+          <Avatar initials={initials} size={40} />
+          <div className="flex-1 min-w-0">
+            <p className="font-druk-wide uppercase leading-none truncate"
+              style={{ fontSize: "0.78rem", color: TEXT }}>{displayName}</p>
+            <div className="flex items-center gap-1 mt-1">
+              <svg width="8" height="8" viewBox="0 0 24 24" fill={ACCENT}>
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+              <span className="font-ekstra" style={{ fontSize: 10, color: MUTED }}>{points} WFF Punkte</span>
             </div>
           </div>
-          <button onClick={onSignOut} className="font-ekstra uppercase" style={{ fontSize: 9, letterSpacing: "0.20em", color: "rgba(53,56,63,0.40)" }}>
-            Abmelden
+          <button
+            onClick={onSignOut}
+            className="flex items-center justify-center shrink-0"
+            style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.50)", border: "1px solid rgba(255,255,255,0.72)" }}
+            aria-label="Abmelden"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={TEXT} strokeWidth="1.8" strokeLinecap="round">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
           </button>
-        </div>
-      </motion.div>
+        </motion.div>
 
-      {/* ── Mobile horizontal tab nav ── */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.1, duration: 0.4 }}
-        className="block md:hidden overflow-x-auto pb-2 mb-6"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
-      >
-        <div className="flex gap-2 w-max">
+        {/* Nav grid — 2 columns */}
+        <div className="grid grid-cols-2 gap-2 mb-6">
           {NAV.map((item, i) => {
             const isActive = active === item.id
             return (
               <motion.button
                 key={item.id}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.12 + i * 0.04, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                initial={{ opacity: 0, scale: 0.94 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.05 + i * 0.04, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                 onClick={() => setActive(item.id)}
-                className="flex flex-col items-center gap-1.5 px-3.5 py-2.5 rounded-xl transition-all duration-200 shrink-0"
+                className="flex items-center gap-3 text-left"
                 style={{
-                  background: isActive ? "rgba(255,255,255,0.72)" : "rgba(255,255,255,0.32)",
-                  border: `1px solid ${isActive ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.45)"}`,
-                  color: isActive ? TEXT : MUTED,
+                  padding: "14px 16px",
+                  borderRadius: 14,
+                  background: isActive ? TEXT : "rgba(255,255,255,0.42)",
+                  border: `1px solid ${isActive ? TEXT : "rgba(255,255,255,0.68)"}`,
+                  color: isActive ? "#e8e4dc" : TEXT,
+                  transition: "all 0.2s ease",
                 }}
               >
-                <span style={{ color: isActive ? TEXT : "rgba(53,56,63,0.40)" }}>{item.icon}</span>
-                <span className="font-ekstra" style={{ fontSize: 9, letterSpacing: "0.12em", whiteSpace: "nowrap", color: isActive ? TEXT : MUTED }}>
-                  {item.label.split(" ")[0]}
+                <span style={{ opacity: isActive ? 1 : 0.45, flexShrink: 0 }}>{item.icon}</span>
+                <span className="font-ekstra leading-tight" style={{ fontSize: "0.78rem", letterSpacing: "0.01em" }}>
+                  {item.label}
                 </span>
               </motion.button>
             )
           })}
         </div>
-      </motion.div>
 
-      {/* ── Desktop full sidebar ── */}
+      </div>
+
+      {/* ═══════════════════════════════════════════
+          DESKTOP  (md+)
+      ═══════════════════════════════════════════ */}
       <div className="hidden md:block space-y-1.5">
 
         {/* User card */}
@@ -187,31 +198,21 @@ export function AccountSidebar({ active, setActive, onSignOut, user, profile }: 
           className="mb-6"
           style={{ padding: "clamp(20px,2.8vh,28px)", borderRadius: 18, background: "rgba(255,255,255,0.48)", border: "1px solid rgba(255,255,255,0.70)" }}
         >
-          {/* Logo */}
           <div className="flex justify-center mb-6">
-            <Image
-              src="/logo.webp"
-              alt="WEEDFORFRIENDS"
-              width={56}
-              height={56}
-              style={{ height: 56, width: 56, filter: "brightness(0)", opacity: 0.72, borderRadius: "50%" }}
-            />
+            <Image src="/logo.webp" alt="WEEDFORFRIENDS" width={56} height={56}
+              style={{ height: 56, width: 56, filter: "brightness(0)", opacity: 0.72, borderRadius: "50%" }} />
           </div>
 
-          {/* Avatar + name */}
           <div className="flex items-center gap-3">
             <Avatar initials={initials} size={44} />
             <div className="min-w-0">
               <p className="font-druk-wide uppercase leading-none truncate" style={{ fontSize: "0.82rem", color: TEXT }}>
                 {displayName}
               </p>
-              <p className="font-ekstra truncate mt-1" style={{ fontSize: 10, color: MUTED }}>
-                {user?.email}
-              </p>
+              <p className="font-ekstra truncate mt-1" style={{ fontSize: 10, color: MUTED }}>{user?.email}</p>
             </div>
           </div>
 
-          {/* Points */}
           <div className="mt-5 pt-4 flex items-center justify-between" style={{ borderTop: `1px solid ${DIM}` }}>
             <span className="font-ekstra uppercase" style={{ fontSize: 9, letterSpacing: "0.22em", color: MUTED }}>Punkte</span>
             <div className="flex items-center gap-1.5">
@@ -236,7 +237,6 @@ export function AccountSidebar({ active, setActive, onSignOut, user, profile }: 
           </div>
         </motion.div>
 
-        {/* Nav items — staggered */}
         {NAV.map((item, i) => {
           const isActive = active === item.id
           return (
@@ -259,7 +259,6 @@ export function AccountSidebar({ active, setActive, onSignOut, user, profile }: 
           )
         })}
 
-        {/* Logout */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
