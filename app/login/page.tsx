@@ -91,27 +91,26 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ background: "#bcc0ca", minHeight: "100vh" }}>
+    <div style={{ background: "#bcc0ca", minHeight: "100vh", overflowX: "hidden" }}>
       <Navbar />
-
-      {/* Ghost text */}
-      <div
-        aria-hidden
-        className="fixed inset-0 flex items-end pointer-events-none select-none overflow-hidden"
-        style={{ zIndex: 0 }}
-      >
-        <p
-          className="font-druk-wide uppercase leading-none w-full text-right"
-          style={{ fontSize: "clamp(10rem, 36vw, 52rem)", color: "rgba(53,56,63,0.034)", letterSpacing: "-0.04em" }}
-        >
-          WFF
-        </p>
-      </div>
 
       <div
         className="relative flex items-center justify-center"
         style={{ zIndex: 1, minHeight: "100vh", padding: "clamp(88px,14vh,140px) clamp(16px,5vw,60px) 80px" }}
       >
+        {/* Ghost text — absolute so it's clipped by the container */}
+        <div
+          aria-hidden
+          className="absolute inset-0 flex items-end pointer-events-none select-none overflow-hidden"
+          style={{ zIndex: 0 }}
+        >
+          <p
+            className="font-druk-wide uppercase leading-none w-full text-right"
+            style={{ fontSize: "clamp(8rem, 30vw, 52rem)", color: "rgba(53,56,63,0.034)", letterSpacing: "-0.04em" }}
+          >
+            WFF
+          </p>
+        </div>
         <div className="w-full" style={{ maxWidth: 496 }}>
 
           {/* ─── Logo ─── */}
@@ -173,7 +172,7 @@ export default function LoginPage() {
                 <div className="mb-10">
                   <h1
                     className="font-druk-wide uppercase leading-none"
-                    style={{ fontSize: "clamp(2.6rem, 7vw, 5rem)", color: TEXT, letterSpacing: "-0.03em" }}
+                    style={{ fontSize: "clamp(2rem, 6.5vw, 5rem)", color: TEXT, letterSpacing: "-0.03em" }}
                   >
                     Willkommen<br />zurück.
                   </h1>
@@ -317,7 +316,7 @@ export default function LoginPage() {
                     <div className="mb-10">
                       <h1
                         className="font-druk-wide uppercase leading-none"
-                        style={{ fontSize: "clamp(2.6rem, 7vw, 5rem)", color: TEXT, letterSpacing: "-0.03em" }}
+                        style={{ fontSize: "clamp(2rem, 6.5vw, 5rem)", color: TEXT, letterSpacing: "-0.03em" }}
                       >
                         Konto<br />erstellen.
                       </h1>
