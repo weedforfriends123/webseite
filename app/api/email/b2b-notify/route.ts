@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   const { company, contact, email, phone, business_type, volume, message } = body
 
   const { error } = await resend.emails.send({
-    from: "WEED FOR FRIENDS <onboarding@resend.dev>",
+    from: "WEED FOR FRIENDS <noreply@weedforfriends.com>",
     to: ["info@weedforfriends.com"],
     subject: `Neue B2B-Anfrage: ${company}`,
     html: `
