@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/Navbar"
@@ -30,17 +30,22 @@ export default function AccountPage() {
   const { user, profile, loading, signOut } = useUser()
   const [active, setActive] = useState<Section>("dashboard")
 
-  if (loading) {
+  // Redirect to home when signed out — useEffect prevents the synchronous
+  // router.push from racing with the onSignOut callback's own push to "/"
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/")
+    }
+  }, [loading, user, router])
+
+  // Show branded loading screen during auth check AND during sign-out transition.
+  // Never return null — that causes the browser default (dark) background to flash.
+  if (loading || !user) {
     return (
       <div style={{ background: "#bcc0ca", minHeight: "100vh" }} className="flex items-center justify-center">
         <div className="w-6 h-6 rounded-full border-2 border-[#35383f] border-t-transparent animate-spin" />
       </div>
     )
-  }
-
-  if (!user) {
-    router.push("/login")
-    return null
   }
 
   const VIEWS: Record<Section, React.ComponentType<{ user: typeof user; profile: typeof profile; signOut: typeof signOut }>> = {

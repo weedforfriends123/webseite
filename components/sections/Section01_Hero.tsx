@@ -88,8 +88,9 @@ export function Section01_Hero() {
           style={{
             flex: 1,
             alignItems: "center",
+            alignContent: "center", // vertically center the stacked rows on mobile
             padding: "clamp(4px,0.8vh,16px) clamp(16px,4vw,72px) clamp(12px,2.5vh,36px)",
-            gap: "clamp(4px,1.5vw,32px)",
+            gap: "clamp(12px,2.5vw,32px)",
             position: "relative", zIndex: 5,
             overflow: "hidden",
           }}
@@ -97,9 +98,11 @@ export function Section01_Hero() {
           {/* ── POUCH COLUMN ────────────────────────────────────────────────── */}
           <div className="flex items-center justify-center" style={{ minHeight: 0 }}>
 
-            {/* MOBILE: simple fade — rendered with CSS, zero JS detection = no hydration mismatch */}
+            {/* MOBILE: initial={false} means the image is visible immediately on page load
+                 (no entrance animation = zero risk of SSR/hydration mismatch).
+                 AnimatePresence only runs exit/enter on STRAIN CHANGE (key change). */}
             <div className="block md:hidden" style={{ position: "relative" }}>
-              <AnimatePresence mode="wait">
+              <AnimatePresence initial={false} mode="wait">
                 <motion.div
                   key={strain.key + "-m"}
                   initial={FADE_ENTER}
@@ -110,7 +113,7 @@ export function Section01_Hero() {
                   <img
                     src={strain.img}
                     alt={`${strain.line1} ${strain.line2}`}
-                    style={{ height: "40vh", width: "auto", objectFit: "contain", userSelect: "none", pointerEvents: "none", display: "block" }}
+                    style={{ height: "45vh", width: "auto", objectFit: "contain", userSelect: "none", pointerEvents: "none", display: "block" }}
                     draggable={false}
                   />
                 </motion.div>
