@@ -99,7 +99,7 @@ export function WFFHeader() {
         className="fixed z-[80] transition-all duration-300"
         style={atHero
           ? { top: 12, left: 16, right: 16 }
-          : { top: 0, left: 0, right: 0, background: "rgba(214,236,194,0.96)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", borderBottom: "1px solid rgba(53,56,63,0.08)" }
+          : { top: 0, left: 0, right: 0, background: "rgba(188,192,202,0.96)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", borderBottom: "1px solid rgba(53,56,63,0.08)" }
         }
       >
         {/* Flat nav center — only shown when scrolled past hero */}

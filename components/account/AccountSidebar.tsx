@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import { motion } from "framer-motion"
 import type { Section } from "@/app/account/page"
 import type { User } from "@supabase/supabase-js"
 import type { Profile } from "@/lib/hooks/useUser"
@@ -78,6 +79,24 @@ const NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
   },
 ]
 
+function Avatar({ initials, size = 44 }: { initials: string; size?: number }) {
+  const hasInitials = initials && initials !== "?"
+  return (
+    <div
+      className="shrink-0 flex items-center justify-center overflow-hidden"
+      style={{ width: size, height: size, borderRadius: "50%", background: TEXT, color: "#e8e4dc" }}
+    >
+      {hasInitials ? (
+        <span style={{ fontFamily: "var(--font-druk-wide, sans-serif)", fontSize: size * 0.32, fontWeight: 700 }}>
+          {initials}
+        </span>
+      ) : (
+        <Image src="/logo.webp" alt="WFF" width={size} height={size} style={{ width: size * 0.7, height: size * 0.7, objectFit: "contain", filter: "brightness(0) invert(1)", opacity: 0.85 }} />
+      )}
+    </div>
+  )
+}
+
 interface Props {
   active: Section
   setActive: (s: Section) => void
@@ -90,127 +109,144 @@ export function AccountSidebar({ active, setActive, onSignOut, user, profile }: 
   const initials = [profile?.first_name, profile?.last_name]
     .filter(Boolean)
     .map(n => n![0].toUpperCase())
-    .join("") || (user?.email?.[0].toUpperCase() ?? "?")
+    .join("") || (user?.email?.[0].toUpperCase() ?? "")
 
   const displayName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || "Mein Konto"
-  const points = profile?.loyalty_points ?? 0
-  const nextReward = 500
-  const progress = Math.min((points / nextReward) * 100, 100)
+  const points      = profile?.loyalty_points ?? 0
+  const nextReward  = 500
+  const progress    = Math.min((points / nextReward) * 100, 100)
 
   return (
     <div>
 
       {/* ── Mobile user info bar ── */}
-      <div className="block md:hidden mb-4 flex items-center justify-between px-4 py-3 rounded-2xl" style={{ background: "rgba(255,255,255,0.48)", border: "1px solid rgba(255,255,255,0.70)" }}>
-        <div className="flex items-center gap-3">
-          <div style={{ width: 36, height: 36, borderRadius: "50%", background: TEXT, color: "#e8e4dc", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontFamily: "var(--font-druk-wide, sans-serif)" }}>
-            {initials}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        className="block md:hidden mb-4"
+        style={{ background: "rgba(255,255,255,0.48)", border: "1px solid rgba(255,255,255,0.70)", borderRadius: 18, padding: "12px 16px" }}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Avatar initials={initials} size={38} />
+            <div>
+              <p className="font-druk-wide uppercase leading-none" style={{ fontSize: "0.78rem", color: TEXT }}>{displayName}</p>
+              <p className="font-ekstra mt-0.5" style={{ fontSize: 9, color: MUTED }}>{points} WFF Punkte</p>
+            </div>
           </div>
-          <div>
-            <p className="font-druk-wide uppercase leading-none" style={{ fontSize: "0.75rem", color: TEXT }}>{displayName}</p>
-            <p className="font-ekstra mt-0.5" style={{ fontSize: 9, color: MUTED }}>{points} WFF Punkte</p>
-          </div>
+          <button onClick={onSignOut} className="font-ekstra uppercase" style={{ fontSize: 9, letterSpacing: "0.20em", color: "rgba(53,56,63,0.40)" }}>
+            Abmelden
+          </button>
         </div>
-        <button onClick={onSignOut} className="font-ekstra uppercase" style={{ fontSize: 9, letterSpacing: "0.20em", color: "rgba(53,56,63,0.40)" }}>
-          Abmelden
-        </button>
-      </div>
+      </motion.div>
 
       {/* ── Mobile horizontal tab nav ── */}
-      <div className="block md:hidden overflow-x-auto pb-2 mb-6" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-        <div className="flex gap-2 w-max px-0">
-          {NAV.map((item) => {
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.1, duration: 0.4 }}
+        className="block md:hidden overflow-x-auto pb-2 mb-6"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
+      >
+        <div className="flex gap-2 w-max">
+          {NAV.map((item, i) => {
             const isActive = active === item.id
             return (
-              <button
+              <motion.button
                 key={item.id}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.12 + i * 0.04, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                 onClick={() => setActive(item.id)}
-                className="flex flex-col items-center gap-1.5 px-4 py-2.5 rounded-xl transition-all duration-150 shrink-0"
+                className="flex flex-col items-center gap-1.5 px-3.5 py-2.5 rounded-xl transition-all duration-200 shrink-0"
                 style={{
-                  background: isActive ? "rgba(255,255,255,0.70)" : "rgba(255,255,255,0.32)",
-                  border: `1px solid ${isActive ? "rgba(255,255,255,0.90)" : "rgba(255,255,255,0.45)"}`,
+                  background: isActive ? "rgba(255,255,255,0.72)" : "rgba(255,255,255,0.32)",
+                  border: `1px solid ${isActive ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.45)"}`,
                   color: isActive ? TEXT : MUTED,
                 }}
               >
                 <span style={{ color: isActive ? TEXT : "rgba(53,56,63,0.40)" }}>{item.icon}</span>
-                <span className="font-ekstra" style={{ fontSize: 9, letterSpacing: "0.14em", whiteSpace: "nowrap", color: isActive ? TEXT : MUTED }}>
+                <span className="font-ekstra" style={{ fontSize: 9, letterSpacing: "0.12em", whiteSpace: "nowrap", color: isActive ? TEXT : MUTED }}>
                   {item.label.split(" ")[0]}
                 </span>
-              </button>
+              </motion.button>
             )
           })}
         </div>
-      </div>
+      </motion.div>
 
-      {/* ── Desktop full sidebar (hidden on mobile) ── */}
+      {/* ── Desktop full sidebar ── */}
       <div className="hidden md:block space-y-1.5">
 
         {/* User card */}
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
           className="mb-6"
-          style={{
-            padding: "clamp(18px,2.5vh,24px)",
-            borderRadius: 18,
-            background: "rgba(255,255,255,0.48)",
-            border: "1px solid rgba(255,255,255,0.70)",
-          }}
+          style={{ padding: "clamp(20px,2.8vh,28px)", borderRadius: 18, background: "rgba(255,255,255,0.48)", border: "1px solid rgba(255,255,255,0.70)" }}
         >
-          <div className="flex justify-center mb-5">
-            <Image src="/logo.webp" alt="WFF" width={80} height={28} style={{ height: 28, width: "auto", filter: "brightness(0)", opacity: 0.7 }} />
+          {/* Logo */}
+          <div className="flex justify-center mb-6">
+            <Image
+              src="/logo.webp"
+              alt="WEEDFORFRIENDS"
+              width={56}
+              height={56}
+              style={{ height: 56, width: 56, filter: "brightness(0)", opacity: 0.72, borderRadius: "50%" }}
+            />
           </div>
+
+          {/* Avatar + name */}
           <div className="flex items-center gap-3">
-            <div
-              className="shrink-0 flex items-center justify-center"
-              style={{
-                width: 44, height: 44, borderRadius: "50%",
-                background: TEXT, color: "#e8e4dc",
-                fontFamily: "var(--font-druk-wide, sans-serif)",
-                fontSize: 14, fontWeight: 700,
-              }}
-            >
-              {initials}
-            </div>
+            <Avatar initials={initials} size={44} />
             <div className="min-w-0">
               <p className="font-druk-wide uppercase leading-none truncate" style={{ fontSize: "0.82rem", color: TEXT }}>
                 {displayName}
               </p>
-              <p className="font-ekstra truncate mt-0.5" style={{ fontSize: 10, color: MUTED }}>
+              <p className="font-ekstra truncate mt-1" style={{ fontSize: 10, color: MUTED }}>
                 {user?.email}
               </p>
             </div>
           </div>
 
           {/* Points */}
-          <div
-            className="mt-5 pt-4 flex items-center justify-between"
-            style={{ borderTop: `1px solid ${DIM}` }}
-          >
-            <span className="font-ekstra uppercase" style={{ fontSize: 9, letterSpacing: "0.22em", color: MUTED }}>
-              Punkte
-            </span>
+          <div className="mt-5 pt-4 flex items-center justify-between" style={{ borderTop: `1px solid ${DIM}` }}>
+            <span className="font-ekstra uppercase" style={{ fontSize: 9, letterSpacing: "0.22em", color: MUTED }}>Punkte</span>
             <div className="flex items-center gap-1.5">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill={ACCENT}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill={ACCENT}>
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
               <span className="font-druk-wide" style={{ fontSize: "0.88rem", color: TEXT }}>{points} WFF</span>
             </div>
           </div>
           <div className="mt-2">
             <div style={{ height: 3, borderRadius: 9999, background: DIM, overflow: "hidden" }}>
-              <div style={{ height: "100%", background: ACCENT, borderRadius: 9999, width: `${progress}%`, transition: "width 0.6s" }} />
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+                style={{ height: "100%", background: ACCENT, borderRadius: 9999 }}
+              />
             </div>
             <p className="font-ekstra mt-1.5" style={{ fontSize: 8, letterSpacing: "0.16em", color: "rgba(53,56,63,0.30)" }}>
               {nextReward - points} Punkte bis zur nächsten Prämie
             </p>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Nav */}
-        {NAV.map((item) => {
+        {/* Nav items — staggered */}
+        {NAV.map((item, i) => {
           const isActive = active === item.id
           return (
-            <button
+            <motion.button
               key={item.id}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.18 + i * 0.05, duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
               onClick={() => setActive(item.id)}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-150 text-left"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-left"
               style={{
                 background: isActive ? "rgba(255,255,255,0.60)" : "transparent",
                 border: `1px solid ${isActive ? "rgba(255,255,255,0.80)" : "transparent"}`,
@@ -219,15 +255,21 @@ export function AccountSidebar({ active, setActive, onSignOut, user, profile }: 
             >
               <span style={{ color: isActive ? TEXT : "rgba(53,56,63,0.36)" }}>{item.icon}</span>
               <span className="font-ekstra" style={{ fontSize: "0.82rem" }}>{item.label}</span>
-            </button>
+            </motion.button>
           )
         })}
 
         {/* Logout */}
-        <div className="pt-3 mt-1" style={{ borderTop: `1px solid ${DIM}` }}>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.60, duration: 0.35 }}
+          className="pt-3 mt-1"
+          style={{ borderTop: `1px solid ${DIM}` }}
+        >
           <button
             onClick={onSignOut}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-150 text-left"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-left hover:opacity-70"
             style={{ color: "rgba(53,56,63,0.35)" }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
@@ -235,7 +277,7 @@ export function AccountSidebar({ active, setActive, onSignOut, user, profile }: 
             </svg>
             <span className="font-ekstra" style={{ fontSize: "0.82rem" }}>Abmelden</span>
           </button>
-        </div>
+        </motion.div>
 
       </div>
     </div>

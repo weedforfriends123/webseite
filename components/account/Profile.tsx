@@ -41,7 +41,9 @@ function Field({
         {label}
       </label>
       <input
-        type={type} value={value} placeholder={placeholder}
+        type={type === "date" ? "text" : type}
+        inputMode={type === "date" ? "numeric" : undefined}
+        value={value} placeholder={type === "date" ? "TT.MM.JJJJ" : placeholder}
         onChange={e => onChange(e.target.value)}
         onFocus={() => onFocus(name)} onBlur={onBlur}
         className={cls}

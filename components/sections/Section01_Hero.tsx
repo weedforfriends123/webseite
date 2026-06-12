@@ -91,12 +91,6 @@ export function Section01_Hero() {
         >
           {/* ── POUCH COLUMN ────────────────────────────────────────────────── */}
           <div className="flex items-center justify-center relative" style={{ height: "100%", minHeight: 0 }}>
-            <div aria-hidden style={{
-              position: "absolute", bottom: "6%", left: "50%",
-              transform: "translateX(-50%)",
-              width: "40%", height: "8%", borderRadius: "50%",
-              background: "rgba(0,0,0,0.40)", filter: "blur(24px)", zIndex: 1,
-            }} />
             <AnimatePresence mode="wait">
               <motion.div
                 key={strain.key}
@@ -111,19 +105,26 @@ export function Section01_Hero() {
                 className="mt-10 md:mt-0"
                 style={{ position: "relative", zIndex: 2, display: "flex", alignItems: "center", justifyContent: "center" }}
               >
-                <motion.div animate={{ y: [0, -20, 0] }} transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut" }}>
+                <motion.div
+                  className="hidden md:block"
+                  animate={{ y: [0, -20, 0] }}
+                  transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut" }}
+                >
                   <img
                     src={strain.img}
                     alt={`${strain.line1} ${strain.line2}`}
                     className="h-[40vh] md:h-[68vh]"
-                    style={{
-                      maxHeight: 820, width: "auto", objectFit: "contain",
-                      filter: "drop-shadow(0 36px 52px rgba(0,0,0,0.55)) drop-shadow(0 8px 24px rgba(0,0,0,0.30))",
-                      userSelect: "none", pointerEvents: "none",
-                    }}
+                    style={{ maxHeight: 820, width: "auto", objectFit: "contain", userSelect: "none", pointerEvents: "none" }}
                     draggable={false}
                   />
                 </motion.div>
+                <img
+                  src={strain.img}
+                  alt={`${strain.line1} ${strain.line2}`}
+                  className="block md:hidden h-[40vh]"
+                  style={{ width: "auto", objectFit: "contain", userSelect: "none", pointerEvents: "none" }}
+                  draggable={false}
+                />
               </motion.div>
             </AnimatePresence>
           </div>
