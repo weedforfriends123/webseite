@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useEffect } from "react"
+import { useRef, useState } from "react"
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion"
 
 const BG    = "#bcc0ca"
@@ -40,19 +40,16 @@ function StatStrip() {
   )
 }
 
+// Shared fade transition — no y-offset, works identically on SSR and client
+const FADE_ENTER = { opacity: 0, scale: 0.90 }
+const FADE_SHOW  = { opacity: 1, scale: 1 }
+const FADE_EXIT  = { opacity: 0, scale: 1.06 }
+const FADE_TRANS = { duration: 0.38, ease: [0.16, 1, 0.3, 1] as const }
 
 export function Section01_Hero() {
   const outerRef  = useRef<HTMLDivElement>(null)
   const activeRef = useRef(0)
   const [activeIndex, setActiveIndex] = useState(0)
-  const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768)
-    check()
-    window.addEventListener("resize", check, { passive: true })
-    return () => window.removeEventListener("resize", check)
-  }, [])
 
   const { scrollYProgress } = useScroll({ target: outerRef, offset: ["start start", "end start"] })
 
@@ -98,46 +95,57 @@ export function Section01_Hero() {
           }}
         >
           {/* ── POUCH COLUMN ────────────────────────────────────────────────── */}
-          <div className="flex items-center justify-center relative" style={{ height: "100%", minHeight: 0 }}>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={strain.key}
-                initial={isMobile ? { opacity: 0 } : { y: "-110%", rotate: -10, opacity: 0 }}
-                animate={isMobile ? { opacity: 1 } : { y: 0, rotate: 0, opacity: 1 }}
-                exit={isMobile ? { opacity: 0 } : { y: "60%", rotate: 8, opacity: 0, scale: 0.88 }}
-                transition={isMobile
-                  ? { duration: 0.22, ease: "easeOut" }
-                  : {
-                      y: { type: "spring", stiffness: 200, damping: 22, mass: 0.9 },
-                      rotate: { type: "spring", stiffness: 180, damping: 20 },
-                      opacity: { duration: 0.2 },
-                    }
-                }
-                className="mt-10 md:mt-0"
-                style={{ position: "relative", zIndex: 2, display: "flex", alignItems: "center", justifyContent: "center" }}
-              >
+          <div className="flex items-center justify-center" style={{ minHeight: 0 }}>
+
+            {/* MOBILE: simple fade — rendered with CSS, zero JS detection = no hydration mismatch */}
+            <div className="block md:hidden" style={{ position: "relative" }}>
+              <AnimatePresence mode="wait">
                 <motion.div
-                  className="hidden md:block"
-                  animate={{ y: [0, -20, 0] }}
-                  transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut" }}
+                  key={strain.key + "-m"}
+                  initial={FADE_ENTER}
+                  animate={FADE_SHOW}
+                  exit={FADE_EXIT}
+                  transition={FADE_TRANS}
                 >
                   <img
                     src={strain.img}
                     alt={`${strain.line1} ${strain.line2}`}
-                    className="h-[40vh] md:h-[68vh]"
-                    style={{ maxHeight: 820, width: "auto", objectFit: "contain", userSelect: "none", pointerEvents: "none" }}
+                    style={{ height: "40vh", width: "auto", objectFit: "contain", userSelect: "none", pointerEvents: "none", display: "block" }}
                     draggable={false}
                   />
                 </motion.div>
-                <img
-                  src={strain.img}
-                  alt={`${strain.line1} ${strain.line2}`}
-                  className="block md:hidden h-[40vh]"
-                  style={{ width: "auto", objectFit: "contain", userSelect: "none", pointerEvents: "none" }}
-                  draggable={false}
-                />
-              </motion.div>
-            </AnimatePresence>
+              </AnimatePresence>
+            </div>
+
+            {/* DESKTOP: spring fly-in + ambient float */}
+            <div className="hidden md:block" style={{ position: "relative" }}>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={strain.key + "-d"}
+                  initial={{ y: "-110%", rotate: -10, opacity: 0 }}
+                  animate={{ y: 0, rotate: 0, opacity: 1 }}
+                  exit={{ y: "60%", rotate: 8, opacity: 0, scale: 0.88 }}
+                  transition={{
+                    y: { type: "spring", stiffness: 200, damping: 22, mass: 0.9 },
+                    rotate: { type: "spring", stiffness: 180, damping: 20 },
+                    opacity: { duration: 0.2 },
+                  }}
+                >
+                  <motion.div
+                    animate={{ y: [0, -20, 0] }}
+                    transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <img
+                      src={strain.img}
+                      alt={`${strain.line1} ${strain.line2}`}
+                      style={{ height: "68vh", maxHeight: 820, width: "auto", objectFit: "contain", userSelect: "none", pointerEvents: "none", display: "block" }}
+                      draggable={false}
+                    />
+                  </motion.div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
           </div>
 
           {/* ── INFO COLUMN ─────────────────────────────────────────────────── */}
