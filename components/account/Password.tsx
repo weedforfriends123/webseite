@@ -9,8 +9,8 @@ const TEXT  = "#35383f"
 const MUTED = "rgba(53,56,63,0.55)"
 const DIM   = "rgba(53,56,63,0.10)"
 
-const IS  = { background: "rgba(255,255,255,0.72)", border: "1.5px solid rgba(53,56,63,0.18)", color: TEXT, boxShadow: "inset 0 1px 2px rgba(53,56,63,0.04)" } as React.CSSProperties
-const IFS = { background: "rgba(255,255,255,0.96)", border: "1.5px solid rgba(53,56,63,0.50)", color: TEXT, outline: "none", boxShadow: "0 0 0 3px rgba(53,56,63,0.07)" } as React.CSSProperties
+const IS  = { background: "rgba(255,255,255,0.72)", border: "1.5px solid rgba(53,56,63,0.18)", color: TEXT, boxShadow: "inset 0 1px 2px rgba(53,56,63,0.04)", fontSize: "max(16px, 0.875rem)" } as React.CSSProperties
+const IFS = { background: "rgba(255,255,255,0.96)", border: "1.5px solid rgba(53,56,63,0.50)", color: TEXT, outline: "none", boxShadow: "0 0 0 3px rgba(53,56,63,0.07)", fontSize: "max(16px, 0.875rem)" } as React.CSSProperties
 
 interface Props { user: User | null; profile: Profile | null; signOut: () => void }
 
@@ -24,7 +24,7 @@ export function Password({ }: Props) {
   const [msg,      setMsg]    = useState("")
   const [isErr,    setIsErr]  = useState(false)
 
-  const cls = "w-full px-5 py-4 rounded-xl text-sm placeholder:opacity-40 font-ekstra"
+  const cls = "w-full px-5 py-4 rounded-xl placeholder:opacity-40 font-ekstra"
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()

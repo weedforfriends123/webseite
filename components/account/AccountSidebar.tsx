@@ -98,98 +98,145 @@ export function AccountSidebar({ active, setActive, onSignOut, user, profile }: 
   const progress = Math.min((points / nextReward) * 100, 100)
 
   return (
-    <div className="space-y-1.5">
+    <div>
 
-      {/* User card */}
-      <div
-        className="mb-6"
-        style={{
-          padding: "clamp(18px,2.5vh,24px)",
-          borderRadius: 18,
-          background: "rgba(255,255,255,0.48)",
-          border: "1px solid rgba(255,255,255,0.70)",
-        }}
-      >
-        <div className="flex justify-center mb-5">
-          <Image src="/logo.webp" alt="WFF" width={80} height={28} style={{ height: 28, width: "auto", filter: "brightness(0)", opacity: 0.7 }} />
-        </div>
+      {/* ── Mobile user info bar ── */}
+      <div className="block md:hidden mb-4 flex items-center justify-between px-4 py-3 rounded-2xl" style={{ background: "rgba(255,255,255,0.48)", border: "1px solid rgba(255,255,255,0.70)" }}>
         <div className="flex items-center gap-3">
-          <div
-            className="shrink-0 flex items-center justify-center"
-            style={{
-              width: 44, height: 44, borderRadius: "50%",
-              background: TEXT, color: "#e8e4dc",
-              fontFamily: "var(--font-druk-wide, sans-serif)",
-              fontSize: 14, fontWeight: 700,
-            }}
-          >
+          <div style={{ width: 36, height: 36, borderRadius: "50%", background: TEXT, color: "#e8e4dc", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontFamily: "var(--font-druk-wide, sans-serif)" }}>
             {initials}
           </div>
-          <div className="min-w-0">
-            <p className="font-druk-wide uppercase leading-none truncate" style={{ fontSize: "0.82rem", color: TEXT }}>
-              {displayName}
-            </p>
-            <p className="font-ekstra truncate mt-0.5" style={{ fontSize: 10, color: MUTED }}>
-              {user?.email}
-            </p>
+          <div>
+            <p className="font-druk-wide uppercase leading-none" style={{ fontSize: "0.75rem", color: TEXT }}>{displayName}</p>
+            <p className="font-ekstra mt-0.5" style={{ fontSize: 9, color: MUTED }}>{points} WFF Punkte</p>
           </div>
         </div>
+        <button onClick={onSignOut} className="font-ekstra uppercase" style={{ fontSize: 9, letterSpacing: "0.20em", color: "rgba(53,56,63,0.40)" }}>
+          Abmelden
+        </button>
+      </div>
 
-        {/* Points */}
-        <div
-          className="mt-5 pt-4 flex items-center justify-between"
-          style={{ borderTop: `1px solid ${DIM}` }}
-        >
-          <span className="font-ekstra uppercase" style={{ fontSize: 9, letterSpacing: "0.22em", color: MUTED }}>
-            Punkte
-          </span>
-          <div className="flex items-center gap-1.5">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill={ACCENT}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-            <span className="font-druk-wide" style={{ fontSize: "0.88rem", color: TEXT }}>{points} WFF</span>
-          </div>
-        </div>
-        <div className="mt-2">
-          <div style={{ height: 3, borderRadius: 9999, background: DIM, overflow: "hidden" }}>
-            <div style={{ height: "100%", background: ACCENT, borderRadius: 9999, width: `${progress}%`, transition: "width 0.6s" }} />
-          </div>
-          <p className="font-ekstra mt-1.5" style={{ fontSize: 8, letterSpacing: "0.16em", color: "rgba(53,56,63,0.30)" }}>
-            {nextReward - points} Punkte bis zur nächsten Prämie
-          </p>
+      {/* ── Mobile horizontal tab nav ── */}
+      <div className="block md:hidden overflow-x-auto pb-2 mb-6" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+        <div className="flex gap-2 w-max px-0">
+          {NAV.map((item) => {
+            const isActive = active === item.id
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActive(item.id)}
+                className="flex flex-col items-center gap-1.5 px-4 py-2.5 rounded-xl transition-all duration-150 shrink-0"
+                style={{
+                  background: isActive ? "rgba(255,255,255,0.70)" : "rgba(255,255,255,0.32)",
+                  border: `1px solid ${isActive ? "rgba(255,255,255,0.90)" : "rgba(255,255,255,0.45)"}`,
+                  color: isActive ? TEXT : MUTED,
+                }}
+              >
+                <span style={{ color: isActive ? TEXT : "rgba(53,56,63,0.40)" }}>{item.icon}</span>
+                <span className="font-ekstra" style={{ fontSize: 9, letterSpacing: "0.14em", whiteSpace: "nowrap", color: isActive ? TEXT : MUTED }}>
+                  {item.label.split(" ")[0]}
+                </span>
+              </button>
+            )
+          })}
         </div>
       </div>
 
-      {/* Nav */}
-      {NAV.map((item) => {
-        const isActive = active === item.id
-        return (
-          <button
-            key={item.id}
-            onClick={() => setActive(item.id)}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-150 text-left"
-            style={{
-              background: isActive ? "rgba(255,255,255,0.60)" : "transparent",
-              border: `1px solid ${isActive ? "rgba(255,255,255,0.80)" : "transparent"}`,
-              color: isActive ? TEXT : MUTED,
-            }}
-          >
-            <span style={{ color: isActive ? TEXT : "rgba(53,56,63,0.36)" }}>{item.icon}</span>
-            <span className="font-ekstra" style={{ fontSize: "0.82rem" }}>{item.label}</span>
-          </button>
-        )
-      })}
+      {/* ── Desktop full sidebar (hidden on mobile) ── */}
+      <div className="hidden md:block space-y-1.5">
 
-      {/* Logout */}
-      <div className="pt-3 mt-1" style={{ borderTop: `1px solid ${DIM}` }}>
-        <button
-          onClick={onSignOut}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-150 text-left"
-          style={{ color: "rgba(53,56,63,0.35)" }}
+        {/* User card */}
+        <div
+          className="mb-6"
+          style={{
+            padding: "clamp(18px,2.5vh,24px)",
+            borderRadius: 18,
+            background: "rgba(255,255,255,0.48)",
+            border: "1px solid rgba(255,255,255,0.70)",
+          }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
-          </svg>
-          <span className="font-ekstra" style={{ fontSize: "0.82rem" }}>Abmelden</span>
-        </button>
+          <div className="flex justify-center mb-5">
+            <Image src="/logo.webp" alt="WFF" width={80} height={28} style={{ height: 28, width: "auto", filter: "brightness(0)", opacity: 0.7 }} />
+          </div>
+          <div className="flex items-center gap-3">
+            <div
+              className="shrink-0 flex items-center justify-center"
+              style={{
+                width: 44, height: 44, borderRadius: "50%",
+                background: TEXT, color: "#e8e4dc",
+                fontFamily: "var(--font-druk-wide, sans-serif)",
+                fontSize: 14, fontWeight: 700,
+              }}
+            >
+              {initials}
+            </div>
+            <div className="min-w-0">
+              <p className="font-druk-wide uppercase leading-none truncate" style={{ fontSize: "0.82rem", color: TEXT }}>
+                {displayName}
+              </p>
+              <p className="font-ekstra truncate mt-0.5" style={{ fontSize: 10, color: MUTED }}>
+                {user?.email}
+              </p>
+            </div>
+          </div>
+
+          {/* Points */}
+          <div
+            className="mt-5 pt-4 flex items-center justify-between"
+            style={{ borderTop: `1px solid ${DIM}` }}
+          >
+            <span className="font-ekstra uppercase" style={{ fontSize: 9, letterSpacing: "0.22em", color: MUTED }}>
+              Punkte
+            </span>
+            <div className="flex items-center gap-1.5">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill={ACCENT}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+              <span className="font-druk-wide" style={{ fontSize: "0.88rem", color: TEXT }}>{points} WFF</span>
+            </div>
+          </div>
+          <div className="mt-2">
+            <div style={{ height: 3, borderRadius: 9999, background: DIM, overflow: "hidden" }}>
+              <div style={{ height: "100%", background: ACCENT, borderRadius: 9999, width: `${progress}%`, transition: "width 0.6s" }} />
+            </div>
+            <p className="font-ekstra mt-1.5" style={{ fontSize: 8, letterSpacing: "0.16em", color: "rgba(53,56,63,0.30)" }}>
+              {nextReward - points} Punkte bis zur nächsten Prämie
+            </p>
+          </div>
+        </div>
+
+        {/* Nav */}
+        {NAV.map((item) => {
+          const isActive = active === item.id
+          return (
+            <button
+              key={item.id}
+              onClick={() => setActive(item.id)}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-150 text-left"
+              style={{
+                background: isActive ? "rgba(255,255,255,0.60)" : "transparent",
+                border: `1px solid ${isActive ? "rgba(255,255,255,0.80)" : "transparent"}`,
+                color: isActive ? TEXT : MUTED,
+              }}
+            >
+              <span style={{ color: isActive ? TEXT : "rgba(53,56,63,0.36)" }}>{item.icon}</span>
+              <span className="font-ekstra" style={{ fontSize: "0.82rem" }}>{item.label}</span>
+            </button>
+          )
+        })}
+
+        {/* Logout */}
+        <div className="pt-3 mt-1" style={{ borderTop: `1px solid ${DIM}` }}>
+          <button
+            onClick={onSignOut}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-150 text-left"
+            style={{ color: "rgba(53,56,63,0.35)" }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            <span className="font-ekstra" style={{ fontSize: "0.82rem" }}>Abmelden</span>
+          </button>
+        </div>
+
       </div>
     </div>
   )

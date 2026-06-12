@@ -65,6 +65,7 @@ const IS = {
   color: TEXT,
   fontFamily: "inherit",
   boxShadow: "inset 0 1px 2px rgba(53,56,63,0.04)",
+  fontSize: "max(16px, 0.875rem)",
 } as React.CSSProperties
 
 const IFS = {
@@ -74,6 +75,7 @@ const IFS = {
   fontFamily: "inherit",
   outline: "none",
   boxShadow: "0 0 0 3px rgba(53,56,63,0.07)",
+  fontSize: "max(16px, 0.875rem)",
 } as React.CSSProperties
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -136,7 +138,7 @@ export default function B2BPage() {
       >
         <p
           className="font-druk-wide uppercase leading-none"
-          style={{ fontSize: "clamp(14rem, 42vw, 56rem)", color: "rgba(53,56,63,0.036)", letterSpacing: "-0.04em" }}
+          style={{ fontSize: "clamp(8rem, 42vw, 56rem)", color: "rgba(53,56,63,0.036)", letterSpacing: "-0.04em" }}
         >
           B2B
         </p>
@@ -145,7 +147,7 @@ export default function B2BPage() {
       <div className="relative" style={{ zIndex: 1 }}>
         <div
           className="max-w-7xl mx-auto"
-          style={{ padding: "clamp(108px,16vh,160px) clamp(24px,5vw,80px) clamp(80px,12vh,140px)" }}
+          style={{ padding: "clamp(88px,14vh,160px) clamp(16px,5vw,80px) clamp(64px,10vh,140px)" }}
         >
 
           {/* ─── SECTION 1 — Headline ─── */}
@@ -178,7 +180,7 @@ export default function B2BPage() {
             transition={{ delay: 0.18, duration: 0.7 }}
           >
             <div
-              className="flex flex-wrap"
+              className="grid grid-cols-2 sm:grid-cols-4"
               style={{
                 borderTop: `1px solid ${DIM}`,
                 borderBottom: `1px solid ${DIM}`,
@@ -187,12 +189,13 @@ export default function B2BPage() {
               {STATS.map((s, i) => (
                 <div
                   key={s.label}
-                  className="flex flex-col py-7"
-                  style={{
-                    paddingLeft:  i === 0 ? 0 : "clamp(28px,3.8vw,56px)",
-                    paddingRight: "clamp(28px,3.8vw,56px)",
-                    borderLeft:   i === 0 ? "none" : `1px solid ${DIM}`,
-                  }}
+                  className={[
+                    "flex flex-col py-6 sm:py-7 px-4 sm:px-8",
+                    (i === 1 || i === 3) ? "border-l border-[rgba(53,56,63,0.12)]" : "",
+                    i >= 2 ? "border-t border-[rgba(53,56,63,0.12)] sm:border-t-0" : "",
+                    i >= 1 ? "sm:border-l sm:border-[rgba(53,56,63,0.12)]" : "",
+                  ].join(" ")}
+                  style={i === 0 ? { paddingLeft: 0 } : undefined}
                 >
                   <span
                     className="font-druk-wide uppercase leading-none"

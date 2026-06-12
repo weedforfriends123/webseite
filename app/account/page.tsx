@@ -59,12 +59,12 @@ export default function AccountPage() {
 
       <div
         className="max-w-7xl mx-auto"
-        style={{ padding: "clamp(100px,14vh,140px) clamp(20px,5vw,80px) clamp(60px,10vh,100px)" }}
+        style={{ padding: "clamp(88px,13vh,140px) clamp(16px,5vw,80px) clamp(48px,8vh,100px)" }}
       >
         <div className="flex flex-col md:flex-row gap-10">
 
-          <div className="w-full md:w-60 shrink-0">
-            <AccountSidebar active={active} setActive={setActive} onSignOut={async () => { await signOut(); router.push("/") }} />
+          <div className="w-full md:w-64 shrink-0">
+            <AccountSidebar active={active} setActive={setActive} user={user} profile={profile} onSignOut={async () => { await signOut(); router.push("/") }} />
           </div>
 
           <div className="flex-1 min-w-0">

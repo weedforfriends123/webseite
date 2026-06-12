@@ -17,6 +17,7 @@ const IS = {
   border: "1.5px solid rgba(53,56,63,0.20)",
   color: TEXT,
   boxShadow: "inset 0 1px 2px rgba(53,56,63,0.04)",
+  fontSize: "max(16px, 0.875rem)",
 } as React.CSSProperties
 
 const IFS = {
@@ -25,6 +26,7 @@ const IFS = {
   color: TEXT,
   outline: "none",
   boxShadow: "0 0 0 3px rgba(53,56,63,0.07)",
+  fontSize: "max(16px, 0.875rem)",
 } as React.CSSProperties
 
 export default function LoginPage() {
@@ -108,7 +110,7 @@ export default function LoginPage() {
 
       <div
         className="relative flex items-center justify-center"
-        style={{ zIndex: 1, minHeight: "100vh", padding: "clamp(100px,14vh,140px) clamp(20px,5vw,60px) 80px" }}
+        style={{ zIndex: 1, minHeight: "100vh", padding: "clamp(88px,14vh,140px) clamp(16px,5vw,60px) 80px" }}
       >
         <div className="w-full" style={{ maxWidth: 496 }}>
 
@@ -326,7 +328,7 @@ export default function LoginPage() {
 
                     <form onSubmit={handleRegister} className="space-y-5">
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-2 gap-3 sm:gap-4">
                         {[
                           { label: "Vorname", val: first, set: setFirst, key: "fn" },
                           { label: "Nachname", val: last,  set: setLast,  key: "ln" },

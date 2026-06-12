@@ -25,7 +25,7 @@ export default function CartPage() {
 
       <div
         className="max-w-6xl mx-auto"
-        style={{ padding: "clamp(108px,16vh,156px) clamp(24px,5vw,80px) clamp(80px,12vh,120px)" }}
+        style={{ padding: "clamp(88px,14vh,156px) clamp(16px,5vw,80px) clamp(60px,10vh,120px)" }}
       >
 
         {/* ─── HEADER ─── */}
@@ -111,10 +111,10 @@ export default function CartPage() {
         ) : (
 
           /* ─── ITEMS + SUMMARY ─── */
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-14 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8 lg:gap-14 items-start">
 
             {/* LEFT — items */}
-            <div>
+            <div className="order-2 lg:order-1">
 
               {/* Free shipping indicator */}
               <motion.div
@@ -172,7 +172,7 @@ export default function CartPage() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, height: 0, overflow: "hidden" }}
                       transition={{ duration: 0.22 }}
-                      className="flex items-center gap-5 py-6"
+                      className="flex items-start gap-3 sm:gap-5 py-5 sm:py-6"
                       style={{ borderBottom: `1px solid ${DIM}` }}
                     >
                       {/* Image slot */}
@@ -218,20 +218,20 @@ export default function CartPage() {
                         <button
                           onClick={() => dispatch({ type: "SET_QTY", id: item.id, pack: item.pack, qty: item.qty - 1 })}
                           className="flex items-center justify-center transition-all duration-150"
-                          style={{ width: 36, height: 36, color: TEXT, fontSize: 18, lineHeight: 1 }}
+                          style={{ width: 40, height: 40, color: TEXT, fontSize: 18, lineHeight: 1 }}
                         >
                           −
                         </button>
                         <span
                           className="font-ekstra"
-                          style={{ minWidth: 28, textAlign: "center", color: TEXT, fontSize: "0.88rem", borderLeft: `1px solid rgba(53,56,63,0.12)`, borderRight: `1px solid rgba(53,56,63,0.12)`, height: 36, lineHeight: "36px" }}
+                          style={{ minWidth: 28, textAlign: "center", color: TEXT, fontSize: "0.88rem", borderLeft: `1px solid rgba(53,56,63,0.12)`, borderRight: `1px solid rgba(53,56,63,0.12)`, height: 40, lineHeight: "40px" }}
                         >
                           {item.qty}
                         </span>
                         <button
                           onClick={() => dispatch({ type: "SET_QTY", id: item.id, pack: item.pack, qty: item.qty + 1 })}
                           className="flex items-center justify-center transition-all duration-150"
-                          style={{ width: 36, height: 36, color: TEXT, fontSize: 18, lineHeight: 1 }}
+                          style={{ width: 40, height: 40, color: TEXT, fontSize: 18, lineHeight: 1 }}
                         >
                           +
                         </button>
@@ -260,7 +260,7 @@ export default function CartPage() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.12, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="lg:sticky"
+              className="lg:sticky order-1 lg:order-2"
               style={{ top: "calc(64px + 24px)" }}
             >
               <div

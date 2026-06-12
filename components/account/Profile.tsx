@@ -15,6 +15,7 @@ const IS = {
   border: "1.5px solid rgba(53,56,63,0.18)",
   color: TEXT,
   boxShadow: "inset 0 1px 2px rgba(53,56,63,0.04)",
+  fontSize: "max(16px, 0.875rem)",
 } as React.CSSProperties
 
 const IFS = {
@@ -23,6 +24,7 @@ const IFS = {
   color: TEXT,
   outline: "none",
   boxShadow: "0 0 0 3px rgba(53,56,63,0.07)",
+  fontSize: "max(16px, 0.875rem)",
 } as React.CSSProperties
 
 function Field({
@@ -32,7 +34,7 @@ function Field({
   type?: string; placeholder?: string; foc: string; name: string
   onFocus: (n: string) => void; onBlur: () => void
 }) {
-  const cls = "w-full px-5 py-4 rounded-xl text-sm placeholder:opacity-40 font-ekstra"
+  const cls = "w-full px-5 py-4 rounded-xl placeholder:opacity-40 font-ekstra"
   return (
     <div className="flex flex-col gap-2">
       <label className="font-ekstra uppercase" style={{ fontSize: 10, letterSpacing: "0.28em", color: MUTED }}>
@@ -100,7 +102,7 @@ export function Profile({ user, profile }: Props) {
     setTimeout(() => setSaved(false), 2500)
   }
 
-  const cls = "w-full px-5 py-4 rounded-xl text-sm placeholder:opacity-40 font-ekstra"
+  const cls = "w-full px-5 py-4 rounded-xl placeholder:opacity-40 font-ekstra"
 
   return (
     <div className="space-y-10">
