@@ -1,145 +1,162 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { createClient } from "@/lib/supabase/client"
+import type { User } from "@supabase/supabase-js"
+import type { Profile } from "@/lib/hooks/useUser"
 
-const ORDERS = [
-  {
-    id: "WFF-2026-005", date: "04.06.2026", total: "12,99€",
-    status: "Neu", statusColor: "text-cream/50 bg-cream/[0.06] border-cream/10",
-    items: [{ name: "Purple Haze Blüten", qty: "5G", price: "12,99€" }],
-    tracking: null,
-  },
-  {
-    id: "WFF-2026-004", date: "03.06.2026", total: "29,99€",
-    status: "Versandbereit", statusColor: "text-gold bg-gold/10 border-gold/20",
-    items: [{ name: "Girl Scout Cookies Vape", qty: "1× 1ML", price: "29,99€" }],
-    tracking: null,
-  },
-  {
-    id: "WFF-2026-003", date: "01.06.2026", total: "51,96€",
-    status: "Unterwegs", statusColor: "text-lime bg-lime/10 border-lime/20",
-    items: [
-      { name: "Gelato Pod (Elfbar)", qty: "3×", price: "38,97€" },
-      { name: "Afghan Hasch", qty: "5G", price: "12,99€" },
-    ],
-    tracking: "1Z999AA10123456784",
-  },
-  {
-    id: "WFF-2026-002", date: "22.05.2026", total: "32,94€",
-    status: "Geliefert", statusColor: "text-lime/60 bg-lime/[0.06] border-lime/10",
-    items: [
-      { name: "Amnesia Haze Blüten", qty: "3G", price: "7,99€" },
-      { name: "Cookies Pre-Roll", qty: "5×", price: "24,95€" },
-    ],
-    tracking: "1Z999AA10123456785",
-  },
-  {
-    id: "WFF-2026-001", date: "15.05.2026", total: "59,98€",
-    status: "Geliefert", statusColor: "text-lime/60 bg-lime/[0.06] border-lime/10",
-    items: [{ name: "Northern Lights Vape", qty: "2×", price: "59,98€" }],
-    tracking: "1Z999AA10123456786",
-  },
-]
+const TEXT   = "#35383f"
+const MUTED  = "rgba(53,56,63,0.55)"
+const DIM    = "rgba(53,56,63,0.10)"
+const ACCENT = "#eddc8c"
 
-export function Orders() {
+const STATUS_STYLE: Record<string, React.CSSProperties> = {
+  pending:    { background: "rgba(53,56,63,0.08)", color: MUTED },
+  processing: { background: "rgba(237,220,140,0.22)", color: "#8a7b2a" },
+  shipped:    { background: "rgba(53,56,63,0.12)", color: TEXT },
+  delivered:  { background: "rgba(110,125,106,0.18)", color: "#4a5f46" },
+  cancelled:  { background: "rgba(192,57,43,0.10)", color: "#c0392b" },
+}
+const STATUS_LABEL: Record<string, string> = {
+  pending: "Neu", processing: "In Bearbeitung", shipped: "Unterwegs", delivered: "Geliefert", cancelled: "Storniert",
+}
+
+type OrderItem = { id: string; name: string; pack: string | null; price: number; qty: number }
+type Order = {
+  id: string; status: string; total: number; shipping_cost: number
+  created_at: string; tracking_code: string | null
+  order_items: OrderItem[]
+}
+
+interface Props { user: User | null; profile: Profile | null; signOut: () => void }
+
+export function Orders({ user }: Props) {
+  const supabase = createClient()
+  const [orders,   setOrders]   = useState<Order[]>([])
+  const [loading,  setLoading]  = useState(true)
   const [expanded, setExpanded] = useState<string | null>(null)
 
+  useEffect(() => {
+    if (!user) return
+    supabase
+      .from("orders")
+      .select("id, status, total, shipping_cost, created_at, tracking_code, order_items(id, name, pack, price, qty)")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => { setOrders(data ?? []); setLoading(false) })
+  }, [user])
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+
       <div>
-        <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-lime/60 mb-2">Konto</p>
-        <h1 className="font-sans font-extrabold text-4xl text-cream">Bestellungen</h1>
+        <p className="font-ekstra uppercase mb-2" style={{ fontSize: 11, letterSpacing: "0.30em", color: "rgba(53,56,63,0.40)" }}>Konto</p>
+        <h1 className="font-druk-wide uppercase leading-none" style={{ fontSize: "clamp(2rem, 5vw, 4rem)", color: TEXT }}>
+          Bestellungen
+        </h1>
       </div>
 
-      <div className="space-y-3">
-        {ORDERS.map((order) => (
-          <div key={order.id} className="rounded-2xl border border-cream/[0.08] bg-cream/[0.02] overflow-hidden">
-            {/* Header row */}
-            <button
-              onClick={() => setExpanded(expanded === order.id ? null : order.id)}
-              className="w-full flex items-center justify-between p-5 hover:bg-cream/[0.02] transition-colors"
-            >
-              <div className="flex items-center gap-5 min-w-0">
-                <div className="text-left">
-                  <p className="font-sans font-bold text-sm text-cream">{order.id}</p>
-                  <p className="font-mono text-[9px] text-cream/25 mt-0.5">{order.date}</p>
-                </div>
-                <div className="hidden sm:block text-left min-w-0">
-                  <p className="font-sans text-xs text-cream/40 truncate max-w-[200px]">
-                    {order.items.map(i => i.name).join(", ")}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 shrink-0 ml-3">
-                <p className="font-sans font-bold text-sm text-cream">{order.total}</p>
-                <span className={`font-mono text-[9px] tracking-widest uppercase px-2.5 py-1 rounded-full border ${order.statusColor}`}>
-                  {order.status}
-                </span>
-                <svg
-                  width="14" height="14" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-                  className={`text-cream/20 transition-transform ${expanded === order.id ? "rotate-180" : ""}`}
+      {loading ? (
+        <div className="flex justify-center py-16">
+          <div className="w-6 h-6 rounded-full border-2 border-[#35383f] border-t-transparent animate-spin" />
+        </div>
+      ) : orders.length === 0 ? (
+        <div className="text-center py-16">
+          <p className="font-druk-wide uppercase" style={{ fontSize: "1.5rem", color: TEXT, marginBottom: 8 }}>Noch keine Bestellung.</p>
+          <p className="font-ekstra" style={{ fontSize: "0.92rem", color: MUTED }}>Deine Bestellungen erscheinen hier.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {orders.map((order) => {
+            const statusStyle = STATUS_STYLE[order.status] ?? STATUS_STYLE.pending
+            const date = new Date(order.created_at).toLocaleDateString("de-DE")
+            return (
+              <div
+                key={order.id}
+                style={{ borderRadius: 16, background: "rgba(255,255,255,0.42)", border: "1px solid rgba(255,255,255,0.65)", overflow: "hidden" }}
+              >
+                <button
+                  onClick={() => setExpanded(expanded === order.id ? null : order.id)}
+                  className="w-full flex items-center justify-between px-5 py-4"
                 >
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </div>
-            </button>
-
-            {/* Expanded detail */}
-            <AnimatePresence>
-              {expanded === order.id && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  className="overflow-hidden"
-                >
-                  <div className="px-5 pb-5 border-t border-cream/[0.06] pt-4 space-y-4">
-                    {/* Items */}
-                    <div className="space-y-2">
-                      {order.items.map((item) => (
-                        <div key={item.name} className="flex items-center justify-between">
-                          <div>
-                            <p className="font-sans text-sm text-cream/70">{item.name}</p>
-                            <p className="font-mono text-[9px] text-cream/25">{item.qty}</p>
-                          </div>
-                          <p className="font-sans font-bold text-sm text-cream">{item.price}</p>
-                        </div>
-                      ))}
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="text-left">
+                      <p className="font-druk-wide uppercase" style={{ fontSize: "0.82rem", color: TEXT }}>
+                        {order.id.slice(0, 8).toUpperCase()}
+                      </p>
+                      <p className="font-ekstra mt-0.5" style={{ fontSize: 10, color: MUTED }}>{date}</p>
                     </div>
-
-                    {/* Tracking */}
-                    {order.tracking && (
-                      <div className="p-3 rounded-xl bg-lime/[0.04] border border-lime/15 flex items-center gap-3">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a0ba87" strokeWidth="1.8" strokeLinecap="round">
-                          <path d="M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h11a2 2 0 012 2v3" />
-                          <rect x="9" y="11" width="14" height="10" rx="2" />
-                          <path d="M16 11v-3" />
-                        </svg>
-                        <div>
-                          <p className="font-mono text-[9px] text-lime/60 tracking-widest uppercase">Tracking</p>
-                          <p className="font-sans text-xs text-cream/60 mt-0.5">{order.tracking}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex gap-3 pt-2">
-                      <button className="px-4 py-2 rounded-full border border-cream/15 text-cream/50 text-xs font-sans hover:text-cream hover:border-cream/30 transition-all">
-                        Erneut bestellen
-                      </button>
-                      <button className="px-4 py-2 rounded-full border border-cream/10 text-cream/30 text-xs font-sans hover:text-cream/60 transition-all">
-                        Rechnung
-                      </button>
-                    </div>
+                    <p className="hidden sm:block font-ekstra truncate max-w-[200px]" style={{ fontSize: "0.82rem", color: MUTED }}>
+                      {order.order_items?.map(i => i.name).join(", ") || "—"}
+                    </p>
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        ))}
-      </div>
+                  <div className="flex items-center gap-3 shrink-0 ml-3">
+                    <p className="font-druk-wide" style={{ fontSize: "0.92rem", color: TEXT }}>
+                      {Number(order.total).toFixed(2).replace(".", ",")} €
+                    </p>
+                    <span
+                      className="font-ekstra uppercase px-2.5 py-1 rounded-full"
+                      style={{ fontSize: 9, letterSpacing: "0.16em", ...statusStyle }}
+                    >
+                      {STATUS_LABEL[order.status] ?? order.status}
+                    </span>
+                    <svg
+                      width="13" height="13" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                      style={{ color: MUTED, transition: "transform 0.2s", transform: expanded === order.id ? "rotate(180deg)" : "none" }}
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </div>
+                </button>
+
+                <AnimatePresence>
+                  {expanded === order.id && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                      style={{ overflow: "hidden" }}
+                    >
+                      <div className="px-5 pb-5 space-y-4" style={{ borderTop: `1px solid ${DIM}`, paddingTop: 16 }}>
+                        {order.order_items?.map((item) => (
+                          <div key={item.id} className="flex items-center justify-between">
+                            <div>
+                              <p className="font-ekstra" style={{ fontSize: "0.88rem", color: TEXT }}>{item.name}</p>
+                              {item.pack && <p className="font-ekstra uppercase mt-0.5" style={{ fontSize: 9, letterSpacing: "0.18em", color: MUTED }}>{item.pack}{item.qty > 1 ? ` × ${item.qty}` : ""}</p>}
+                            </div>
+                            <p className="font-druk-wide" style={{ fontSize: "0.88rem", color: TEXT }}>
+                              {(item.price * item.qty).toFixed(2).replace(".", ",")} €
+                            </p>
+                          </div>
+                        ))}
+
+                        {order.tracking_code && (
+                          <div
+                            className="flex items-center gap-3 p-3 rounded-xl"
+                            style={{ background: "rgba(237,220,140,0.18)", border: `1px solid rgba(237,220,140,0.35)` }}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={TEXT} strokeWidth="1.8" strokeLinecap="round">
+                              <path d="M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h11a2 2 0 012 2v3" />
+                              <rect x="9" y="11" width="14" height="10" rx="2" />
+                            </svg>
+                            <div>
+                              <p className="font-ekstra uppercase" style={{ fontSize: 9, letterSpacing: "0.20em", color: MUTED }}>Tracking</p>
+                              <p className="font-ekstra mt-0.5" style={{ fontSize: "0.82rem", color: TEXT }}>{order.tracking_code}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

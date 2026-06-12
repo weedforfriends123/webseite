@@ -10,7 +10,6 @@ const MUTED = "rgba(53,56,63,0.52)"
 const STRAINS = [
   { key: "nl",  line1: "NORTHERN",  line2: "LIGHTS",  img: "/pouches/northern-lights.png",  flavor: "Kiefer · Erde · Süße" },
   { key: "ph",  line1: "PURPLE",    line2: "HAZE",    img: "/pouches/purple-haze.png",       flavor: "Beere · Blüte · Süße" },
-  { key: "ah",  line1: "AMNESIA",   line2: "HAZE",    img: "/pouches/amnesia-haze.png",      flavor: "Zitrus · Kräuter · Erde" },
   { key: "icc", line1: "ICE CREAM", line2: "COOKIES", img: "/pouches/ice-cream-cookies.png", flavor: "Vanille · Cookie · Crème" },
 ]
 
@@ -50,14 +49,14 @@ export function Section01_Hero() {
   const { scrollYProgress } = useScroll({ target: outerRef, offset: ["start start", "end start"] })
 
   useMotionValueEvent(scrollYProgress, "change", (v) => {
-    const idx = Math.min(Math.floor(v * 4), 3)
+    const idx = Math.min(Math.floor(v * STRAINS.length), STRAINS.length - 1)
     if (idx !== activeRef.current) { activeRef.current = idx; setActiveIndex(idx) }
   })
 
   const jumpToStrain = (idx: number) => {
     const el = outerRef.current
     if (!el) return
-    window.scrollTo({ top: el.offsetTop + (idx / 4) * el.offsetHeight, behavior: "smooth" })
+    window.scrollTo({ top: el.offsetTop + (idx / STRAINS.length) * el.offsetHeight, behavior: "smooth" })
   }
 
   const strain = STRAINS[activeIndex]

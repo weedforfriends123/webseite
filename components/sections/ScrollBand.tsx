@@ -74,6 +74,7 @@ export function ScrollBand() {
           </textPath>
         </text>
       </svg>
+
     </div>
   )
 }

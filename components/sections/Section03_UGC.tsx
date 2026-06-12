@@ -126,7 +126,7 @@ export function Section03_UGC() {
   const x    = useSpring(rawX, { stiffness: 55, damping: 18 })
 
   return (
-    <section style={{ background: BG, position: "relative", overflow: "hidden" }}>
+    <section style={{ background: BG, position: "relative" }}>
 
       {/* ── HEADLINE ──────────────────────────────────────────────────────── */}
       <motion.div
@@ -135,9 +135,9 @@ export function Section03_UGC() {
         whileInView="show"
         viewport={{ once: true, margin: "-60px" }}
         style={{
-          padding: `clamp(60px,8vh,120px) ${PAD_X} 0`,
+          padding: `clamp(40px,5vh,80px) ${PAD_X} 0`,
           textAlign: "center",
-          marginBottom: "clamp(36px,6vh,90px)",
+          marginBottom: "clamp(80px,12vh,160px)",
         }}
       >
         <h2 className="font-druk-wide uppercase"
@@ -201,6 +201,31 @@ export function Section03_UGC() {
           <TextBlock noMotion={noMotion} />
         </div>
       </div>
+
+      {/* ── SCRIBBLE — bottom-right, at the Section2→Section3 boundary ────── */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: "-40px" }}
+        transition={{ duration: 0.9, delay: 0.4 }}
+        aria-hidden
+        style={{
+          position: "absolute",
+          bottom: "-48px",
+          right: "clamp(100px,14vw,240px)",
+          transform: "rotate(4deg)",
+          zIndex: 30, pointerEvents: "none", userSelect: "none",
+          textAlign: "right",
+        }}
+      >
+        <p className="font-mindflow" style={{ color: "#eddc8c", fontSize: "clamp(14px,1.8vw,26px)", lineHeight: 1.55 }}>
+          Why People love<br />our products
+        </p>
+        <svg width="36" height="42" viewBox="0 0 36 42" style={{ marginTop: 4, display: "block", marginLeft: "auto" }}>
+          <path d="M28 4 Q18 20 8 36" fill="none" stroke="#eddc8c" strokeWidth="1.2" strokeLinecap="round" />
+          <path d="M8 36L6 26M8 36L16 32" fill="none" stroke="#eddc8c" strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+      </motion.div>
 
       {/* ── DESKTOP LAYOUT ────────────────────────────────────────────────── */}
       <div

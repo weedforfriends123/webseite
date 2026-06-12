@@ -67,9 +67,6 @@ export function WFFHeader() {
   const [atHero,       setAtHero]       = useState(true)
   const { dispatch, count } = useCart()
 
-  // New landing page has its own nav — hide this header on the homepage
-  if (pathname === "/") return null
-
   useEffect(() => {
     const onScroll = () => setAtHero(window.scrollY < window.innerHeight * 0.88)
     window.addEventListener("scroll", onScroll, { passive: true })
@@ -86,6 +83,9 @@ export function WFFHeader() {
     document.body.style.overflow = menuOpen ? "hidden" : ""
     return () => { document.body.style.overflow = "" }
   }, [menuOpen])
+
+  // New landing page has its own nav — hide this header on the homepage
+  if (pathname === "/") return null
 
   const closeMenu = () => { setMenuOpen(false); setExpandedItem(null) }
 
