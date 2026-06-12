@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion"
 
 const BG    = "#bcc0ca"
@@ -8,9 +8,9 @@ const TEXT  = "#35383f"
 const MUTED = "rgba(53,56,63,0.52)"
 
 const STRAINS = [
-  { key: "nl",  line1: "NORTHERN",  line2: "LIGHTS",  img: "/pouches/northern-lights.png",  flavor: "Kiefer · Erde · Süße" },
-  { key: "ph",  line1: "PURPLE",    line2: "HAZE",    img: "/pouches/purple-haze.png",       flavor: "Beere · Blüte · Süße" },
-  { key: "icc", line1: "ICE CREAM", line2: "COOKIES", img: "/pouches/ice-cream-cookies.png", flavor: "Vanille · Cookie · Crème" },
+  { key: "nl",  line1: "NORTHERN",  line2: "LIGHTS",  img: "/pouches/northern-lights.webp",  flavor: "Kiefer · Erde · Süße" },
+  { key: "ph",  line1: "PURPLE",    line2: "HAZE",    img: "/pouches/purple-haze.webp",       flavor: "Beere · Blüte · Süße" },
+  { key: "icc", line1: "ICE CREAM", line2: "COOKIES", img: "/pouches/ice-cream-cookies.webp", flavor: "Vanille · Cookie · Crème" },
 ]
 
 function StatStrip() {
@@ -45,6 +45,14 @@ export function Section01_Hero() {
   const outerRef  = useRef<HTMLDivElement>(null)
   const activeRef = useRef(0)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener("resize", check, { passive: true })
+    return () => window.removeEventListener("resize", check)
+  }, [])
 
   const { scrollYProgress } = useScroll({ target: outerRef, offset: ["start start", "end start"] })
 
@@ -94,14 +102,17 @@ export function Section01_Hero() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={strain.key}
-                initial={{ y: "-110%", rotate: -10, opacity: 0 }}
-                animate={{ y: 0, rotate: 0, opacity: 1 }}
-                exit={{ y: "60%", rotate: 8, opacity: 0, scale: 0.88 }}
-                transition={{
-                  y: { type: "spring", stiffness: 200, damping: 22, mass: 0.9 },
-                  rotate: { type: "spring", stiffness: 180, damping: 20 },
-                  opacity: { duration: 0.2 },
-                }}
+                initial={isMobile ? { opacity: 0 } : { y: "-110%", rotate: -10, opacity: 0 }}
+                animate={isMobile ? { opacity: 1 } : { y: 0, rotate: 0, opacity: 1 }}
+                exit={isMobile ? { opacity: 0 } : { y: "60%", rotate: 8, opacity: 0, scale: 0.88 }}
+                transition={isMobile
+                  ? { duration: 0.22, ease: "easeOut" }
+                  : {
+                      y: { type: "spring", stiffness: 200, damping: 22, mass: 0.9 },
+                      rotate: { type: "spring", stiffness: 180, damping: 20 },
+                      opacity: { duration: 0.2 },
+                    }
+                }
                 className="mt-10 md:mt-0"
                 style={{ position: "relative", zIndex: 2, display: "flex", alignItems: "center", justifyContent: "center" }}
               >

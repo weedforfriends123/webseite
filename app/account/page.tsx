@@ -12,6 +12,7 @@ import { Password } from "@/components/account/Password"
 import { Payments } from "@/components/account/Payments"
 import { Notifications } from "@/components/account/Notifications"
 import { Loyalty } from "@/components/account/Loyalty"
+import { AgeVerification } from "@/components/account/AgeVerification"
 import { useUser } from "@/lib/hooks/useUser"
 
 export type Section =
@@ -22,6 +23,7 @@ export type Section =
   | "payments"
   | "notifications"
   | "loyalty"
+  | "ageverification"
 
 export default function AccountPage() {
   const router = useRouter()
@@ -42,13 +44,14 @@ export default function AccountPage() {
   }
 
   const VIEWS: Record<Section, React.ComponentType<{ user: typeof user; profile: typeof profile; signOut: typeof signOut }>> = {
-    dashboard:     Dashboard,
-    orders:        Orders,
-    profile:       Profile,
-    password:      Password,
-    payments:      Payments,
-    notifications: Notifications,
-    loyalty:       Loyalty,
+    dashboard:       Dashboard,
+    orders:          Orders,
+    profile:         Profile,
+    password:        Password,
+    payments:        Payments,
+    notifications:   Notifications,
+    loyalty:         Loyalty,
+    ageverification: AgeVerification,
   }
 
   const View = VIEWS[active]

@@ -77,6 +77,15 @@ const NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
       </svg>
     ),
   },
+  {
+    id: "ageverification",
+    label: "Altersverifizierung",
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      </svg>
+    ),
+  },
 ]
 
 function Avatar({ initials, size = 44 }: { initials: string; size?: number }) {
@@ -163,19 +172,20 @@ export function AccountSidebar({ active, setActive, onSignOut, user, profile }: 
                 initial={{ opacity: 0, scale: 0.94 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.05 + i * 0.04, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                onClick={() => setActive(item.id)}
-                className="flex items-center gap-3 text-left"
+                onClick={(e) => { setActive(item.id); (e.currentTarget as HTMLButtonElement).blur() }}
+                className="flex flex-col items-center gap-2"
                 style={{
-                  padding: "14px 16px",
+                  padding: "14px 10px",
                   borderRadius: 14,
                   background: isActive ? TEXT : "rgba(255,255,255,0.42)",
                   border: `1px solid ${isActive ? TEXT : "rgba(255,255,255,0.68)"}`,
                   color: isActive ? "#e8e4dc" : TEXT,
                   transition: "all 0.2s ease",
+                  textAlign: "center",
                 }}
               >
-                <span style={{ opacity: isActive ? 1 : 0.45, flexShrink: 0 }}>{item.icon}</span>
-                <span className="font-ekstra leading-tight" style={{ fontSize: "0.78rem", letterSpacing: "0.01em" }}>
+                <span style={{ opacity: isActive ? 1 : 0.45 }}>{item.icon}</span>
+                <span className="font-ekstra leading-tight" style={{ fontSize: "0.7rem", letterSpacing: "0.01em", wordBreak: "break-word", hyphens: "auto" } as React.CSSProperties}>
                   {item.label}
                 </span>
               </motion.button>
