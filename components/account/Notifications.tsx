@@ -59,7 +59,7 @@ export function Notifications({ }: Props) {
     <div className="space-y-8">
       <div>
         <p className="font-ekstra uppercase mb-2" style={{ fontSize: 11, letterSpacing: "0.30em", color: "rgba(53,56,63,0.40)" }}>Konto</p>
-        <h1 className="font-druk-wide uppercase leading-none" style={{ fontSize: "clamp(1.5rem, 5vw, 4rem)", color: TEXT }}>
+        <h1 className="font-druk-wide uppercase leading-none" style={{ fontSize: "clamp(1.1rem, 4.5vw, 4rem)", color: TEXT }}>
           Benachrichtigungen
         </h1>
       </div>

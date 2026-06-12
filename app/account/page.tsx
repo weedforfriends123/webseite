@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/Navbar"
@@ -27,13 +27,6 @@ export default function AccountPage() {
   const router = useRouter()
   const { user, profile, loading, signOut } = useUser()
   const [active, setActive] = useState<Section>("dashboard")
-  const contentRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.innerWidth < 768) {
-      setTimeout(() => contentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 60)
-    }
-  }, [active])
 
   if (loading) {
     return (
@@ -74,7 +67,7 @@ export default function AccountPage() {
             <AccountSidebar active={active} setActive={setActive} user={user} profile={profile} onSignOut={async () => { await signOut(); router.push("/") }} />
           </div>
 
-          <div ref={contentRef} className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0">
             <AnimatePresence mode="wait">
               <motion.div
                 key={active}
