@@ -51,9 +51,9 @@ function FeatureBlock({
   if (isMobile) {
     return (
       <motion.div style={{
-        position: "absolute", bottom: "clamp(28px,5vh,64px)",
+        position: "absolute", bottom: "clamp(80px,16vh,160px)",
         left: 0, right: 0, textAlign: "center",
-        opacity, y, zIndex: 5, pointerEvents: "none", padding: "0 24px",
+        opacity, y, zIndex: 5, pointerEvents: "none", padding: "0 32px",
       }}>
         <p className="font-druk" style={{
           fontSize: "clamp(56px,16vw,96px)", color: TEXT,
@@ -166,52 +166,35 @@ function FrameScrubber({
   // Track last wheel event to prevent onScroll overriding it
   const lastWheelMs = useRef(0)
 
-  // ── Draw with frame blending (cross-fade A→B) ─────────────────────────────
+  // ── Draw single frame — no globalAlpha blending (avoids white-flash on RGBA frames) ──
   const drawAt = useCallback((floatIdx: number) => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    const a = Math.max(0, Math.min(FRAME_COUNT - 1, Math.floor(floatIdx)))
-    const b = Math.min(FRAME_COUNT - 1, a + 1)
-    const t = floatIdx - Math.floor(floatIdx)  // 0–1 blend factor
-
-    const imgA = loadedRef.current.has(a) ? imgsRef.current[a] : null
-    if (!imgA) return
+    const idx = Math.max(0, Math.min(FRAME_COUNT - 1, Math.round(floatIdx)))
+    const img = loadedRef.current.has(idx) ? imgsRef.current[idx] : null
+    if (!img) return
 
     ctx.imageSmoothingEnabled = true
     ctx.imageSmoothingQuality = "high"
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    const stamp = (img: HTMLImageElement, alpha: number) => {
-      const sc = Math.min(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight)
-      const w  = img.naturalWidth  * sc
-      const h  = img.naturalHeight * sc
-      ctx.globalAlpha = alpha
-      ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h)
-    }
-
-    const imgB = (t > 0.02 && loadedRef.current.has(b)) ? imgsRef.current[b] : null
-    if (imgB) {
-      stamp(imgA, 1 - t)
-      stamp(imgB, t)
-    } else {
-      stamp(imgA, 1)
-    }
-    ctx.globalAlpha = 1
+    const sc = Math.min(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight)
+    const w  = img.naturalWidth  * sc
+    const h  = img.naturalHeight * sc
+    ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h)
   }, [])
 
-  // ── Continuous 60fps spring loop — natural video-like playback ───────────
+  // ── 60fps spring loop — overdamped (k=0.22, d=1.0: critical=2√0.22≈0.939 < 1.0) ──
   useEffect(() => {
     const tick = () => {
       const diff = targetRef.current - smoothRef.current
-      // Overdamped spring: accelerates toward target, decelerates smoothly
-      const acc = diff * 0.14 - velRef.current * 0.72
-      velRef.current  += acc
-      smoothRef.current += velRef.current
-
-      if (Math.abs(diff) > 0.05 || Math.abs(velRef.current) > 0.05) {
+      if (Math.abs(diff) > 0.1 || Math.abs(velRef.current) > 0.1) {
+        const acc = diff * 0.22 - velRef.current * 1.0
+        velRef.current    = Math.max(-10, Math.min(10, velRef.current + acc))
+        smoothRef.current += velRef.current
         drawAt(Math.max(0, Math.min(FRAME_COUNT - 1, smoothRef.current)))
       }
       animRaf.current = requestAnimationFrame(tick)
@@ -286,13 +269,13 @@ function FrameScrubber({
       ref={wrapRef}
       style={{
         position: "absolute",
-        left: "50%", top: "44%",
+        left: "50%", top: isMobile ? "38%" : "44%",
         translateX: "-50%", translateY: "-50%",
         y: floatY,
-        width:     isMobile ? "clamp(220px,72vw,320px)" : "clamp(340px,44vw,680px)",
-        height:    isMobile ? "clamp(220px,72vw,320px)" : "clamp(340px,44vw,680px)",
-        maxWidth:  isMobile ? 320 : 700,
-        maxHeight: isMobile ? 320 : 700,
+        width:     isMobile ? "clamp(180px,58vw,260px)" : "clamp(340px,44vw,680px)",
+        height:    isMobile ? "clamp(180px,58vw,260px)" : "clamp(340px,44vw,680px)",
+        maxWidth:  isMobile ? 260 : 700,
+        maxHeight: isMobile ? 260 : 700,
         zIndex: 10,
         pointerEvents: "none",
       }}
@@ -374,16 +357,17 @@ export function Section04_Features() {
         {/* ── OUTRO CTA — below the floating product ── */}
         <motion.div style={{
           position: "absolute",
-          bottom: "clamp(48px,8vh,96px)", left: "50%",
+          bottom: isMobile ? "clamp(80px,16vh,160px)" : "clamp(48px,8vh,96px)",
+          left: "50%",
           translateX: "-50%",
           textAlign: "center", opacity: outroOpacity, y: outroY,
           zIndex: 15, pointerEvents: "none",
-          width: "clamp(240px,52vw,600px)",
+          width: isMobile ? "clamp(220px,85vw,340px)" : "clamp(240px,52vw,600px)",
         }}>
           <h2 className="font-druk-wide uppercase" style={{
-            fontSize: "clamp(26px,4vw,68px)",
+            fontSize: isMobile ? "clamp(26px,8vw,40px)" : "clamp(26px,4vw,68px)",
             lineHeight: 0.88, letterSpacing: "-0.03em",
-            margin: "0 0 clamp(18px,2.8vh,36px)",
+            margin: "0 0 clamp(14px,2.2vh,28px)",
           }}>
             <span style={{ display: "block", color: "transparent", WebkitTextStroke: `clamp(1.5px,0.12vw,2px) ${TEXT}` }}>
               ÜBERZEUG DICH

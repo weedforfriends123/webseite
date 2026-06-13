@@ -4,9 +4,9 @@ import { useEffect, useRef } from "react"
 import { useAnimationFrame } from "framer-motion"
 
 // Spring constants
-const STIFFNESS = 95
-const DAMPING   = 20
-const MASS      = 0.9
+const STIFFNESS = 120
+const DAMPING   = 22
+const MASS      = 0.85
 
 // Exposed so FrameScrubber can read the pre-spring wheel target
 export const smoothScrollTarget = { current: 0 }
