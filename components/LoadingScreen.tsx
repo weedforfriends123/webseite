@@ -14,7 +14,12 @@ export function LoadingScreen() {
   const [triggered, setTriggered] = useState(0)
   const [phase, setPhase]         = useState<Phase>("writing")
 
-  const glbFrac     = useRef(0)     // 0–1 real download fraction
+  // glbFrac: 0–1 real byte progress — drives letter animation pacing
+  // glbDone: true when GLB finished OR errored — one part of the exit gate
+  // pageReady: true when window.load fired — other part of the exit gate
+  // Separating them ensures a network error never skips the animation.
+  const glbFrac     = useRef(0)
+  const glbDone     = useRef(false)
   const pageReady   = useRef(false)
   const finishing   = useRef(false)
   const tickRef     = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
@@ -32,14 +37,11 @@ export function LoadingScreen() {
 
     const START = performance.now()
 
-    // Called on every tick and on every load event — completes only once
+    // Exit gate: needs both assets done AND minimum time elapsed
     const tryFinish = () => {
       if (finishing.current) return
-      const elapsed  = performance.now() - START
-      const timeFrac = elapsed / MIN_MS
-      // Progress = whichever is further along: real download or time floor
-      const frac = Math.min(1, Math.max(timeFrac, glbFrac.current))
-      if (frac >= 1 && pageReady.current) {
+      const timeFrac = (performance.now() - START) / MIN_MS
+      if (timeFrac >= 1 && glbDone.current && pageReady.current) {
         finishing.current = true
         clearInterval(tickRef.current)
         setTriggered(LETTERS.length)
@@ -47,43 +49,49 @@ export function LoadingScreen() {
       }
     }
 
-    // ── Tick every 50 ms — advances letters in sync with load progress ──────
+    // ── Tick every 50 ms — letter count follows real download progress ───
     tickRef.current = setInterval(() => {
-      const elapsed  = performance.now() - START
-      const timeFrac = elapsed / MIN_MS
-      // Letters follow whichever is slower: real download vs 2.5 s minimum
+      const timeFrac = (performance.now() - START) / MIN_MS
+      // Pacing: use the higher of time-floor and real GLB bytes received.
+      // On error glbFrac stays 0, so time alone drives the animation —
+      // this prevents TikTok/WebView fetch failures from jumping to 100%.
       const frac  = Math.min(1, Math.max(timeFrac, glbFrac.current))
       const count = frac >= 1 ? LETTERS.length : Math.floor(frac * LETTERS.length)
       setTriggered(count)
       tryFinish()
     }, 50)
 
-    // ── Stream GLB — updates glbFrac as bytes arrive ──────────────────────
+    // ── Stream GLB — updates glbFrac as real bytes arrive ────────────────
     fetch("/product.glb", { cache: "force-cache" })
       .then(res => {
         const total = parseInt(res.headers.get("content-length") || "") || 14_000_000
-        if (!res.body) { glbFrac.current = 1; tryFinish(); return }
+        if (!res.body) {
+          // No streaming support — mark done but leave glbFrac at 0
+          // so time-based pacing takes over
+          glbDone.current = true; tryFinish(); return
+        }
         const reader = res.body.getReader()
         let got = 0
         const pump = (): Promise<void> =>
           reader.read().then(({ done: d, value }) => {
-            if (d) { glbFrac.current = 1; tryFinish(); return }
+            if (d) { glbFrac.current = 1; glbDone.current = true; tryFinish(); return }
             got += value.byteLength
             glbFrac.current = Math.min(1, got / total)
             return pump()
-          }).catch(() => { glbFrac.current = 1; tryFinish() })
+          }).catch(() => { glbDone.current = true; tryFinish() })
         return pump()
       })
-      .catch(() => { glbFrac.current = 1; tryFinish() })
+      // fetch itself failed (WebView CSP, no network, etc.) — don't touch glbFrac
+      .catch(() => { glbDone.current = true; tryFinish() })
 
-    // ── Window load (fonts, images, etc.) ────────────────────────────────
+    // ── Window load ───────────────────────────────────────────────────────
     const onLoad = () => { pageReady.current = true; tryFinish() }
     if (document.readyState === "complete") onLoad()
     else window.addEventListener("load", onLoad)
 
     // ── Hard fallback ─────────────────────────────────────────────────────
     const timeout = setTimeout(() => {
-      glbFrac.current = 1; pageReady.current = true; tryFinish()
+      glbDone.current = true; pageReady.current = true; tryFinish()
     }, MAX_MS)
 
     return () => {
