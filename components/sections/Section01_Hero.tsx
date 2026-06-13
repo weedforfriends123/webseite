@@ -302,7 +302,25 @@ export function Section01_Hero() {
 
         </div>
 
-        {/* ── SCRIBBLE — desktop only ───────────────────────────────────────── */}
+        {/* ── SCRIBBLE ─────────────────────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          transition={{ duration: 0.9, delay: 0.5 }} aria-hidden
+          style={{
+            position: "absolute",
+            // Mobile: bottom-left corner above the dots row, clear of the image
+            // Desktop: upper-left quadrant
+            bottom: "clamp(80px,14vh,140px)",
+            left:   "clamp(14px,5vw,240px)",
+            top: "auto",
+          }}
+          className="block md:hidden"
+        >
+          <p className="font-mindflow" style={{ color: "#eddc8c", fontSize: "clamp(13px,3.8vw,18px)", lineHeight: 1.5, transform: "rotate(-4deg)", transformOrigin: "left center" }}>
+            Real Flavor,<br />Original Taste
+          </p>
+        </motion.div>
+        {/* Desktop scribble — original top-left position */}
         <motion.div
           className="hidden md:block"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }}
