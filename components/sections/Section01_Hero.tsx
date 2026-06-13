@@ -89,7 +89,7 @@ export function Section01_Hero() {
   return (
     // Mobile: exactly one viewport height — no extra scroll space, fast paint.
     // Desktop: 400vh so scroll drives the strain carousel via useScroll.
-    <div ref={outerRef} className="h-[100svh] md:h-[400vh] relative">
+    <div ref={outerRef} className="h-[100svh] md:h-[240vh] relative">
       <section
         id="hero"
         onTouchStart={onTouchStart}
