@@ -40,9 +40,9 @@ const FEATURES = [
   {
     side: "left"  as const,
     num:  "05",
-    big:  "5",
+    big:  "6",
     tag:  "FLAVOURS",
-    desc: "Northern Lights · Purple Haze · Ice Cream Cookies\nAmnesia Haze · Gelato",
+    desc: "Northern Lights · Purple Haze · Ice Cream Cookies\nAmnesia Haze · Gelato · Girl Scout Cookies",
   },
   {
     side: "right" as const,
