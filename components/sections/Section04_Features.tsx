@@ -2,12 +2,6 @@
 
 import { useRef, useEffect, useState } from "react"
 import { motion, useScroll, useTransform, MotionValue } from "framer-motion"
-import dynamic from "next/dynamic"
-
-const Product3D = dynamic(
-  () => import("./Product3D").then(m => ({ default: m.Product3D })),
-  { ssr: false, loading: () => null },
-)
 
 const BG    = "#bcc0ca"
 const TEXT  = "#35383f"
@@ -17,34 +11,52 @@ const MUTED = "rgba(53,56,63,0.52)"
 const FEATURES = [
   {
     side: "left"  as const,
-    big: "600",
-    tag: "PUFFS",
+    num:  "01",
+    big:  "600",
+    tag:  "PUFFS",
     desc: "Smooth bis zum letzten Zug.\nKein Absatz. Kein Nachlassen.",
   },
   {
     side: "right" as const,
-    big: "0%",
-    tag: "NIKOTIN",
+    num:  "02",
+    big:  "0%",
+    tag:  "NIKOTIN",
     desc: "100% tabakfrei · nikotinfrei.\nEU-zertifiziert und laborgeprüft.",
   },
   {
     side: "left"  as const,
-    big: "LAB",
-    tag: "TESTED",
-    desc: "Apothekenqualität.\nStrenge EU-Standards.",
+    num:  "03",
+    big:  "ECHT",
+    tag:  "TERPENE",
+    desc: "Echter Geschmack. Echte Aromen.\nSmooth und aromatisch, Zug für Zug.",
   },
   {
     side: "right" as const,
-    big: "EU",
-    tag: "MADE",
-    desc: "Hergestellt in der EU.\nKontrollierte Qualität.",
+    num:  "04",
+    big:  "LAB",
+    tag:  "TESTED",
+    desc: "Apothekenqualität.\nStrenge EU-Standards. Kein Kompromiss.",
+  },
+  {
+    side: "left"  as const,
+    num:  "05",
+    big:  "3",
+    tag:  "FLAVOURS",
+    desc: "Northern Lights · Purple Haze\nIce Cream Cookies",
+  },
+  {
+    side: "right" as const,
+    num:  "06",
+    big:  "EU",
+    tag:  "ZERTIFIZIERT",
+    desc: "Hergestellt in der EU.\nKontrollierte Qualität. Kein Kompromiss.",
   },
 ] as const
 
-// scroll window per feature: intro 0–0.12, f[0] 0.12–0.29, f[1] 0.29–0.46, f[2] 0.46–0.63, f[3] 0.63–0.80, outro 0.80–1.00
-const fStart = (i: number) => 0.12 + i * 0.17
-const fEnd   = (i: number) => fStart(i) + 0.17
-const RAMP   = 0.028
+// scroll layout: intro 0–0.10, 6×features each 13%, outro 0.88–1.00
+const fStart = (i: number) => 0.10 + i * 0.13
+const fEnd   = (i: number) => fStart(i) + 0.13
+const RAMP   = 0.025
 
 function FeatureBlock({
   feature, index, isMobile, scrollYProgress,
@@ -54,8 +66,8 @@ function FeatureBlock({
   isMobile: boolean
   scrollYProgress: MotionValue<number>
 }) {
-  const s     = fStart(index)
-  const e     = fEnd(index)
+  const s      = fStart(index)
+  const e      = fEnd(index)
   const isLeft = feature.side === "left"
 
   const opacity = useTransform(
@@ -63,54 +75,53 @@ function FeatureBlock({
     [s, s + RAMP, e - RAMP, e],
     [0, 1, 1, 0],
   )
-  // desktop: slide in from the side; mobile: rise up from below
   const x = useTransform(
     scrollYProgress,
     [s, s + RAMP, e - RAMP, e],
-    isMobile ? [0, 0, 0, 0] : [isLeft ? -140 : 140, 0, 0, isLeft ? -80 : 80],
+    isMobile ? [0, 0, 0, 0] : [isLeft ? -120 : 120, 0, 0, isLeft ? -70 : 70],
   )
   const y = useTransform(
     scrollYProgress,
     [s, s + RAMP, e - RAMP, e],
-    isMobile ? [52, 0, 0, 52] : [0, 0, 0, 0],
+    isMobile ? [48, 0, 0, 48] : [0, 0, 0, 0],
   )
-
-  const bigSize    = isMobile ? "clamp(72px,20vw,120px)" : "clamp(80px,11.5vw,180px)"
-  const tagSize    = isMobile ? "clamp(18px,5.5vw,28px)" : "clamp(20px,2.6vw,42px)"
-  const descSize   = isMobile ? "clamp(11px,3vw,14px)"   : "clamp(12px,0.9vw,15px)"
-  const maxW       = isMobile ? "none" : "clamp(200px,22vw,340px)"
-  const edgePad    = "clamp(28px,4vw,72px)"
 
   if (isMobile) {
     return (
       <motion.div
         style={{
           position: "absolute",
-          bottom: "clamp(32px,6vh,72px)",
+          bottom: "clamp(36px,7vh,80px)",
           left: 0, right: 0,
           textAlign: "center",
           opacity, y,
           zIndex: 5,
           pointerEvents: "none",
-          padding: "0 24px",
+          padding: "0 28px",
         }}
       >
+        <p className="font-ekstra uppercase" style={{
+          color: MUTED, fontSize: "clamp(9px,2.4vw,11px)",
+          letterSpacing: "0.22em", margin: "0 0 6px",
+        }}>
+          {feature.num} / 06
+        </p>
         <p className="font-druk" style={{
-          fontSize: bigSize, color: TEXT, lineHeight: 0.85,
-          letterSpacing: "-0.04em", margin: "0 0 4px",
+          fontSize: "clamp(64px,18vw,110px)", color: TEXT,
+          lineHeight: 0.85, letterSpacing: "-0.04em", margin: "0 0 2px",
         }}>
           {feature.big}
         </p>
         <p className="font-druk-wide uppercase" style={{
-          fontSize: tagSize, lineHeight: 1,
-          color: "transparent", WebkitTextStroke: `clamp(1.2px,0.1vw,1.8px) ${TEXT}`,
+          fontSize: "clamp(16px,4.8vw,26px)", lineHeight: 1,
+          color: "transparent", WebkitTextStroke: `clamp(1.2px,0.1vw,1.6px) ${TEXT}`,
           letterSpacing: "0.06em", margin: "0 0 10px",
         }}>
           {feature.tag}
         </p>
         <p style={{
-          color: MUTED, fontSize: descSize, lineHeight: 1.65,
-          margin: 0, whiteSpace: "pre-line",
+          color: MUTED, fontSize: "clamp(11px,2.8vw,14px)",
+          lineHeight: 1.65, margin: 0, whiteSpace: "pre-line",
         }}>
           {feature.desc}
         </p>
@@ -118,57 +129,69 @@ function FeatureBlock({
     )
   }
 
+  const align = isLeft ? "left" : "right"
+  const edge  = "clamp(48px,5.5vw,96px)"
+
   return (
     <motion.div
       style={{
         position: "absolute",
         top: "50%",
         translateY: "-50%",
-        [isLeft ? "left" : "right"]: edgePad,
+        [isLeft ? "left" : "right"]: edge,
         opacity, x,
         zIndex: 5,
         pointerEvents: "none",
-        maxWidth: maxW,
+        maxWidth: "clamp(220px,28vw,420px)",
+        textAlign: align,
       }}
     >
-      {/* BIG number — filled */}
+      {/* Counter */}
+      <p className="font-ekstra uppercase" style={{
+        color: MUTED, fontSize: "clamp(9px,0.6vw,11px)",
+        letterSpacing: "0.24em", margin: "0 0 clamp(10px,1.4vh,18px)",
+      }}>
+        {feature.num} / 06
+      </p>
+
+      {/* Big word — filled */}
       <p className="font-druk" style={{
-        fontSize: bigSize,
+        fontSize: "clamp(80px,11vw,176px)",
         color: TEXT,
         lineHeight: 0.82,
         letterSpacing: "-0.04em",
-        margin: "0 0 6px",
-        textAlign: isLeft ? "left" : "right",
+        margin: "0 0 4px",
       }}>
         {feature.big}
       </p>
-      {/* Tag — outline style like Section 1 */}
+
+      {/* Tag — outline like Section 1 */}
       <p className="font-druk-wide uppercase" style={{
-        fontSize: tagSize,
+        fontSize: "clamp(18px,2.4vw,40px)",
         color: "transparent",
-        WebkitTextStroke: `clamp(1.4px,0.11vw,2px) ${TEXT}`,
+        WebkitTextStroke: `clamp(1.4px,0.10vw,1.8px) ${TEXT}`,
         letterSpacing: "0.06em",
         lineHeight: 1,
-        margin: "0 0 clamp(12px,1.6vh,22px)",
-        textAlign: isLeft ? "left" : "right",
+        margin: "0 0 clamp(14px,1.8vh,26px)",
       }}>
         {feature.tag}
       </p>
+
       {/* Divider */}
       <div style={{
-        width: "clamp(40px,5vw,80px)",
+        width: "clamp(36px,4vw,64px)",
         height: 1,
-        background: `rgba(53,56,63,0.22)`,
+        background: "rgba(53,56,63,0.20)",
         margin: `0 ${isLeft ? "0" : "auto"} clamp(10px,1.4vh,18px) ${isLeft ? "0" : "auto"}`,
       }} />
+
       {/* Description */}
       <p style={{
         color: MUTED,
-        fontSize: descSize,
-        lineHeight: 1.75,
+        fontSize: "clamp(12px,0.88vw,14px)",
+        lineHeight: 1.80,
         margin: 0,
         whiteSpace: "pre-line",
-        textAlign: isLeft ? "left" : "right",
       }}>
         {feature.desc}
       </p>
@@ -197,37 +220,33 @@ function FeatureCounter({
   if (active < 0) return null
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      style={{
-        position: "absolute",
-        bottom: "clamp(28px,4vh,48px)",
-        right: "clamp(28px,4vw,56px)",
-        zIndex: 20,
-        pointerEvents: "none",
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-      }}
-    >
+    <div style={{
+      position: "absolute",
+      bottom: "clamp(28px,4vh,48px)",
+      right: "clamp(28px,4vw,56px)",
+      zIndex: 20,
+      pointerEvents: "none",
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+    }}>
       {FEATURES.map((_, i) => (
         <motion.div
           key={i}
           animate={{
             width:   i === active ? 26 : 8,
-            opacity: i === active ? 1 : 0.25,
+            opacity: i === active ? 1 : 0.22,
           }}
           transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
           style={{ height: 5, borderRadius: 99, background: TEXT }}
         />
       ))}
-    </motion.div>
+    </div>
   )
 }
 
 export function Section04_Features() {
-  const sectionRef = useRef<HTMLElement>(null)
+  const sectionRef  = useRef<HTMLElement>(null)
   const isMobileRef = useRef(false)
   const [isMobile, setIsMobile] = useState(false)
 
@@ -246,50 +265,18 @@ export function Section04_Features() {
     return () => window.removeEventListener("resize", check)
   }, [])
 
-  // Product entrance + exit scale
-  const productScale = useTransform(
-    scrollYProgress,
-    [0, 0.08, 0.80, 0.94],
-    [0.28, 1.0, 1.0, 0.45],
-  )
+  // Intro
+  const introOpacity = useTransform(scrollYProgress, [0, 0.06, 0.11], [1, 1, 0])
+  const introY       = useTransform(scrollYProgress, [0, 0.11], [0, -44])
 
-  // Vertical parallax
-  const productY = useTransform(scrollYProgress, [0, 1], [160, -120])
-
-  // Horizontal dance: product shifts opposite to feature text
-  const productX = useTransform(scrollYProgress, (v) => {
-    if (isMobileRef.current) return 0
-    const kf: [number, number][] = [
-      [0,    0], [0.12, 0], [0.17,  52],
-      [0.29, 52], [0.34, -52],
-      [0.46,-52], [0.51,  52],
-      [0.63, 52], [0.68, -52],
-      [0.80, 0], [1,      0],
-    ]
-    for (let i = 0; i < kf.length - 1; i++) {
-      const [t0, x0] = kf[i], [t1, x1] = kf[i + 1]
-      if (v >= t0 && v <= t1) {
-        return x0 + (x1 - x0) * ((v - t0) / (t1 - t0))
-      }
-    }
-    return 0
-  })
-
-  // Intro text
-  const introOpacity = useTransform(scrollYProgress, [0, 0.07, 0.13], [1, 1, 0])
-  const introY       = useTransform(scrollYProgress, [0, 0.13], [0, -50])
-
-  // CTA outro
-  const outroOpacity = useTransform(scrollYProgress, [0.80, 0.88], [0, 1])
-  const outroY       = useTransform(scrollYProgress, [0.80, 0.90], [64, 0])
-
-  // Mobile: product sits in upper portion
-  const productTop  = isMobile ? "38%" : "50%"
+  // Outro CTA
+  const outroOpacity = useTransform(scrollYProgress, [0.88, 0.94], [0, 1])
+  const outroY       = useTransform(scrollYProgress, [0.88, 0.96], [60, 0])
 
   return (
     <section
       ref={sectionRef}
-      style={{ background: BG, minHeight: "550vh", position: "relative" }}
+      style={{ background: BG, minHeight: "700vh", position: "relative" }}
     >
       <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden" }}>
 
@@ -331,21 +318,31 @@ export function Section04_Features() {
               ERLEBNIS
             </span>
           </h2>
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="font-ekstra"
-            style={{
-              color: MUTED,
-              fontSize: "clamp(11px,0.85vw,14px)",
-              letterSpacing: "0.04em",
-              margin: "clamp(16px,2.4vh,28px) 0 0",
-            }}
-          >
-            Scroll to explore
-          </motion.p>
         </motion.div>
+
+        {/* ── CENTER placeholder — video frames go here ── */}
+        <div style={{
+          position: "absolute",
+          left: "50%", top: "50%",
+          transform: "translate(-50%, -50%)",
+          width:  isMobile ? "clamp(180px,48vw,280px)" : "clamp(220px,26vw,380px)",
+          height: isMobile ? "clamp(220px,44vh,340px)" : "clamp(280px,52vh,640px)",
+          zIndex: 10,
+          pointerEvents: "none",
+          // subtle outline so it's easy to identify when adding frames
+          border: "1px dashed rgba(53,56,63,0.14)",
+          borderRadius: "clamp(8px,1vw,16px)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <p className="font-ekstra uppercase" style={{
+            color: "rgba(53,56,63,0.18)",
+            fontSize: "clamp(9px,0.65vw,11px)",
+            letterSpacing: "0.22em",
+            margin: 0,
+          }}>
+            Video
+          </p>
+        </div>
 
         {/* ── FEATURES ── */}
         {FEATURES.map((f, i) => (
@@ -411,30 +408,8 @@ export function Section04_Features() {
           </a>
         </motion.div>
 
-        {/* ── PRODUCT — always in foreground ── */}
-        <motion.div
-          style={{
-            position: "absolute",
-            left: "50%",
-            top: productTop,
-            translateX: "-50%",
-            translateY: "-50%",
-            x: productX,
-            y: productY,
-            scale: productScale,
-            zIndex: 15,
-            pointerEvents: "none",
-            width:  isMobile ? "clamp(200px,52vw,320px)" : "clamp(260px,32vw,480px)",
-            height: isMobile ? "clamp(240px,48vh,400px)" : "clamp(300px,56vh,720px)",
-          }}
-        >
-          <Product3D />
-        </motion.div>
-
-        {/* ── FEATURE DOTS (desktop only) ── */}
-        {!isMobile && (
-          <FeatureCounter scrollYProgress={scrollYProgress} />
-        )}
+        {/* ── DOTS ── */}
+        {!isMobile && <FeatureCounter scrollYProgress={scrollYProgress} />}
 
       </div>
     </section>
