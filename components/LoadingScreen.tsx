@@ -4,9 +4,9 @@ import { useEffect, useState, useRef } from "react"
 import { motion } from "framer-motion"
 
 const WORD   = "WEEDFORFRIENDS"
-const LETTERS = WORD.split("")          // 14 letters
-const MIN_MS  = 2500                    // always at least 2.5 s even on cache hits
-const MAX_MS  = 12_000                  // hard fallback
+const LETTERS = WORD.split("")   // 14 letters
+const MIN_MS  = 2800             // minimum animation duration (~200 ms / letter)
+const MAX_MS  = 12_000
 
 type Phase = "writing" | "exiting" | "done"
 
@@ -14,18 +14,16 @@ export function LoadingScreen() {
   const [triggered, setTriggered] = useState(0)
   const [phase, setPhase]         = useState<Phase>("writing")
 
-  // glbFrac: 0–1 real byte progress — drives letter animation pacing
-  // glbDone: true when GLB finished OR errored — one part of the exit gate
-  // pageReady: true when window.load fired — other part of the exit gate
-  // Separating them ensures a network error never skips the animation.
-  const glbFrac     = useRef(0)
-  const glbDone     = useRef(false)
-  const pageReady   = useRef(false)
-  const finishing   = useRef(false)
-  const tickRef     = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
-  const isMobileRef = useRef(false)
-  const exitY       = useRef(0)
-  const exitScale   = useRef(1)
+  const glbFrac        = useRef(0)      // 0–1 real byte progress
+  const glbDone        = useRef(false)  // GLB finished or errored
+  const streamWorks    = useRef(false)  // true once any bytes received
+  const pageReady      = useRef(false)
+  const finishing      = useRef(false)
+  const tickRef        = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
+  const isMobileRef    = useRef(false)
+  const exitY          = useRef(0)
+  const exitScale      = useRef(1)
+  const startRef       = useRef(0)
 
   useEffect(() => {
     isMobileRef.current = window.innerWidth < 768
@@ -35,12 +33,11 @@ export function LoadingScreen() {
       exitScale.current = 32 / fh
     }
 
-    const START = performance.now()
+    startRef.current = performance.now()
 
-    // Exit gate: needs both assets done AND minimum time elapsed
     const tryFinish = () => {
       if (finishing.current) return
-      const timeFrac = (performance.now() - START) / MIN_MS
+      const timeFrac = (performance.now() - startRef.current) / MIN_MS
       if (timeFrac >= 1 && glbDone.current && pageReady.current) {
         finishing.current = true
         clearInterval(tickRef.current)
@@ -49,39 +46,41 @@ export function LoadingScreen() {
       }
     }
 
-    // ── Tick every 50 ms — letter count follows real download progress ───
+    // ── Tick: advance letters at pace of whichever is slower ────────────────
+    // streamWorks=true  → letterFrac = min(timeFrac, glbFrac)
+    //   Fast/cached GLB: glbFrac=1 quickly, letters follow 2800ms time floor
+    //   Slow GLB: glbFrac < timeFrac, letters follow download speed
+    // streamWorks=false → letterFrac = timeFrac (TikTok/WebView fallback)
     tickRef.current = setInterval(() => {
-      const timeFrac = (performance.now() - START) / MIN_MS
-      // Pacing: use the higher of time-floor and real GLB bytes received.
-      // On error glbFrac stays 0, so time alone drives the animation —
-      // this prevents TikTok/WebView fetch failures from jumping to 100%.
-      const frac  = Math.min(1, Math.max(timeFrac, glbFrac.current))
-      const count = frac >= 1 ? LETTERS.length : Math.floor(frac * LETTERS.length)
+      const timeFrac = (performance.now() - startRef.current) / MIN_MS
+      const letterFrac = streamWorks.current
+        ? Math.min(timeFrac, glbFrac.current)
+        : Math.min(1, timeFrac)
+      // +1 offset so first letter appears as soon as any progress > 0
+      const count = letterFrac <= 0
+        ? 0
+        : Math.min(LETTERS.length, Math.floor(letterFrac * LETTERS.length) + 1)
       setTriggered(count)
       tryFinish()
     }, 50)
 
-    // ── Stream GLB — updates glbFrac as real bytes arrive ────────────────
+    // ── Stream GLB ────────────────────────────────────────────────────────
     fetch("/product.glb", { cache: "force-cache" })
       .then(res => {
         const total = parseInt(res.headers.get("content-length") || "") || 14_000_000
-        if (!res.body) {
-          // No streaming support — mark done but leave glbFrac at 0
-          // so time-based pacing takes over
-          glbDone.current = true; tryFinish(); return
-        }
+        if (!res.body) { glbDone.current = true; tryFinish(); return }
         const reader = res.body.getReader()
         let got = 0
         const pump = (): Promise<void> =>
           reader.read().then(({ done: d, value }) => {
             if (d) { glbFrac.current = 1; glbDone.current = true; tryFinish(); return }
             got += value.byteLength
-            glbFrac.current = Math.min(1, got / total)
+            glbFrac.current    = Math.min(1, got / total)
+            streamWorks.current = true
             return pump()
           }).catch(() => { glbDone.current = true; tryFinish() })
         return pump()
       })
-      // fetch itself failed (WebView CSP, no network, etc.) — don't touch glbFrac
       .catch(() => { glbDone.current = true; tryFinish() })
 
     // ── Window load ───────────────────────────────────────────────────────
