@@ -299,6 +299,8 @@ function FrameScrubber({
       if (b !== a && b < FRAME_COUNT && loadedRef.current.has(b)) { img = imgsRef.current[b]; break }
     }
     if (!img) return
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = "high"
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     const sc = Math.min(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight)
     const w = img.naturalWidth * sc
