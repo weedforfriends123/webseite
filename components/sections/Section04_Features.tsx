@@ -132,8 +132,7 @@ function FeatureBlock({
     )
   }
 
-  const align = isLeft ? "left" : "right"
-  const edge  = "clamp(48px,5.5vw,96px)"
+  const edge = "clamp(36px,4vw,72px)"
 
   return (
     <motion.div
@@ -145,59 +144,85 @@ function FeatureBlock({
         opacity, x,
         zIndex: 5,
         pointerEvents: "none",
-        maxWidth: "clamp(220px,28vw,420px)",
-        textAlign: align,
+        maxWidth: "clamp(200px,24vw,360px)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: isLeft ? "flex-start" : "flex-end",
+        gap: "clamp(10px,1.2vh,16px)",
       }}
     >
-      {/* Counter */}
-      <p className="font-ekstra uppercase" style={{
-        color: MUTED, fontSize: "clamp(9px,0.6vw,11px)",
-        letterSpacing: "0.24em", margin: "0 0 clamp(10px,1.4vh,18px)",
-      }}>
-        {feature.num} / 06
-      </p>
-
-      {/* Big word — filled */}
-      <p className="font-druk" style={{
-        fontSize: "clamp(80px,11vw,176px)",
-        color: TEXT,
-        lineHeight: 0.82,
-        letterSpacing: "-0.04em",
-        margin: "0 0 4px",
-      }}>
-        {feature.big}
-      </p>
-
-      {/* Tag — outline like Section 1 */}
-      <p className="font-druk-wide uppercase" style={{
-        fontSize: "clamp(18px,2.4vw,40px)",
-        color: "transparent",
-        WebkitTextStroke: `clamp(1.4px,0.10vw,1.8px) ${TEXT}`,
-        letterSpacing: "0.06em",
-        lineHeight: 1,
-        margin: "0 0 clamp(14px,1.8vh,26px)",
-      }}>
-        {feature.tag}
-      </p>
-
-      {/* Divider */}
+      {/* Counter badge */}
       <div style={{
-        width: "clamp(36px,4vw,64px)",
-        height: 1,
-        background: "rgba(53,56,63,0.20)",
-        margin: `0 ${isLeft ? "0" : "auto"} clamp(10px,1.4vh,18px) ${isLeft ? "0" : "auto"}`,
-      }} />
-
-      {/* Description */}
-      <p style={{
-        color: MUTED,
-        fontSize: "clamp(12px,0.88vw,14px)",
-        lineHeight: 1.80,
-        margin: 0,
-        whiteSpace: "pre-line",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "4px 10px 4px 8px",
+        border: `1px solid rgba(53,56,63,0.22)`,
+        borderRadius: 999,
+        background: "rgba(53,56,63,0.06)",
       }}>
-        {feature.desc}
-      </p>
+        <span style={{
+          width: 6, height: 6, borderRadius: "50%",
+          background: TEXT, opacity: 0.5, flexShrink: 0,
+        }} />
+        <span className="font-ekstra uppercase" style={{
+          color: MUTED, fontSize: "clamp(8px,0.55vw,10px)",
+          letterSpacing: "0.22em",
+        }}>
+          {feature.num} / 06
+        </span>
+      </div>
+
+      {/* Big number + outline tag stacked */}
+      <div style={{ lineHeight: 1, textAlign: isLeft ? "left" : "right" }}>
+        <p className="font-druk" style={{
+          fontSize: "clamp(76px,10vw,160px)",
+          color: TEXT,
+          lineHeight: 0.84,
+          letterSpacing: "-0.04em",
+          margin: "0 0 2px",
+        }}>
+          {feature.big}
+        </p>
+        <p className="font-druk-wide uppercase" style={{
+          fontSize: "clamp(16px,2vw,34px)",
+          color: "transparent",
+          WebkitTextStroke: `clamp(1.2px,0.09vw,1.6px) ${TEXT}`,
+          letterSpacing: "0.08em",
+          lineHeight: 1,
+          margin: 0,
+        }}>
+          {feature.tag}
+        </p>
+      </div>
+
+      {/* Accent line + description */}
+      <div style={{
+        display: "flex",
+        flexDirection: isLeft ? "row" : "row-reverse",
+        alignItems: "flex-start",
+        gap: 12,
+      }}>
+        <div style={{
+          width: 2,
+          alignSelf: "stretch",
+          minHeight: 32,
+          background: `rgba(53,56,63,0.18)`,
+          borderRadius: 1,
+          flexShrink: 0,
+          marginTop: 3,
+        }} />
+        <p style={{
+          color: MUTED,
+          fontSize: "clamp(11px,0.82vw,13px)",
+          lineHeight: 1.85,
+          margin: 0,
+          whiteSpace: "pre-line",
+          textAlign: isLeft ? "left" : "right",
+        }}>
+          {feature.desc}
+        </p>
+      </div>
     </motion.div>
   )
 }
@@ -347,9 +372,10 @@ function FrameScrubber({
         position: "absolute",
         left: "50%", top: "50%",
         transform: "translate(-50%, -50%)",
-        width:  isMobile ? "clamp(180px,46vw,280px)" : "clamp(260px,28vw,420px)",
+        width:  isMobile ? "42vh" : "68vh",
         height: isMobile ? "42vh" : "68vh",
-        maxHeight: isMobile ? 400 : 820,
+        maxWidth:  isMobile ? 380 : 820,
+        maxHeight: isMobile ? 380 : 820,
         zIndex: 10,
         pointerEvents: "none",
       }}

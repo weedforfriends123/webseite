@@ -33,26 +33,13 @@ export function LoadingScreen() {
       }
     }
 
-    // ── Asset loading (GLB + page) — gate for exit, not for letter pacing ──
+    // ── Asset loading — gate for exit, not for letter pacing ──
     const markReady = () => { assetsReady.current = true; tryExit() }
-
-    fetch("/product.glb", { cache: "force-cache" })
-      .then(res => {
-        if (!res.body) { markReady(); return }
-        const reader = res.body.getReader()
-        const drain = (): Promise<void> =>
-          reader.read().then(({ done: d }) => {
-            if (d) { markReady(); return }
-            return drain()
-          }).catch(() => markReady())
-        return drain()
-      })
-      .catch(() => markReady())
 
     if (document.readyState === "complete") markReady()
     else window.addEventListener("load", markReady)
 
-    const hardTimeout = setTimeout(markReady, 12_000)
+    const hardTimeout = setTimeout(markReady, 5_000)
 
     // ── Fixed-pace letter reveal — always plays in full, never skips ────────
     let n = 0
