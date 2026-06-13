@@ -11,6 +11,8 @@ const STRAINS = [
   { key: "nl",  line1: "NORTHERN",  line2: "LIGHTS",  img: "/pouches/northern-lights.webp",  flavor: "Kiefer · Erde · Süße" },
   { key: "ph",  line1: "PURPLE",    line2: "HAZE",    img: "/pouches/purple-haze.webp",       flavor: "Beere · Blüte · Süße" },
   { key: "icc", line1: "ICE CREAM", line2: "COOKIES", img: "/pouches/ice-cream-cookies.webp", flavor: "Vanille · Cookie · Crème" },
+  { key: "ah",  line1: "AMNESIA",   line2: "HAZE",    img: "/pouches/amnesia-haze.webp",      flavor: "Zitrus · Erde · Würze" },
+  { key: "gel", line1: "GEL",       line2: "ATO",     img: "/pouches/gelato.webp",            flavor: "Beere · Sahne · Süße" },
 ]
 
 
@@ -89,7 +91,7 @@ export function Section01_Hero() {
   return (
     // Mobile: exactly one viewport height — no extra scroll space, fast paint.
     // Desktop: 400vh so scroll drives the strain carousel via useScroll.
-    <div ref={outerRef} className="h-[100svh] md:h-[240vh] relative">
+    <div ref={outerRef} className="h-[100svh] md:h-[400vh] relative">
       <section
         id="hero"
         onTouchStart={onTouchStart}
