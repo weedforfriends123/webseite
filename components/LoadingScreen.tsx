@@ -3,41 +3,39 @@
 import { useEffect, useState, useRef } from "react"
 import { motion } from "framer-motion"
 
-const WORD     = "WEED4FRIENDS"
-const LETTERS  = WORD.split("")
-const INTERVAL = 155  // ms per letter  (~1.86s total)
+const WORD            = "WEED4FRIENDS"
+const LETTERS         = WORD.split("")
+const LETTER_DRAW_MS  = 210   // how long each letter "draws" (clip wipe)
+const LETTER_DELAY_MS = 195   // gap between triggering each letter (~2.3s total)
 
-type Phase = "typing" | "waiting" | "exiting" | "done"
+type Phase = "writing" | "waiting" | "exiting" | "done"
 
 export function LoadingScreen() {
-  const [shown,  setShown]  = useState(0)
-  const [cursor, setCursor] = useState(true)
-  const [phase,  setPhase]  = useState<Phase>("typing")
+  const [triggered, setTriggered] = useState(0)  // how many letters started drawing
+  const [phase, setPhase]         = useState<Phase>("writing")
 
   const glbReady    = useRef(false)
   const pageReady   = useRef(false)
-  const typingDone  = useRef(false)
+  const writeDone   = useRef(false)
   const isMobileRef = useRef(false)
-  // target for desktop exit: shrink + fly to navbar area
   const exitY       = useRef(-260)
   const exitScale   = useRef(0.18)
 
   useEffect(() => {
     isMobileRef.current = window.innerWidth < 768
     if (!isMobileRef.current) {
-      // Adjust for viewport height — fly to top-left area
       const fh = Math.min(80, Math.max(36, window.innerWidth * 0.06))
       exitY.current     = -(window.innerHeight / 2 - 28)
       exitScale.current = 32 / fh
     }
 
     const tryExit = () => {
-      if (glbReady.current && pageReady.current && typingDone.current) {
-        setPhase("exiting")
+      if (glbReady.current && pageReady.current && writeDone.current) {
+        setTimeout(() => setPhase("exiting"), 320)  // brief hold at 100%
       }
     }
 
-    // Stream GLB to track real load progress
+    // Stream GLB so real load drives the "waiting" phase
     fetch("/product.glb", { cache: "force-cache" })
       .then(res => {
         if (!res.body) { glbReady.current = true; tryExit(); return }
@@ -50,35 +48,29 @@ export function LoadingScreen() {
       })
       .catch(() => { glbReady.current = true; tryExit() })
 
-    // Page load event
     const onLoad = () => { pageReady.current = true; tryExit() }
     if (document.readyState === "complete") onLoad()
     else window.addEventListener("load", onLoad)
 
-    // Hard fallback — never block longer than 10s
     const timeout = setTimeout(() => {
       glbReady.current = true; pageReady.current = true; tryExit()
     }, 10_000)
 
-    // Typewriter
+    // Trigger letters one by one — like a pen moving across
     let count = 0
-    const typeTimer = setInterval(() => {
+    const writeTimer = setInterval(() => {
       count++
-      setShown(count)
+      setTriggered(count)
       if (count >= LETTERS.length) {
-        clearInterval(typeTimer)
-        typingDone.current = true
-        setPhase(prev => prev === "typing" ? "waiting" : prev)
+        clearInterval(writeTimer)
+        writeDone.current = true
+        setPhase(p => p === "writing" ? "waiting" : p)
         tryExit()
       }
-    }, INTERVAL)
-
-    // Blinking cursor
-    const cursorTimer = setInterval(() => setCursor(c => !c), 520)
+    }, LETTER_DELAY_MS)
 
     return () => {
-      clearInterval(typeTimer)
-      clearInterval(cursorTimer)
+      clearInterval(writeTimer)
       clearTimeout(timeout)
       window.removeEventListener("load", onLoad)
     }
@@ -90,10 +82,10 @@ export function LoadingScreen() {
 
   return (
     <>
-      {/* Background — fades out after text starts moving */}
+      {/* Background — fades out after text animates away */}
       <motion.div
         animate={exiting ? { opacity: 0 } : { opacity: 1 }}
-        transition={{ duration: 0.55, delay: 0.15, ease: "easeIn" }}
+        transition={{ duration: 0.55, delay: 0.18, ease: "easeIn" }}
         onAnimationComplete={() => { if (exiting) setPhase("done") }}
         style={{
           position: "fixed", inset: 0,
@@ -103,46 +95,46 @@ export function LoadingScreen() {
         }}
       />
 
-      {/* Text — flies to navbar on desktop, fades on mobile */}
+      {/* Text — flies toward navbar on desktop, fades on mobile */}
       <motion.div
         animate={exiting ? (isMobileRef.current
           ? { opacity: 0 }
           : { y: exitY.current, scale: exitScale.current, opacity: 0 }
         ) : {}}
-        transition={{ duration: 0.60, ease: [0.4, 0, 0.2, 1] }}
+        transition={{ duration: 0.65, ease: [0.4, 0, 0.2, 1] }}
         style={{
           position: "fixed", inset: 0,
           zIndex: 10000,
           display: "flex", alignItems: "center", justifyContent: "center",
           pointerEvents: "none",
-          // On desktop: bias slightly left so it visually aims at logo
-          paddingRight: isMobileRef.current ? 0 : "clamp(0px,10vw,120px)",
+          // slight left offset on desktop so it reads as heading toward the logo
+          paddingRight: isMobileRef.current ? 0 : "clamp(0px,8vw,100px)",
         }}
       >
         <p
           className="font-druk-wide uppercase"
           style={{
-            fontSize: "clamp(36px,6vw,80px)",
+            fontSize: "clamp(38px,6.2vw,82px)",
             color: "#e8e4dc",
             letterSpacing: "0.06em",
             margin: 0,
             lineHeight: 1,
           }}
         >
-          {WORD.slice(0, shown)}
-          {!exiting && (
+          {LETTERS.map((letter, i) => (
             <span
+              key={i}
               style={{
-                opacity: cursor ? 0.9 : 0,
-                transition: "opacity 0.12s ease",
                 display: "inline-block",
-                width: "0.55em",
-                verticalAlign: "baseline",
+                // clip sweeps from left to right — the "pen stroke" reveal
+                clipPath: triggered > i ? "inset(0 0% 0 0)" : "inset(0 100% 0 0)",
+                // transition is always defined so the wipe animates when clip changes
+                transition: `clip-path ${LETTER_DRAW_MS}ms cubic-bezier(0.4, 0, 0.4, 1)`,
               }}
             >
-              _
+              {letter}
             </span>
-          )}
+          ))}
         </p>
       </motion.div>
     </>
