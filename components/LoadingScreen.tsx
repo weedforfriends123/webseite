@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react"
 import { motion } from "framer-motion"
 
-const WORD            = "WEED4FRIENDS"
+const WORD            = "WEEDFORFRIENDS"
 const LETTERS         = WORD.split("")
 const LETTER_DRAW_MS  = 210   // how long each letter "draws" (clip wipe)
 const LETTER_DELAY_MS = 195   // gap between triggering each letter (~2.3s total)
