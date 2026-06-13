@@ -1,137 +1,150 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { useEffect, useState, useRef } from "react"
+import { motion } from "framer-motion"
 
-const MIN_MS = 2000    // always show at least 2 seconds
-const MAX_MS = 12_000  // force-complete after 12 seconds (fallback)
+const WORD     = "WEED4FRIENDS"
+const LETTERS  = WORD.split("")
+const INTERVAL = 155  // ms per letter  (~1.86s total)
+
+type Phase = "typing" | "waiting" | "exiting" | "done"
 
 export function LoadingScreen() {
-  const [progress, setProgress] = useState(0)
-  const [done, setDone]         = useState(false)
+  const [shown,  setShown]  = useState(0)
+  const [cursor, setCursor] = useState(true)
+  const [phase,  setPhase]  = useState<Phase>("typing")
+
+  const glbReady    = useRef(false)
+  const pageReady   = useRef(false)
+  const typingDone  = useRef(false)
+  const isMobileRef = useRef(false)
+  // target for desktop exit: shrink + fly to navbar area
+  const exitY       = useRef(-260)
+  const exitScale   = useRef(0.18)
 
   useEffect(() => {
-    const START   = Date.now()
-    let glb       = 0   // 0–1 streaming GLB download progress
-    let page      = 0   // 0 or 1 (window.load fired)
-    let completed = false
-
-    const finish = () => {
-      if (completed) return
-      completed = true
-      setTimeout(() => setDone(true), 280)  // brief pause at 100%
+    isMobileRef.current = window.innerWidth < 768
+    if (!isMobileRef.current) {
+      // Adjust for viewport height — fly to top-left area
+      const fh = Math.min(80, Math.max(36, window.innerWidth * 0.06))
+      exitY.current     = -(window.innerHeight / 2 - 28)
+      exitScale.current = 32 / fh
     }
 
-    const tick = () => {
-      if (completed) return
-      const elapsed = Math.min(1, (Date.now() - START) / MIN_MS)
-      // 70% GLB · 20% page load · 10% time padding (ensures smooth progress)
-      const raw = glb * 0.70 + page * 0.20 + elapsed * 0.10
-      const pct = Math.min(100, Math.round(raw * 100))
-      setProgress(pct)
-      if (pct >= 100 && Date.now() - START >= MIN_MS) finish()
+    const tryExit = () => {
+      if (glbReady.current && pageReady.current && typingDone.current) {
+        setPhase("exiting")
+      }
     }
 
-    // ── Stream-track the GLB (heaviest asset at ~13 MB) ──
+    // Stream GLB to track real load progress
     fetch("/product.glb", { cache: "force-cache" })
       .then(res => {
-        const total = parseInt(res.headers.get("content-length") || "") || 14_000_000
-        if (!res.body) { glb = 1; tick(); return }
+        if (!res.body) { glbReady.current = true; tryExit(); return }
         const reader = res.body.getReader()
-        let got = 0
-        const pump = (): Promise<void> =>
-          reader.read().then(({ done: d, value }) => {
-            if (d) { glb = 1; tick(); return }
-            got += value.byteLength
-            glb  = Math.min(1, got / total)
-            tick()
-            return pump()
-          }).catch(() => { glb = 1; tick() })
-        return pump()
+        const drain = (): Promise<void> => reader.read().then(({ done: d }) => {
+          if (d) { glbReady.current = true; tryExit(); return }
+          return drain()
+        }).catch(() => { glbReady.current = true; tryExit() })
+        return drain()
       })
-      .catch(() => { glb = 1; tick() })
+      .catch(() => { glbReady.current = true; tryExit() })
 
-    // ── Page load event (images, fonts, etc.) ──
-    const onLoad = () => { page = 1; tick() }
+    // Page load event
+    const onLoad = () => { pageReady.current = true; tryExit() }
     if (document.readyState === "complete") onLoad()
     else window.addEventListener("load", onLoad)
 
-    // ── Tick every 80ms to drive the time-based 10% increment ──
-    const interval = setInterval(tick, 80)
+    // Hard fallback — never block longer than 10s
+    const timeout = setTimeout(() => {
+      glbReady.current = true; pageReady.current = true; tryExit()
+    }, 10_000)
 
-    // ── Hard timeout fallback ──
-    const timeout = setTimeout(() => { glb = 1; page = 1; tick() }, MAX_MS)
+    // Typewriter
+    let count = 0
+    const typeTimer = setInterval(() => {
+      count++
+      setShown(count)
+      if (count >= LETTERS.length) {
+        clearInterval(typeTimer)
+        typingDone.current = true
+        setPhase(prev => prev === "typing" ? "waiting" : prev)
+        tryExit()
+      }
+    }, INTERVAL)
+
+    // Blinking cursor
+    const cursorTimer = setInterval(() => setCursor(c => !c), 520)
 
     return () => {
-      clearInterval(interval)
+      clearInterval(typeTimer)
+      clearInterval(cursorTimer)
       clearTimeout(timeout)
       window.removeEventListener("load", onLoad)
     }
   }, [])
 
+  if (phase === "done") return null
+
+  const exiting = phase === "exiting"
+
   return (
-    <AnimatePresence>
-      {!done && (
-        <motion.div
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0, scale: 1.025 }}
-          transition={{ duration: 0.80, ease: [0.4, 0, 0.2, 1] }}
+    <>
+      {/* Background — fades out after text starts moving */}
+      <motion.div
+        animate={exiting ? { opacity: 0 } : { opacity: 1 }}
+        transition={{ duration: 0.55, delay: 0.15, ease: "easeIn" }}
+        onAnimationComplete={() => { if (exiting) setPhase("done") }}
+        style={{
+          position: "fixed", inset: 0,
+          zIndex: 9999,
+          background: "#111212",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Text — flies to navbar on desktop, fades on mobile */}
+      <motion.div
+        animate={exiting ? (isMobileRef.current
+          ? { opacity: 0 }
+          : { y: exitY.current, scale: exitScale.current, opacity: 0 }
+        ) : {}}
+        transition={{ duration: 0.60, ease: [0.4, 0, 0.2, 1] }}
+        style={{
+          position: "fixed", inset: 0,
+          zIndex: 10000,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          pointerEvents: "none",
+          // On desktop: bias slightly left so it visually aims at logo
+          paddingRight: isMobileRef.current ? 0 : "clamp(0px,10vw,120px)",
+        }}
+      >
+        <p
+          className="font-druk-wide uppercase"
           style={{
-            position: "fixed", inset: 0, zIndex: 9999,
-            background: "#111212",
-            display: "flex", flexDirection: "column",
-            alignItems: "center", justifyContent: "center",
+            fontSize: "clamp(36px,6vw,80px)",
+            color: "#e8e4dc",
+            letterSpacing: "0.06em",
+            margin: 0,
+            lineHeight: 1,
           }}
         >
-          {/* Logo */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/logo.webp"
-            alt="WEEDFORFRIENDS"
-            style={{
-              width: "clamp(72px,12vw,120px)",
-              filter: "brightness(0) invert(1)",
-              opacity: 0.90,
-              marginBottom: "clamp(40px,7vh,72px)",
-            }}
-          />
-
-          {/* Percentage — font-druk like Section 1 numbers */}
-          <p
-            className="font-druk"
-            style={{
-              fontSize: "clamp(64px,14vw,120px)",
-              color: "#e8e4dc",
-              lineHeight: 1,
-              letterSpacing: "-0.03em",
-              margin: "0 0 clamp(20px,3.5vh,36px)",
-              fontVariantNumeric: "tabular-nums",
-            }}
-          >
-            {String(progress).padStart(3, "0")}
-          </p>
-
-          {/* Progress bar */}
-          <div style={{ width: "clamp(200px,32vw,340px)" }}>
-            <div style={{
-              width: "100%", height: 1,
-              background: "rgba(255,255,255,0.12)",
-              borderRadius: 99, overflow: "hidden", position: "relative",
-            }}>
-              <motion.div
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
-                style={{
-                  position: "absolute", left: 0, top: 0,
-                  height: "100%",
-                  background: "rgba(232,228,220,0.75)",
-                  borderRadius: 99,
-                }}
-              />
-            </div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          {WORD.slice(0, shown)}
+          {!exiting && (
+            <span
+              style={{
+                opacity: cursor ? 0.9 : 0,
+                transition: "opacity 0.12s ease",
+                display: "inline-block",
+                width: "0.55em",
+                verticalAlign: "baseline",
+              }}
+            >
+              _
+            </span>
+          )}
+        </p>
+      </motion.div>
+    </>
   )
 }
