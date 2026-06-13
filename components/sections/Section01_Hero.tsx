@@ -13,11 +13,6 @@ const STRAINS = [
   { key: "icc", line1: "ICE CREAM", line2: "COOKIES", img: "/pouches/ice-cream-cookies.webp", flavor: "Vanille · Cookie · Crème" },
 ]
 
-// Fast crossfade — only used on strain CHANGE (initial={false} skips page-load entrance)
-const CROSS_ENTER = { opacity: 0, scale: 0.94 }
-const CROSS_SHOW  = { opacity: 1, scale: 1 }
-const CROSS_EXIT  = { opacity: 0, scale: 1.04 }
-const CROSS_TRANS = { duration: 0.18, ease: [0.16, 1, 0.3, 1] as const }
 
 function StatStrip() {
   const stats = [
@@ -50,6 +45,7 @@ export function Section01_Hero() {
   const outerRef  = useRef<HTMLDivElement>(null)
   const activeRef = useRef(0)
   const swipeX    = useRef<number | null>(null)
+  const swipeDir  = useRef<1 | -1>(1)
   const [activeIndex, setActiveIndex] = useState(0)
 
   // ── Desktop: scroll position drives the active strain ──────────────────────
@@ -65,6 +61,7 @@ export function Section01_Hero() {
   const goTo = (idx: number) => {
     const i = Math.max(0, Math.min(idx, STRAINS.length - 1))
     if (i === activeRef.current) return
+    swipeDir.current = i > activeRef.current ? 1 : -1
     activeRef.current = i
     setActiveIndex(i)
   }
@@ -137,13 +134,14 @@ export function Section01_Hero() {
             <div className="block md:hidden">
               {/* initial={false} → image is immediately visible on page load.
                   AnimatePresence only runs the crossfade on STRAIN CHANGE. */}
-              <AnimatePresence initial={false} mode="wait">
+              <AnimatePresence initial={false} mode="wait" custom={swipeDir.current}>
                 <motion.div
                   key={strain.key + "-m"}
-                  initial={CROSS_ENTER}
-                  animate={CROSS_SHOW}
-                  exit={CROSS_EXIT}
-                  transition={CROSS_TRANS}
+                  custom={swipeDir.current}
+                  initial={(dir: number) => ({ opacity: 0, x: dir * 64 })}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={(dir: number) => ({ opacity: 0, x: dir * -64 })}
+                  transition={{ duration: 0.30, ease: [0.16, 1, 0.3, 1] as const }}
                 >
                   <img
                     src={strain.img}
@@ -251,13 +249,14 @@ export function Section01_Hero() {
             </motion.div>
 
             {/* Strain name + flavour — initial={false} so text appears instantly on load */}
-            <AnimatePresence initial={false} mode="wait">
+            <AnimatePresence initial={false} mode="wait" custom={swipeDir.current}>
               <motion.div
                 key={strain.key + "-text"}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.20, ease: [0.16, 1, 0.3, 1] }}
+                custom={swipeDir.current}
+                initial={(dir: number) => ({ opacity: 0, x: dir * 28, y: 4 })}
+                animate={{ opacity: 1, x: 0, y: 0 }}
+                exit={(dir: number) => ({ opacity: 0, x: dir * -28, y: -4 })}
+                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] as const }}
                 style={{ width: "100%" }}
               >
                 <h1
@@ -309,10 +308,10 @@ export function Section01_Hero() {
           className="block md:hidden"
           style={{
             position: "absolute",
-            top: "clamp(78px,11vh,120px)",
-            left: "clamp(12px,4vw,32px)",
+            top: "calc(clamp(72px,10vh,112px) + 6px)",
+            left: "clamp(14px,4vw,32px)",
             transform: "rotate(-4deg)",
-            zIndex: 10, pointerEvents: "none", userSelect: "none",
+            zIndex: 20, pointerEvents: "none", userSelect: "none",
           }}
         >
           <p className="font-mindflow" style={{ color: "#eddc8c", fontSize: "clamp(13px,3.8vw,18px)", lineHeight: 1.5 }}>
