@@ -306,19 +306,22 @@ export function Section01_Hero() {
         <motion.div
           initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           transition={{ duration: 0.9, delay: 0.5 }} aria-hidden
+          className="block md:hidden"
           style={{
             position: "absolute",
-            // Mobile: bottom-left corner above the dots row, clear of the image
-            // Desktop: upper-left quadrant
-            bottom: "clamp(80px,14vh,140px)",
-            left:   "clamp(14px,5vw,240px)",
-            top: "auto",
+            top: "clamp(78px,11vh,120px)",
+            left: "clamp(12px,4vw,32px)",
+            transform: "rotate(-4deg)",
+            zIndex: 10, pointerEvents: "none", userSelect: "none",
           }}
-          className="block md:hidden"
         >
-          <p className="font-mindflow" style={{ color: "#eddc8c", fontSize: "clamp(13px,3.8vw,18px)", lineHeight: 1.5, transform: "rotate(-4deg)", transformOrigin: "left center" }}>
+          <p className="font-mindflow" style={{ color: "#eddc8c", fontSize: "clamp(13px,3.8vw,18px)", lineHeight: 1.5 }}>
             Real Flavor,<br />Original Taste
           </p>
+          <svg width="28" height="22" viewBox="0 0 46 38" style={{ marginTop: 3 }}>
+            <path d="M5 5 Q18 22 38 32" fill="none" stroke="#eddc8c" strokeWidth="1.4" strokeLinecap="round" />
+            <path d="M38 32L30 27M38 32L31 22" fill="none" stroke="#eddc8c" strokeWidth="1.4" strokeLinecap="round" />
+          </svg>
         </motion.div>
         {/* Desktop scribble — original top-left position */}
         <motion.div
