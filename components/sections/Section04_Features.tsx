@@ -12,12 +12,18 @@ const MUTED = "rgba(53,56,63,0.52)"
 const FRAME_COUNT = 100
 
 const FEATURES = [
-  { side: "left"  as const, big: "600",  tag: "PUFFS",       desc: "Smooth bis zum letzten Zug.\nKein Absatz. Kein Nachlassen." },
-  { side: "right" as const, big: "0%",   tag: "NIKOTIN",     desc: "100% tabakfrei · nikotinfrei.\nEU-zertifiziert und laborgeprüft." },
-  { side: "left"  as const, big: "ECHT", tag: "TERPENE",     desc: "Echter Geschmack. Echte Aromen.\nSmooth und aromatisch, Zug für Zug." },
-  { side: "right" as const, big: "LAB",  tag: "TESTED",      desc: "Apothekenqualität.\nStrenge EU-Standards. Kein Kompromiss." },
-  { side: "left"  as const, big: "6",    tag: "FLAVOURS",    desc: "Northern Lights · Purple Haze · Ice Cream Cookies\nAmnesia Haze · Gelato · Girl Scout Cookies" },
-  { side: "right" as const, big: "EU",   tag: "ZERTIFIZIERT",desc: "Hergestellt in der EU.\nKontrollierte Qualität. Kein Kompromiss." },
+  { side: "left"  as const, big: "600",  tag: "PUFFS",
+    desc: "600 gleichmäßige Züge — kein Nachlassen, keine Überraschungen.\nVom ersten bis zum letzten Puff dieselbe Qualität.\nKompakt, diskret und für jeden Moment gemacht." },
+  { side: "right" as const, big: "0%",   tag: "NIKOTIN",
+    desc: "Kein Nikotin. Kein Tabak. Keine Sucht.\nWir glauben, dass echter Genuss frei sein sollte —\nvon Abhängigkeiten und Kompromissen." },
+  { side: "left"  as const, big: "ECHT", tag: "TERPENE",
+    desc: "Terpene geben jeder Sorte ihren einzigartigen Charakter —\nAroma, Tiefe und Wirkung in einem.\nNatürlich isoliert, authentisch zurückgeführt." },
+  { side: "right" as const, big: "LAB",  tag: "TESTED",
+    desc: "Jede Charge wird unabhängig getestet — auf Reinheit,\nWirkstoffgehalt und Konsistenz.\nDu weißt genau, was du in der Hand hältst." },
+  { side: "left"  as const, big: "6",    tag: "FLAVOURS",
+    desc: "Sechs Sorten mit eigenem Charakter.\nVon fruchtiger Frische bis zu erdiger Tiefe —\nNorthern Lights · Purple Haze · Ice Cream Cookies\nAmnesia Haze · Gelato · Girl Scout Cookies" },
+  { side: "right" as const, big: "EU",   tag: "ZERTIFIZIERT",
+    desc: "Entwickelt und produziert in der EU —\nnach den strengsten Qualitätsstandards Europas.\nKontrolliert, zertifiziert, transparent. Von hier, für euch." },
 ] as const
 
 const fStart = (i: number) => 0.10 + i * 0.13
@@ -64,7 +70,7 @@ function FeatureBlock({
           color: "transparent", WebkitTextStroke: `1.2px ${TEXT}`,
           letterSpacing: "0.06em", margin: "0 0 8px",
         }}>{feature.tag}</p>
-        <p style={{ color: MUTED, fontSize: "clamp(11px,2.6vw,13px)", lineHeight: 1.65, margin: 0, whiteSpace: "pre-line" }}>
+        <p style={{ color: MUTED, fontSize: "clamp(12px,3.2vw,15px)", lineHeight: 1.65, margin: 0, whiteSpace: "pre-line" }}>
           {feature.desc}
         </p>
       </motion.div>
@@ -77,7 +83,7 @@ function FeatureBlock({
       position: "absolute", top: "50%", translateY: "-50%",
       [isLeft ? "left" : "right"]: edge,
       opacity, x, zIndex: 5, pointerEvents: "none",
-      maxWidth: "clamp(200px,24vw,380px)",
+      maxWidth: "clamp(240px,27vw,420px)",
       display: "flex", flexDirection: "column",
       alignItems: isLeft ? "flex-start" : "flex-end",
       gap: "clamp(6px,0.9vh,12px)",
@@ -95,7 +101,7 @@ function FeatureBlock({
       </div>
       <div style={{ display: "flex", flexDirection: isLeft ? "row" : "row-reverse", alignItems: "flex-start", gap: 10 }}>
         <div style={{ width: 2, alignSelf: "stretch", minHeight: 24, background: "rgba(53,56,63,0.16)", borderRadius: 1, flexShrink: 0, marginTop: 3 }} />
-        <p style={{ color: MUTED, fontSize: "clamp(10px,0.78vw,12px)", lineHeight: 1.85, margin: 0, whiteSpace: "pre-line", textAlign: isLeft ? "left" : "right" }}>
+        <p style={{ color: MUTED, fontSize: "clamp(11px,0.88vw,13px)", lineHeight: 1.78, margin: 0, whiteSpace: "pre-line", textAlign: isLeft ? "left" : "right" }}>
           {feature.desc}
         </p>
       </div>
@@ -272,10 +278,10 @@ function FrameScrubber({
         left: "50%", top: isMobile ? "38%" : "44%",
         translateX: "-50%", translateY: "-50%",
         y: floatY,
-        width:     isMobile ? "clamp(180px,58vw,260px)" : "clamp(340px,44vw,680px)",
-        height:    isMobile ? "clamp(180px,58vw,260px)" : "clamp(340px,44vw,680px)",
-        maxWidth:  isMobile ? 260 : 700,
-        maxHeight: isMobile ? 260 : 700,
+        width:     isMobile ? "clamp(200px,60vw,300px)" : "clamp(320px,64vh,780px)",
+        height:    isMobile ? "clamp(200px,60vw,300px)" : "clamp(320px,64vh,780px)",
+        maxWidth:  isMobile ? 300 : 800,
+        maxHeight: isMobile ? 300 : 800,
         zIndex: 10,
         pointerEvents: "none",
       }}
@@ -289,22 +295,11 @@ function FrameScrubber({
         zIndex: 0, filter: "blur(22px)", pointerEvents: "none",
       }} />
 
-      {/*
-        Shadow is on this wrapper div (box-shadow = no DPR degradation).
-        The canvas itself has no filter — keeps canvas pixel-perfect on Retina.
-      */}
-      <div style={{
-        position: "absolute", inset: 0, zIndex: 1,
-        boxShadow: "0 40px 80px rgba(30,20,55,0.32), 0 12px 30px rgba(30,20,55,0.18)",
-        borderRadius: 8, pointerEvents: "none",
-      }} />
-
       <canvas
         ref={canvasRef}
         style={{
           width: "100%", height: "100%",
-          display: "block", position: "relative", zIndex: 2,
-          // No filter — keeps rendering pixel-perfect on Retina displays
+          display: "block", position: "relative", zIndex: 1,
         }}
       />
     </motion.div>
