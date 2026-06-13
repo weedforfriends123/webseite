@@ -3,27 +3,21 @@
 import { useEffect, useState, useRef } from "react"
 import { motion } from "framer-motion"
 
-const WORD   = "WEEDFORFRIENDS"
+const WORD    = "WEEDFORFRIENDS"
 const LETTERS = WORD.split("")   // 14 letters
-const MIN_MS  = 2800             // minimum animation duration (~200 ms / letter)
-const MAX_MS  = 12_000
+const PACE_MS = 190              // ms between each letter  → ~2.7 s total
 
-type Phase = "writing" | "exiting" | "done"
+type Phase = "writing" | "waiting" | "exiting" | "done"
 
 export function LoadingScreen() {
-  const [triggered, setTriggered] = useState(0)
-  const [phase, setPhase]         = useState<Phase>("writing")
+  const [letterCount, setLetterCount] = useState(0)
+  const [phase, setPhase]             = useState<Phase>("writing")
 
-  const glbFrac        = useRef(0)      // 0–1 real byte progress
-  const glbDone        = useRef(false)  // GLB finished or errored
-  const streamWorks    = useRef(false)  // true once any bytes received
-  const pageReady      = useRef(false)
-  const finishing      = useRef(false)
-  const tickRef        = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
-  const isMobileRef    = useRef(false)
-  const exitY          = useRef(0)
-  const exitScale      = useRef(1)
-  const startRef       = useRef(0)
+  const assetsReady = useRef(false)
+  const writingDone = useRef(false)
+  const isMobileRef = useRef(false)
+  const exitY       = useRef(0)
+  const exitScale   = useRef(1)
 
   useEffect(() => {
     isMobileRef.current = window.innerWidth < 768
@@ -33,70 +27,50 @@ export function LoadingScreen() {
       exitScale.current = 32 / fh
     }
 
-    startRef.current = performance.now()
-
-    const tryFinish = () => {
-      if (finishing.current) return
-      const timeFrac = (performance.now() - startRef.current) / MIN_MS
-      if (timeFrac >= 1 && glbDone.current && pageReady.current) {
-        finishing.current = true
-        clearInterval(tickRef.current)
-        setTriggered(LETTERS.length)
-        setTimeout(() => setPhase("exiting"), 420)
+    const tryExit = () => {
+      if (writingDone.current && assetsReady.current) {
+        setTimeout(() => setPhase("exiting"), 350)
       }
     }
 
-    // ── Tick: advance letters at pace of whichever is slower ────────────────
-    // streamWorks=true  → letterFrac = min(timeFrac, glbFrac)
-    //   Fast/cached GLB: glbFrac=1 quickly, letters follow 2800ms time floor
-    //   Slow GLB: glbFrac < timeFrac, letters follow download speed
-    // streamWorks=false → letterFrac = timeFrac (TikTok/WebView fallback)
-    tickRef.current = setInterval(() => {
-      const timeFrac = (performance.now() - startRef.current) / MIN_MS
-      const letterFrac = streamWorks.current
-        ? Math.min(timeFrac, glbFrac.current)
-        : Math.min(1, timeFrac)
-      // +1 offset so first letter appears as soon as any progress > 0
-      const count = letterFrac <= 0
-        ? 0
-        : Math.min(LETTERS.length, Math.floor(letterFrac * LETTERS.length) + 1)
-      setTriggered(count)
-      tryFinish()
-    }, 50)
+    // ── Asset loading (GLB + page) — gate for exit, not for letter pacing ──
+    const markReady = () => { assetsReady.current = true; tryExit() }
 
-    // ── Stream GLB ────────────────────────────────────────────────────────
     fetch("/product.glb", { cache: "force-cache" })
       .then(res => {
-        const total = parseInt(res.headers.get("content-length") || "") || 14_000_000
-        if (!res.body) { glbDone.current = true; tryFinish(); return }
+        if (!res.body) { markReady(); return }
         const reader = res.body.getReader()
-        let got = 0
-        const pump = (): Promise<void> =>
-          reader.read().then(({ done: d, value }) => {
-            if (d) { glbFrac.current = 1; glbDone.current = true; tryFinish(); return }
-            got += value.byteLength
-            glbFrac.current    = Math.min(1, got / total)
-            streamWorks.current = true
-            return pump()
-          }).catch(() => { glbDone.current = true; tryFinish() })
-        return pump()
+        const drain = (): Promise<void> =>
+          reader.read().then(({ done: d }) => {
+            if (d) { markReady(); return }
+            return drain()
+          }).catch(() => markReady())
+        return drain()
       })
-      .catch(() => { glbDone.current = true; tryFinish() })
+      .catch(() => markReady())
 
-    // ── Window load ───────────────────────────────────────────────────────
-    const onLoad = () => { pageReady.current = true; tryFinish() }
-    if (document.readyState === "complete") onLoad()
-    else window.addEventListener("load", onLoad)
+    if (document.readyState === "complete") markReady()
+    else window.addEventListener("load", markReady)
 
-    // ── Hard fallback ─────────────────────────────────────────────────────
-    const timeout = setTimeout(() => {
-      glbDone.current = true; pageReady.current = true; tryFinish()
-    }, MAX_MS)
+    const hardTimeout = setTimeout(markReady, 12_000)
+
+    // ── Fixed-pace letter reveal — always plays in full, never skips ────────
+    let n = 0
+    const timer = setInterval(() => {
+      n++
+      setLetterCount(n)
+      if (n >= LETTERS.length) {
+        clearInterval(timer)
+        writingDone.current = true
+        setPhase(p => p === "writing" ? "waiting" : p)
+        tryExit()
+      }
+    }, PACE_MS)
 
     return () => {
-      clearInterval(tickRef.current)
-      clearTimeout(timeout)
-      window.removeEventListener("load", onLoad)
+      clearInterval(timer)
+      clearTimeout(hardTimeout)
+      window.removeEventListener("load", markReady)
     }
   }, [])
 
@@ -105,10 +79,10 @@ export function LoadingScreen() {
 
   return (
     <>
-      {/* Background */}
+      {/* Dark background */}
       <motion.div
         animate={exiting ? { opacity: 0 } : { opacity: 1 }}
-        transition={{ duration: 0.55, delay: 0.18, ease: "easeIn" }}
+        transition={{ duration: 0.5, delay: 0.2, ease: "easeIn" }}
         onAnimationComplete={() => { if (exiting) setPhase("done") }}
         style={{
           position: "fixed", inset: 0,
@@ -118,19 +92,19 @@ export function LoadingScreen() {
         }}
       />
 
-      {/* Text */}
+      {/* Text container */}
       <motion.div
-        animate={exiting ? (isMobileRef.current
-          ? { opacity: 0, scale: 0.96 }
-          : { y: exitY.current, scale: exitScale.current, opacity: 0 }
-        ) : {}}
-        transition={{ duration: 0.62, ease: [0.4, 0, 0.2, 1] }}
+        animate={exiting
+          ? isMobileRef.current
+            ? { opacity: 0, scale: 0.97 }
+            : { y: exitY.current, scale: exitScale.current, opacity: 0 }
+          : {}
+        }
+        transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
         style={{
           position: "fixed", inset: 0,
           zIndex: 10000,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          display: "flex", alignItems: "center", justifyContent: "center",
           pointerEvents: "none",
         }}
       >
@@ -146,16 +120,18 @@ export function LoadingScreen() {
           }}
         >
           {LETTERS.map((letter, i) => (
-            <span
+            <motion.span
               key={i}
-              style={{
-                display: "inline-block",
-                clipPath: triggered > i ? "inset(0 0% 0 0)" : "inset(0 100% 0 0)",
-                transition: "clip-path 220ms cubic-bezier(0.4, 0, 0.4, 1)",
-              }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={letterCount > i
+                ? { opacity: 1, y: 0 }
+                : { opacity: 0, y: 8 }
+              }
+              transition={{ duration: 0.20, ease: [0.16, 1, 0.3, 1] }}
+              style={{ display: "inline-block" }}
             >
               {letter}
-            </span>
+            </motion.span>
           ))}
         </p>
       </motion.div>
