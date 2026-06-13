@@ -3,8 +3,8 @@
 import { useRef, useState } from "react"
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion"
 
-const BG    = "#bcc0ca"
-const TEXT  = "#35383f"
+const BG   = "#bcc0ca"
+const TEXT = "#35383f"
 const MUTED = "rgba(53,56,63,0.52)"
 
 const STRAINS = [
@@ -12,6 +12,12 @@ const STRAINS = [
   { key: "ph",  line1: "PURPLE",    line2: "HAZE",    img: "/pouches/purple-haze.webp",       flavor: "Beere · Blüte · Süße" },
   { key: "icc", line1: "ICE CREAM", line2: "COOKIES", img: "/pouches/ice-cream-cookies.webp", flavor: "Vanille · Cookie · Crème" },
 ]
+
+// Fast crossfade — only used on strain CHANGE (initial={false} skips page-load entrance)
+const CROSS_ENTER = { opacity: 0, scale: 0.94 }
+const CROSS_SHOW  = { opacity: 1, scale: 1 }
+const CROSS_EXIT  = { opacity: 0, scale: 1.04 }
+const CROSS_TRANS = { duration: 0.18, ease: [0.16, 1, 0.3, 1] as const }
 
 function StatStrip() {
   const stats = [
@@ -23,12 +29,12 @@ function StatStrip() {
     <div style={{ display: "inline-flex", alignItems: "stretch" }}>
       {stats.map(({ value, label }, i) => (
         <div key={value} style={{
-          display: "flex", flexDirection: "column", alignItems: "center", gap: 7,
-          paddingLeft:  i > 0 ? "clamp(14px,2vw,30px)" : 0,
-          marginLeft:   i > 0 ? "clamp(14px,2vw,30px)" : 0,
-          borderLeft:   i > 0 ? "1px solid rgba(53,56,63,0.22)" : "none",
+          display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+          paddingLeft: i > 0 ? "clamp(12px,2vw,28px)" : 0,
+          marginLeft:  i > 0 ? "clamp(12px,2vw,28px)" : 0,
+          borderLeft:  i > 0 ? "1px solid rgba(53,56,63,0.22)" : "none",
         }}>
-          <span className="font-druk" style={{ fontSize: "clamp(20px,2.6vw,44px)", color: TEXT, lineHeight: 1, letterSpacing: "-0.03em" }}>
+          <span className="font-druk" style={{ fontSize: "clamp(18px,2.6vw,44px)", color: TEXT, lineHeight: 1, letterSpacing: "-0.03em" }}>
             {value}
           </span>
           <span className="font-ekstra" style={{ fontSize: "clamp(8px,0.58vw,9px)", color: MUTED, letterSpacing: "0.18em", textTransform: "uppercase" }}>
@@ -40,47 +46,75 @@ function StatStrip() {
   )
 }
 
-// Shared fade transition — no y-offset, works identically on SSR and client
-const FADE_ENTER = { opacity: 0, scale: 0.90 }
-const FADE_SHOW  = { opacity: 1, scale: 1 }
-const FADE_EXIT  = { opacity: 0, scale: 1.06 }
-const FADE_TRANS = { duration: 0.38, ease: [0.16, 1, 0.3, 1] as const }
-
 export function Section01_Hero() {
   const outerRef  = useRef<HTMLDivElement>(null)
   const activeRef = useRef(0)
+  const swipeX    = useRef<number | null>(null)
   const [activeIndex, setActiveIndex] = useState(0)
 
+  // ── Desktop: scroll position drives the active strain ──────────────────────
   const { scrollYProgress } = useScroll({ target: outerRef, offset: ["start start", "end start"] })
-
   useMotionValueEvent(scrollYProgress, "change", (v) => {
+    // Mobile uses swipe/tap — scroll only changes strains on desktop
+    if (typeof window !== "undefined" && window.innerWidth < 768) return
     const idx = Math.min(Math.floor(v * STRAINS.length), STRAINS.length - 1)
     if (idx !== activeRef.current) { activeRef.current = idx; setActiveIndex(idx) }
   })
 
-  const jumpToStrain = (idx: number) => {
-    const el = outerRef.current
-    if (!el) return
-    window.scrollTo({ top: el.offsetTop + (idx / STRAINS.length) * el.offsetHeight, behavior: "smooth" })
+  // ── Shared navigation ────────────────────────────────────────────────────
+  const goTo = (idx: number) => {
+    const i = Math.max(0, Math.min(idx, STRAINS.length - 1))
+    if (i === activeRef.current) return
+    activeRef.current = i
+    setActiveIndex(i)
+  }
+
+  // Dots: direct state on mobile, smooth scroll on desktop
+  const dotClick = (idx: number) => {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      goTo(idx)
+    } else {
+      const el = outerRef.current
+      if (!el) return
+      window.scrollTo({ top: el.offsetTop + (idx / STRAINS.length) * el.offsetHeight, behavior: "smooth" })
+    }
+  }
+
+  // ── Swipe gesture (mobile only) ──────────────────────────────────────────
+  const onTouchStart = (e: React.TouchEvent) => { swipeX.current = e.touches[0].clientX }
+  const onTouchEnd   = (e: React.TouchEvent) => {
+    if (swipeX.current === null) return
+    const dx = swipeX.current - e.changedTouches[0].clientX
+    if (Math.abs(dx) > 44) goTo(activeRef.current + (dx > 0 ? 1 : -1))
+    swipeX.current = null
   }
 
   const strain = STRAINS[activeIndex]
 
   return (
-    <div ref={outerRef} style={{ height: "400vh", position: "relative" }}>
-      <section id="hero" style={{
-        position: "sticky", top: 0, height: "100svh",
-        background: BG, overflow: "hidden",
-        display: "flex", flexDirection: "column",
-      }}>
+    // Mobile: exactly one viewport height — no extra scroll space, fast paint.
+    // Desktop: 400vh so scroll drives the strain carousel via useScroll.
+    <div ref={outerRef} className="h-[100svh] md:h-[400vh] relative">
+      <section
+        id="hero"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+        style={{
+          position: "sticky", top: 0, height: "100svh",
+          background: BG, overflow: "hidden",
+          display: "flex", flexDirection: "column",
+          // Allow vertical page scroll; capture horizontal for swipe
+          touchAction: "pan-y",
+        }}
+      >
         {/* Radial glow */}
         <div aria-hidden style={{
           position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
-          background: "radial-gradient(ellipse 70% 60% at 65% 55%, rgba(122,107,145,0.30) 0%, transparent 65%)",
+          background: "radial-gradient(ellipse 70% 60% at 65% 55%, rgba(122,107,145,0.28) 0%, transparent 65%)",
         }} />
 
-        {/* spacer so hero content clears the fixed Navbar */}
-        <div style={{ height: "clamp(80px,10.5vh,124px)", flexShrink: 0 }} />
+        {/* Spacer clears the fixed Navbar */}
+        <div style={{ height: "clamp(72px,10vh,112px)", flexShrink: 0 }} />
 
         {/* ── MAIN GRID ────────────────────────────────────────────────────── */}
         <div
@@ -88,40 +122,92 @@ export function Section01_Hero() {
           style={{
             flex: 1,
             alignItems: "center",
-            alignContent: "center", // vertically center the stacked rows on mobile
-            padding: "clamp(4px,0.8vh,16px) clamp(16px,4vw,72px) clamp(12px,2.5vh,36px)",
-            gap: "clamp(12px,2.5vw,32px)",
+            alignContent: "center",
+            padding: "0 clamp(16px,4vw,72px) clamp(10px,2vh,32px)",
+            gap: "clamp(6px,1.6vw,28px)",
             position: "relative", zIndex: 5,
             overflow: "hidden",
           }}
         >
-          {/* ── POUCH COLUMN ────────────────────────────────────────────────── */}
-          <div className="flex items-center justify-center" style={{ minHeight: 0 }}>
 
-            {/* MOBILE: initial={false} means the image is visible immediately on page load
-                 (no entrance animation = zero risk of SSR/hydration mismatch).
-                 AnimatePresence only runs exit/enter on STRAIN CHANGE (key change). */}
-            <div className="block md:hidden" style={{ position: "relative" }}>
+          {/* ── POUCH COLUMN ────────────────────────────────────────────────── */}
+          <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 0 }}>
+
+            {/* ── MOBILE IMAGE (swipeable, no entrance animation on load) ── */}
+            <div className="block md:hidden">
+              {/* initial={false} → image is immediately visible on page load.
+                  AnimatePresence only runs the crossfade on STRAIN CHANGE. */}
               <AnimatePresence initial={false} mode="wait">
                 <motion.div
                   key={strain.key + "-m"}
-                  initial={FADE_ENTER}
-                  animate={FADE_SHOW}
-                  exit={FADE_EXIT}
-                  transition={FADE_TRANS}
+                  initial={CROSS_ENTER}
+                  animate={CROSS_SHOW}
+                  exit={CROSS_EXIT}
+                  transition={CROSS_TRANS}
                 >
                   <img
                     src={strain.img}
                     alt={`${strain.line1} ${strain.line2}`}
-                    style={{ height: "45vh", width: "auto", objectFit: "contain", userSelect: "none", pointerEvents: "none", display: "block" }}
+                    fetchPriority="high"
+                    style={{ height: "42vh", width: "auto", objectFit: "contain",
+                      userSelect: "none", pointerEvents: "none", display: "block" }}
                     draggable={false}
                   />
                 </motion.div>
               </AnimatePresence>
             </div>
 
-            {/* DESKTOP: spring fly-in + ambient float */}
-            <div className="hidden md:block" style={{ position: "relative" }}>
+            {/* ── MOBILE PREV / NEXT BUTTONS ─────────────────────────────── */}
+            <div className="block md:hidden" style={{
+              position: "absolute", inset: 0, zIndex: 10,
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "0 6px", pointerEvents: "none",
+            }}>
+              {/* Prev */}
+              <button
+                onClick={() => goTo(activeIndex - 1)}
+                disabled={activeIndex === 0}
+                style={{
+                  pointerEvents: "all",
+                  width: 30, height: 30, borderRadius: "50%",
+                  background: "rgba(255,255,255,0.55)",
+                  border: "1px solid rgba(255,255,255,0.75)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  opacity: activeIndex === 0 ? 0 : 1,
+                  transition: "opacity 0.25s ease",
+                  cursor: activeIndex === 0 ? "default" : "pointer",
+                }}
+                aria-label="Vorheriger Strain"
+              >
+                <svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke={TEXT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 1.5L3 4.5L6 7.5"/>
+                </svg>
+              </button>
+
+              {/* Next */}
+              <button
+                onClick={() => goTo(activeIndex + 1)}
+                disabled={activeIndex === STRAINS.length - 1}
+                style={{
+                  pointerEvents: "all",
+                  width: 30, height: 30, borderRadius: "50%",
+                  background: "rgba(255,255,255,0.55)",
+                  border: "1px solid rgba(255,255,255,0.75)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  opacity: activeIndex === STRAINS.length - 1 ? 0 : 1,
+                  transition: "opacity 0.25s ease",
+                  cursor: activeIndex === STRAINS.length - 1 ? "default" : "pointer",
+                }}
+                aria-label="Nächster Strain"
+              >
+                <svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke={TEXT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 1.5L6 4.5L3 7.5"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* ── DESKTOP IMAGE (spring fly-in + ambient float) ───────────── */}
+            <div className="hidden md:block">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={strain.key + "-d"}
@@ -141,7 +227,8 @@ export function Section01_Hero() {
                     <img
                       src={strain.img}
                       alt={`${strain.line1} ${strain.line2}`}
-                      style={{ height: "68vh", maxHeight: 820, width: "auto", objectFit: "contain", userSelect: "none", pointerEvents: "none", display: "block" }}
+                      style={{ height: "68vh", maxHeight: 820, width: "auto", objectFit: "contain",
+                        userSelect: "none", pointerEvents: "none", display: "block" }}
                       draggable={false}
                     />
                   </motion.div>
@@ -152,22 +239,31 @@ export function Section01_Hero() {
           </div>
 
           {/* ── INFO COLUMN ─────────────────────────────────────────────────── */}
-          <div className="flex flex-col items-center md:items-start" style={{ gap: "clamp(10px,1.6vh,24px)" }}>
+          <div className="flex flex-col items-center md:items-start" style={{ gap: "clamp(8px,1.4vh,22px)" }}>
 
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.85, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}>
+            {/* Stats — no entrance animation delay on mobile */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.35, delay: 0.05 }}
+            >
               <StatStrip />
             </motion.div>
 
-            <AnimatePresence mode="wait">
+            {/* Strain name + flavour — initial={false} so text appears instantly on load */}
+            <AnimatePresence initial={false} mode="wait">
               <motion.div
                 key={strain.key + "-text"}
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}
-                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.20, ease: [0.16, 1, 0.3, 1] }}
                 style={{ width: "100%" }}
               >
-                <h1 className="font-druk-wide uppercase text-center md:text-left"
-                  style={{ lineHeight: 0.88, letterSpacing: "-0.02em", marginBottom: "clamp(8px,1.2vh,16px)" }}>
+                <h1
+                  className="font-druk-wide uppercase text-center md:text-left"
+                  style={{ lineHeight: 0.88, letterSpacing: "-0.02em", marginBottom: "clamp(8px,1.2vh,16px)" }}
+                >
                   <span className="block text-[9.5vw] md:text-[5.8vw]"
                     style={{ color: "transparent", WebkitTextStroke: `clamp(1.5px,0.14vw,2.5px) ${TEXT}` }}>
                     {strain.line1}
@@ -176,10 +272,8 @@ export function Section01_Hero() {
                     {strain.line2}
                   </span>
                 </h1>
-                <p className="font-ekstra text-center md:text-left" style={{
-                  fontSize: "clamp(12px,1vw,15px)", color: MUTED,
-                  lineHeight: 1.7,
-                }}>
+                <p className="font-ekstra text-center md:text-left"
+                  style={{ fontSize: "clamp(11px,1vw,15px)", color: MUTED, lineHeight: 1.7 }}>
                   600 Puffs · Superior Blend · EU-zertifiziert
                   <br />
                   <span style={{ color: TEXT, opacity: 0.72 }}>{strain.flavor}</span>
@@ -187,24 +281,30 @@ export function Section01_Hero() {
               </motion.div>
             </AnimatePresence>
 
-            {/* Strain dots */}
-            <div className="flex justify-center md:justify-start" style={{ gap: 10, alignItems: "center" }}>
+            {/* Navigation dots */}
+            <div className="flex justify-center md:justify-start" style={{ gap: 8, alignItems: "center" }}>
               {STRAINS.map((s, i) => (
-                <button key={s.key} onClick={() => jumpToStrain(i)} aria-label={`${s.line1} ${s.line2}`}
-                  style={{ border: "none", cursor: "pointer", padding: 4, background: "none", display: "flex" }}>
+                <button
+                  key={s.key}
+                  onClick={() => dotClick(i)}
+                  aria-label={`${s.line1} ${s.line2}`}
+                  style={{ border: "none", cursor: "pointer", padding: "8px 4px", background: "none", display: "flex" }}
+                >
                   <motion.div
-                    animate={{ width: i === activeIndex ? 28 : 8, opacity: i === activeIndex ? 1 : 0.32 }}
-                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                    style={{ height: 6, borderRadius: 99, background: TEXT }}
+                    animate={{ width: i === activeIndex ? 26 : 8, opacity: i === activeIndex ? 1 : 0.30 }}
+                    transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                    style={{ height: 5, borderRadius: 99, background: TEXT }}
                   />
                 </button>
               ))}
             </div>
           </div>
+
         </div>
 
-        {/* ── SCRIBBLE ─────────────────────────────────────────────────────── */}
+        {/* ── SCRIBBLE — desktop only ───────────────────────────────────────── */}
         <motion.div
+          className="hidden md:block"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           transition={{ duration: 0.9, delay: 0.6 }} aria-hidden
           style={{
