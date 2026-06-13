@@ -9,7 +9,7 @@ const TEXT  = "#35383f"
 const LIGHT = "#e8e4dc"
 const MUTED = "rgba(53,56,63,0.52)"
 
-const FRAME_COUNT = 95
+const FRAME_COUNT = 100
 
 const FEATURES = [
   {
