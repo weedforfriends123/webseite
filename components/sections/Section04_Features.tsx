@@ -1,12 +1,14 @@
 "use client"
 
-import { useRef, useEffect, useState } from "react"
-import { motion, useScroll, useTransform, MotionValue } from "framer-motion"
+import { useRef, useEffect, useState, useCallback } from "react"
+import { motion, useScroll, useTransform, useMotionValueEvent, MotionValue } from "framer-motion"
 
 const BG    = "#bcc0ca"
 const TEXT  = "#35383f"
 const LIGHT = "#e8e4dc"
 const MUTED = "rgba(53,56,63,0.52)"
+
+const FRAME_COUNT = 95
 
 const FEATURES = [
   {
@@ -245,6 +247,94 @@ function FeatureCounter({
   )
 }
 
+function FrameScrubber({
+  scrollYProgress,
+  isMobile,
+}: {
+  scrollYProgress: MotionValue<number>
+  isMobile: boolean
+}) {
+  const wrapRef    = useRef<HTMLDivElement>(null)
+  const canvasRef  = useRef<HTMLCanvasElement>(null)
+  const imgsRef    = useRef<HTMLImageElement[]>([])
+  const loadedRef  = useRef(new Set<number>())
+  const currentRef = useRef(0)
+
+  const draw = useCallback((idx: number) => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+    let img: HTMLImageElement | null = null
+    for (let d = 0; d < FRAME_COUNT; d++) {
+      const a = idx - d
+      const b = idx + d
+      if (a >= 0 && loadedRef.current.has(a)) { img = imgsRef.current[a]; break }
+      if (b !== a && b < FRAME_COUNT && loadedRef.current.has(b)) { img = imgsRef.current[b]; break }
+    }
+    if (!img) return
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    const sc = Math.min(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight)
+    const w = img.naturalWidth * sc
+    const h = img.naturalHeight * sc
+    ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h)
+  }, [])
+
+  useEffect(() => {
+    imgsRef.current = Array.from({ length: FRAME_COUNT }, (_, i) => {
+      const img = new Image()
+      img.onload = () => {
+        loadedRef.current.add(i)
+        if (i === 0 || i === currentRef.current) draw(currentRef.current)
+      }
+      img.src = `/frames/frame_${String(i).padStart(3, "0")}.webp`
+      return img
+    })
+  }, [draw])
+
+  useEffect(() => {
+    const wrap   = wrapRef.current
+    const canvas = canvasRef.current
+    if (!wrap || !canvas) return
+    const sync = () => {
+      const dpr = window.devicePixelRatio || 1
+      canvas.width  = wrap.offsetWidth  * dpr
+      canvas.height = wrap.offsetHeight * dpr
+      draw(currentRef.current)
+    }
+    sync()
+    const ro = new ResizeObserver(sync)
+    ro.observe(wrap)
+    return () => ro.disconnect()
+  }, [draw])
+
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    const idx = Math.max(0, Math.min(FRAME_COUNT - 1, Math.floor(v * FRAME_COUNT)))
+    currentRef.current = idx
+    draw(idx)
+  })
+
+  return (
+    <div
+      ref={wrapRef}
+      style={{
+        position: "absolute",
+        left: "50%", top: "50%",
+        transform: "translate(-50%, -50%)",
+        width:  isMobile ? "clamp(180px,48vw,280px)" : "clamp(220px,26vw,380px)",
+        height: isMobile ? "clamp(220px,44vh,340px)" : "clamp(280px,52vh,640px)",
+        zIndex: 10,
+        pointerEvents: "none",
+      }}
+    >
+      <canvas
+        ref={canvasRef}
+        style={{ width: "100%", height: "100%", display: "block" }}
+      />
+    </div>
+  )
+}
+
 export function Section04_Features() {
   const sectionRef  = useRef<HTMLElement>(null)
   const isMobileRef = useRef(false)
@@ -320,29 +410,8 @@ export function Section04_Features() {
           </h2>
         </motion.div>
 
-        {/* ── CENTER placeholder — video frames go here ── */}
-        <div style={{
-          position: "absolute",
-          left: "50%", top: "50%",
-          transform: "translate(-50%, -50%)",
-          width:  isMobile ? "clamp(180px,48vw,280px)" : "clamp(220px,26vw,380px)",
-          height: isMobile ? "clamp(220px,44vh,340px)" : "clamp(280px,52vh,640px)",
-          zIndex: 10,
-          pointerEvents: "none",
-          // subtle outline so it's easy to identify when adding frames
-          border: "1px dashed rgba(53,56,63,0.14)",
-          borderRadius: "clamp(8px,1vw,16px)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          <p className="font-ekstra uppercase" style={{
-            color: "rgba(53,56,63,0.18)",
-            fontSize: "clamp(9px,0.65vw,11px)",
-            letterSpacing: "0.22em",
-            margin: 0,
-          }}>
-            Video
-          </p>
-        </div>
+        {/* ── CENTER frame scrubber ── */}
+        <FrameScrubber scrollYProgress={scrollYProgress} isMobile={isMobile} />
 
         {/* ── FEATURES ── */}
         {FEATURES.map((f, i) => (
