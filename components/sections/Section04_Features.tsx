@@ -1,13 +1,18 @@
 "use client"
 
-import { useRef, useEffect } from "react"
-import { motion, useScroll, useTransform, MotionValue, useMotionValueEvent } from "framer-motion"
+import { useRef, useEffect, useState } from "react"
+import { motion, useScroll, useTransform, MotionValue } from "framer-motion"
+import dynamic from "next/dynamic"
 
-const BG    = "#bcc0ca"
-const CARD  = "#6e7d6a"   // muted sage green
+// Loaded client-only — Three.js Canvas cannot run on the server
+const Product3D = dynamic(
+  () => import("./Product3D").then(m => ({ default: m.Product3D })),
+  { ssr: false, loading: () => null },
+)
+
+const BG   = "#bcc0ca"
+const CARD = "#6e7d6a"
 const LIGHT = "#e8e4dc"
-
-const TOTAL_FRAMES = 102
 
 const RIBBON_D =
   "M 1720 -80 " +
@@ -67,10 +72,12 @@ function FeatureCard({
   feature,
   index,
   scrollYProgress,
+  isMobile,
 }: {
   feature: typeof FEATURES[number]
   index: number
   scrollYProgress: MotionValue<number>
+  isMobile: boolean
 }) {
   const span  = 0.80 / FEATURES.length
   const base  = 0.10 + index * span
@@ -92,20 +99,25 @@ function FeatureCard({
 
   const isRight = feature.side === "right"
   const edgeStyle = isRight ? { right: 0 } : { left: 0 }
-  const r = "clamp(14px,1.4vw,22px)"
-  const borderRadius = isRight
-    ? `${r} 0 0 ${r}`
-    : `0 ${r} ${r} 0`
+
+  // Mobile: right cards at top, left cards at bottom → product center always clear
+  // Desktop: vertically centered
+  const topPos     = isMobile ? (isRight ? "6%"  : "58%") : "50%"
+  const translateY = isMobile ? "0%"                      : "-50%"
+
+  const r = isMobile ? "10px" : "clamp(14px,1.4vw,22px)"
+  const borderRadius = isRight ? `${r} 0 0 ${r}` : `0 ${r} ${r} 0`
 
   return (
     <motion.div
       style={{
         position: "absolute",
-        top: "50%",
-        translateY: "-50%",
+        top: topPos,
+        translateY,
         x,
         opacity,
-        zIndex: 20,
+        // Cards sit behind product (zIndex 15) so product is always in the foreground
+        zIndex: 8,
         ...edgeStyle,
       }}
     >
@@ -114,16 +126,20 @@ function FeatureCard({
         <div style={{
           background: CARD,
           borderRadius,
-          padding: "clamp(48px,6vh,80px) clamp(32px,4.5vw,68px) clamp(40px,5.5vh,68px)",
-          width: "clamp(300px,38vw,540px)",
+          padding: isMobile
+            ? "clamp(28px,4.5vh,44px) clamp(16px,4vw,28px) clamp(22px,3.5vh,36px)"
+            : "clamp(48px,6vh,80px) clamp(32px,4.5vw,68px) clamp(40px,5.5vh,68px)",
+          width: isMobile
+            ? "clamp(190px,76vw,280px)"
+            : "clamp(300px,38vw,540px)",
         }}>
           <h3
             className="font-druk-wide uppercase"
             style={{
               color: LIGHT,
-              fontSize: "clamp(32px,4.8vw,76px)",
+              fontSize: isMobile ? "clamp(22px,6vw,34px)" : "clamp(32px,4.8vw,76px)",
               lineHeight: 0.88,
-              margin: "0 0 clamp(12px,1.6vh,22px)",
+              margin: `0 0 ${isMobile ? "clamp(8px,1.2vh,14px)" : "clamp(12px,1.6vh,22px)"}`,
               whiteSpace: "pre-line",
             }}
           >
@@ -131,7 +147,7 @@ function FeatureCard({
           </h3>
           <p style={{
             color: "rgba(232,228,220,0.72)",
-            fontSize: "clamp(13px,1.05vw,16px)",
+            fontSize: isMobile ? "clamp(11px,2.8vw,14px)" : "clamp(13px,1.05vw,16px)",
             lineHeight: 1.75,
             margin: 0,
             whiteSpace: "pre-line",
@@ -146,45 +162,19 @@ function FeatureCard({
 
 export function Section04_Features() {
   const sectionRef = useRef<HTMLElement>(null)
-  const canvasRef  = useRef<HTMLCanvasElement>(null)
-  const framesRef  = useRef<HTMLImageElement[]>([])
+  const [isMobile, setIsMobile] = useState(false)
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end end"],
   })
 
-  // Preload all frames on mount; draw frame 0 as soon as it's ready
   useEffect(() => {
-    const imgs: HTMLImageElement[] = Array.from({ length: TOTAL_FRAMES }, (_, i) => {
-      const img = new Image()
-      img.src = `/product-frames/${String(i).padStart(3, "0")}.jpg`
-      if (i === 0) {
-        img.onload = () => {
-          const canvas = canvasRef.current
-          if (!canvas) return
-          const ctx = canvas.getContext("2d")
-          ctx?.drawImage(img, 0, 0, canvas.width, canvas.height)
-        }
-      }
-      return img
-    })
-    framesRef.current = imgs
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener("resize", check)
+    return () => window.removeEventListener("resize", check)
   }, [])
-
-  // Scrub frames on scroll
-  useMotionValueEvent(scrollYProgress, "change", (v) => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-    const fi = Math.min(Math.round(v * (TOTAL_FRAMES - 1)), TOTAL_FRAMES - 1)
-    const img = framesRef.current[fi]
-    if (img?.complete && img.naturalWidth > 0) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-    }
-  })
 
   const pathLen      = useTransform(scrollYProgress, [0, 0.45], [0, 1])
   const ribbonY      = useTransform(scrollYProgress, [0, 1], [-50, 90])
@@ -248,7 +238,7 @@ export function Section04_Features() {
           </svg>
         </motion.div>
 
-        {/* ── Product — canvas frame scrubber ── */}
+        {/* ── Product — 3D model (replaces canvas frame scrubber) ── */}
         <motion.div
           style={{
             position: "absolute",
@@ -258,19 +248,11 @@ export function Section04_Features() {
             scale: productScale,
             zIndex: 15,
             pointerEvents: "none",
+            width: "clamp(260px,38vw,540px)",
+            height: "clamp(300px,56vh,760px)",
           }}
         >
-          <canvas
-            ref={canvasRef}
-            width={720}
-            height={1280}
-            style={{
-              height: "clamp(300px,56vh,760px)",
-              width: "auto",
-              display: "block",
-              mixBlendMode: "multiply",
-            }}
-          />
+          <Product3D />
         </motion.div>
 
         {/* ── Feature cards ── */}
@@ -280,6 +262,7 @@ export function Section04_Features() {
             feature={f}
             index={i}
             scrollYProgress={scrollYProgress}
+            isMobile={isMobile}
           />
         ))}
 
