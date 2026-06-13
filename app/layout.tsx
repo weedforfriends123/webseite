@@ -7,6 +7,7 @@ import { WFFHeader } from "@/components/WFFHeader"
 import { MouseTrail } from "@/components/MouseTrail"
 import { PageTransition } from "@/components/PageTransition"
 import { SmoothScroll } from "@/components/SmoothScroll"
+import { LoadingScreen } from "@/components/LoadingScreen"
 
 const syne = Syne({
   subsets: ["latin"],
@@ -44,6 +45,7 @@ export default function RootLayout({
       className={`${syne.variable} ${spaceGrotesk.variable} ${spaceMono.variable}`}
     >
       <body>
+        <LoadingScreen />
         <SmoothScroll />
         <CartProvider>
           <PageTransition>

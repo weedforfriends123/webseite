@@ -2,120 +2,142 @@
 
 import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import dynamic from "next/dynamic"
 
-interface Props {
-  onDone: () => void
-}
+const LoadingScene = dynamic(
+  () => import("./LoadingScene").then(m => ({ default: m.LoadingScene })),
+  { ssr: false, loading: () => null },
+)
 
-export function LoadingScreen({ onDone }: Props) {
-  const [leftDigits, setLeftDigits] = useState([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-  const [rightDigits, setRightDigits] = useState([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-  const [visible, setVisible] = useState(true)
+const MIN_MS = 2000    // always show at least 2 seconds
+const MAX_MS = 12_000  // force-complete after 12 seconds (fallback)
+
+export function LoadingScreen() {
+  const [progress, setProgress] = useState(0)
+  const [done, setDone]         = useState(false)
 
   useEffect(() => {
-    let ticks = 0
-    const MAX = 90
+    const START   = Date.now()
+    let glb       = 0   // 0–1 streaming GLB download progress
+    let page      = 0   // 0 or 1 (window.load fired)
+    let completed = false
 
-    const interval = setInterval(() => {
-      ticks++
+    const finish = () => {
+      if (completed) return
+      completed = true
+      setTimeout(() => setDone(true), 280)  // brief pause at 100%
+    }
 
-      setLeftDigits((prev) => {
-        const next = [...prev]
-        next.unshift(next.pop()!)
-        return next
+    const tick = () => {
+      if (completed) return
+      const elapsed = Math.min(1, (Date.now() - START) / MIN_MS)
+      // 70% GLB · 20% page load · 10% time padding (ensures smooth progress)
+      const raw = glb * 0.70 + page * 0.20 + elapsed * 0.10
+      const pct = Math.min(100, Math.round(raw * 100))
+      setProgress(pct)
+      if (pct >= 100 && Date.now() - START >= MIN_MS) finish()
+    }
+
+    // ── Stream-track the GLB (heaviest asset at ~13 MB) ──
+    fetch("/product.glb", { cache: "force-cache" })
+      .then(res => {
+        const total = parseInt(res.headers.get("content-length") || "") || 14_000_000
+        if (!res.body) { glb = 1; tick(); return }
+        const reader = res.body.getReader()
+        let got = 0
+        const pump = (): Promise<void> =>
+          reader.read().then(({ done: d, value }) => {
+            if (d) { glb = 1; tick(); return }
+            got += value.byteLength
+            glb  = Math.min(1, got / total)
+            tick()
+            return pump()
+          }).catch(() => { glb = 1; tick() })
+        return pump()
       })
+      .catch(() => { glb = 1; tick() })
 
-      if (ticks % 2 === 0) {
-        setRightDigits((prev) => {
-          const next = [...prev]
-          next.unshift(next.pop()!)
-          return next
-        })
-      }
+    // ── Page load event (images, fonts, etc.) ──
+    const onLoad = () => { page = 1; tick() }
+    if (document.readyState === "complete") onLoad()
+    else window.addEventListener("load", onLoad)
 
-      if (ticks >= MAX) {
-        clearInterval(interval)
-        setTimeout(() => {
-          setVisible(false)
-          setTimeout(onDone, 700)
-        }, 300)
-      }
-    }, 40)
+    // ── Tick every 80ms to drive the time-based 10% increment ──
+    const interval = setInterval(tick, 80)
 
-    return () => clearInterval(interval)
-  }, [onDone])
+    // ── Hard timeout fallback ──
+    const timeout = setTimeout(() => { glb = 1; page = 1; tick() }, MAX_MS)
+
+    return () => {
+      clearInterval(interval)
+      clearTimeout(timeout)
+      window.removeEventListener("load", onLoad)
+    }
+  }, [])
 
   return (
     <AnimatePresence>
-      {visible && (
+      {!done && (
         <motion.div
-          key="loader"
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed inset-0 z-[999] flex flex-col items-center justify-center overflow-hidden"
-          style={{ background: "#35383f" }}
+          exit={{ opacity: 0, scale: 1.025 }}
+          transition={{ duration: 0.80, ease: [0.4, 0, 0.2, 1] }}
+          style={{
+            position: "fixed", inset: 0, zIndex: 9999,
+            background: "#111212",
+            display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center",
+          }}
         >
-          <p
-            className="font-sans text-[10px] tracking-[0.5em] uppercase mb-12"
-            style={{ color: "rgba(14,15,17,0.25)" }}
-          >
-            Loading WFF Experience
-          </p>
+          {/* Logo */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.webp"
+            alt="WEEDFORFRIENDS"
+            style={{
+              width: "clamp(36px,5vw,52px)",
+              filter: "brightness(0) invert(1)",
+              opacity: 0.85,
+              marginBottom: "clamp(28px,5vh,48px)",
+            }}
+          />
 
-          {/* Slot machine digits */}
-          <div className="flex gap-1 overflow-hidden" style={{ height: "0.95em" }}>
-            <div className="relative overflow-hidden" style={{ width: "0.6em" }}>
-              <motion.div
-                animate={{ y: `${-leftDigits[0] * 10}%` }}
-                transition={{ duration: 0.04, ease: "linear" }}
-                className="flex flex-col"
-              >
-                {[...Array(10)].map((_, i) => (
-                  <span
-                    key={i}
-                    className="font-sans font-extrabold leading-none"
-                    style={{
-                      fontSize: "clamp(5rem, 18vw, 14rem)",
-                      lineHeight: 1,
-                      color: "#0e0f11",
-                    }}
-                  >
-                    {i}
-                  </span>
-                ))}
-              </motion.div>
-            </div>
-
-            <div className="relative overflow-hidden" style={{ width: "0.6em" }}>
-              <motion.div
-                animate={{ y: `${-rightDigits[0] * 10}%` }}
-                transition={{ duration: 0.08, ease: "linear" }}
-                className="flex flex-col"
-              >
-                {[...Array(10)].map((_, i) => (
-                  <span
-                    key={i}
-                    className="font-sans font-extrabold leading-none"
-                    style={{
-                      fontSize: "clamp(5rem, 18vw, 14rem)",
-                      lineHeight: 1,
-                      color: "#0e0f11",
-                    }}
-                  >
-                    {i}
-                  </span>
-                ))}
-              </motion.div>
-            </div>
+          {/* 3D spinning gem */}
+          <div style={{
+            width:  "clamp(140px,22vw,200px)",
+            height: "clamp(140px,22vw,200px)",
+          }}>
+            <LoadingScene />
           </div>
 
-          <p
-            className="font-sans text-[10px] tracking-[0.4em] uppercase mt-16"
-            style={{ color: "rgba(14,15,17,0.2)" }}
-          >
-            Weed For Friends ®
-          </p>
+          {/* Progress bar + percentage */}
+          <div style={{ marginTop: "clamp(20px,3.5vh,36px)", width: "clamp(180px,28vw,300px)" }}>
+            <div style={{
+              width: "100%", height: 1,
+              background: "rgba(255,255,255,0.10)",
+              borderRadius: 99, overflow: "hidden", position: "relative",
+            }}>
+              <motion.div
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                style={{
+                  position: "absolute", left: 0, top: 0,
+                  height: "100%",
+                  background: "rgba(232,228,220,0.80)",
+                  borderRadius: 99,
+                }}
+              />
+            </div>
+            <p style={{
+              marginTop: 10, textAlign: "center",
+              fontSize: 10, letterSpacing: "0.28em",
+              color: "rgba(232,228,220,0.30)",
+              fontFamily: "var(--font-space-mono, monospace)",
+              fontVariantNumeric: "tabular-nums",
+            }}>
+              {String(progress).padStart(3, "0")}%
+            </p>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
