@@ -321,8 +321,8 @@ function FrameScrubber({
         position: "absolute",
         left: "50%", top: "50%",
         transform: "translate(-50%, -50%)",
-        width:  isMobile ? "clamp(180px,48vw,280px)" : "clamp(220px,26vw,380px)",
-        height: isMobile ? "clamp(220px,44vh,340px)" : "clamp(280px,52vh,640px)",
+        width:  isMobile ? "clamp(220px,62vw,360px)" : "clamp(300px,36vw,520px)",
+        height: isMobile ? "clamp(280px,56vh,440px)" : "clamp(400px,72vh,920px)",
         zIndex: 10,
         pointerEvents: "none",
       }}
