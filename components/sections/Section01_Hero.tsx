@@ -45,7 +45,6 @@ export function Section01_Hero() {
   const outerRef  = useRef<HTMLDivElement>(null)
   const activeRef = useRef(0)
   const swipeX    = useRef<number | null>(null)
-  const swipeDir  = useRef<1 | -1>(1)
   const [activeIndex, setActiveIndex] = useState(0)
 
   // ── Desktop: scroll position drives the active strain ──────────────────────
@@ -61,7 +60,6 @@ export function Section01_Hero() {
   const goTo = (idx: number) => {
     const i = Math.max(0, Math.min(idx, STRAINS.length - 1))
     if (i === activeRef.current) return
-    swipeDir.current = i > activeRef.current ? 1 : -1
     activeRef.current = i
     setActiveIndex(i)
   }
@@ -130,29 +128,33 @@ export function Section01_Hero() {
           {/* ── POUCH COLUMN ────────────────────────────────────────────────── */}
           <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 0 }}>
 
-            {/* ── MOBILE IMAGE (swipeable, no entrance animation on load) ── */}
-            <div className="block md:hidden">
-              {/* initial={false} → image is immediately visible on page load.
-                  AnimatePresence only runs the crossfade on STRAIN CHANGE. */}
-              <AnimatePresence initial={false} mode="wait" custom={swipeDir.current}>
+            {/* ── MOBILE IMAGE — alle 3 immer im DOM, damit sie beim Laden schon da sind ── */}
+            <div className="block md:hidden" style={{ position: "relative", height: "42vh", width: "100%" }}>
+              {STRAINS.map((s, i) => (
                 <motion.div
-                  key={strain.key + "-m"}
-                  custom={swipeDir.current}
-                  initial={(dir: number) => ({ opacity: 0, x: dir * 64 })}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={(dir: number) => ({ opacity: 0, x: dir * -64 })}
+                  key={s.key + "-m"}
+                  initial={{ opacity: i === 0 ? 1 : 0, x: i === 0 ? 0 : 64 }}
+                  animate={{
+                    opacity: i === activeIndex ? 1 : 0,
+                    x: i === activeIndex ? 0 : i < activeIndex ? -64 : 64,
+                  }}
                   transition={{ duration: 0.30, ease: [0.16, 1, 0.3, 1] as const }}
+                  style={{
+                    position: "absolute", inset: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    pointerEvents: i === activeIndex ? "auto" : "none",
+                  }}
                 >
                   <img
-                    src={strain.img}
-                    alt={`${strain.line1} ${strain.line2}`}
-                    fetchPriority="high"
+                    src={s.img}
+                    alt={`${s.line1} ${s.line2}`}
+                    fetchPriority={i === 0 ? "high" : "low"}
                     style={{ height: "42vh", width: "auto", objectFit: "contain",
                       userSelect: "none", pointerEvents: "none", display: "block" }}
                     draggable={false}
                   />
                 </motion.div>
-              </AnimatePresence>
+              ))}
             </div>
 
             {/* ── MOBILE PREV / NEXT BUTTONS ─────────────────────────────── */}
@@ -248,37 +250,45 @@ export function Section01_Hero() {
               <StatStrip />
             </motion.div>
 
-            {/* Strain name + flavour — initial={false} so text appears instantly on load */}
-            <AnimatePresence initial={false} mode="wait" custom={swipeDir.current}>
-              <motion.div
-                key={strain.key + "-text"}
-                custom={swipeDir.current}
-                initial={(dir: number) => ({ opacity: 0, x: dir * 28, y: 4 })}
-                animate={{ opacity: 1, x: 0, y: 0 }}
-                exit={(dir: number) => ({ opacity: 0, x: dir * -28, y: -4 })}
-                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] as const }}
-                style={{ width: "100%" }}
-              >
-                <h1
-                  className="font-druk-wide uppercase text-center md:text-left"
-                  style={{ lineHeight: 0.88, letterSpacing: "-0.02em", marginBottom: "clamp(8px,1.2vh,16px)" }}
+            {/* Strain name + flavour — alle 3 immer im DOM, kein AnimatePresence-Delay */}
+            <div style={{ position: "relative", width: "100%" }}>
+              {STRAINS.map((s, i) => (
+                <motion.div
+                  key={s.key + "-text"}
+                  initial={{ opacity: i === 0 ? 1 : 0, x: i === 0 ? 0 : 28 }}
+                  animate={{
+                    opacity: i === activeIndex ? 1 : 0,
+                    x: i === activeIndex ? 0 : i < activeIndex ? -28 : 28,
+                  }}
+                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] as const }}
+                  style={{
+                    position: i === 0 ? "relative" : "absolute",
+                    top: i === 0 ? undefined : 0,
+                    width: "100%",
+                    pointerEvents: i === activeIndex ? "auto" : "none",
+                  }}
                 >
-                  <span className="block text-[9.5vw] md:text-[5.8vw]"
-                    style={{ color: "transparent", WebkitTextStroke: `clamp(1.5px,0.14vw,2.5px) ${TEXT}` }}>
-                    {strain.line1}
-                  </span>
-                  <span className="block text-[9.5vw] md:text-[5.8vw]" style={{ color: TEXT }}>
-                    {strain.line2}
-                  </span>
-                </h1>
-                <p className="font-ekstra text-center md:text-left"
-                  style={{ fontSize: "clamp(11px,1vw,15px)", color: MUTED, lineHeight: 1.7 }}>
-                  600 Puffs · Superior Blend · EU-zertifiziert
-                  <br />
-                  <span style={{ color: TEXT, opacity: 0.72 }}>{strain.flavor}</span>
-                </p>
-              </motion.div>
-            </AnimatePresence>
+                  <h1
+                    className="font-druk-wide uppercase text-center md:text-left"
+                    style={{ lineHeight: 0.88, letterSpacing: "-0.02em", marginBottom: "clamp(8px,1.2vh,16px)" }}
+                  >
+                    <span className="block text-[9.5vw] md:text-[5.8vw]"
+                      style={{ color: "transparent", WebkitTextStroke: `clamp(1.5px,0.14vw,2.5px) ${TEXT}` }}>
+                      {s.line1}
+                    </span>
+                    <span className="block text-[9.5vw] md:text-[5.8vw]" style={{ color: TEXT }}>
+                      {s.line2}
+                    </span>
+                  </h1>
+                  <p className="font-ekstra text-center md:text-left"
+                    style={{ fontSize: "clamp(11px,1vw,15px)", color: MUTED, lineHeight: 1.7 }}>
+                    600 Puffs · Superior Blend · EU-zertifiziert
+                    <br />
+                    <span style={{ color: TEXT, opacity: 0.72 }}>{s.flavor}</span>
+                  </p>
+                </motion.div>
+              ))}
+            </div>
 
             {/* Navigation dots */}
             <div className="flex justify-center md:justify-start" style={{ gap: 8, alignItems: "center" }}>
