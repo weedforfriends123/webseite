@@ -71,13 +71,13 @@ function FeatureBlock({
     )
   }
 
-  const edge = "clamp(28px,3vw,60px)"
+  const edge = "clamp(24px,2.5vw,52px)"
   return (
     <motion.div style={{
       position: "absolute", top: "50%", translateY: "-50%",
       [isLeft ? "left" : "right"]: edge,
       opacity, x, zIndex: 5, pointerEvents: "none",
-      maxWidth: "clamp(180px,21vw,320px)",
+      maxWidth: "clamp(200px,24vw,380px)",
       display: "flex", flexDirection: "column",
       alignItems: isLeft ? "flex-start" : "flex-end",
       gap: "clamp(6px,0.9vh,12px)",
@@ -157,9 +157,10 @@ function FrameScrubber({
   const imgsRef   = useRef<HTMLImageElement[]>([])
   const loadedRef = useRef(new Set<number>())
 
-  // Smooth interpolation state — floats, not integer
-  const targetRef = useRef(0)  // target frame (from scroll)
-  const smoothRef = useRef(0)  // animated frame (lerped toward target)
+  // Smooth interpolation — spring physics in frame-space
+  const targetRef = useRef(0)   // target frame (from scroll)
+  const smoothRef = useRef(0)   // current animated position
+  const velRef    = useRef(0)   // velocity (frames/frame)
   const animRaf   = useRef(0)
 
   // Track last wheel event to prevent onScroll overriding it
@@ -201,14 +202,17 @@ function FrameScrubber({
     ctx.globalAlpha = 1
   }, [])
 
-  // ── Continuous 60fps lerp loop — makes it feel like a real video ──────────
+  // ── Continuous 60fps spring loop — natural video-like playback ───────────
   useEffect(() => {
     const tick = () => {
       const diff = targetRef.current - smoothRef.current
-      if (Math.abs(diff) > 0.05) {
-        // Lerp toward target: 22% per frame at 60fps → catches up in ~5 frames
-        smoothRef.current += diff * 0.22
-        drawAt(smoothRef.current)
+      // Overdamped spring: accelerates toward target, decelerates smoothly
+      const acc = diff * 0.14 - velRef.current * 0.72
+      velRef.current  += acc
+      smoothRef.current += velRef.current
+
+      if (Math.abs(diff) > 0.05 || Math.abs(velRef.current) > 0.05) {
+        drawAt(Math.max(0, Math.min(FRAME_COUNT - 1, smoothRef.current)))
       }
       animRaf.current = requestAnimationFrame(tick)
     }
@@ -285,11 +289,10 @@ function FrameScrubber({
         left: "50%", top: "44%",
         translateX: "-50%", translateY: "-50%",
         y: floatY,
-        // Portrait-ish container to match Section01 pouch proportions
-        width:     isMobile ? "46vw" : "clamp(220px,26vw,420px)",
-        height:    isMobile ? "56vh" : "78vh",
-        maxWidth:  isMobile ? 260 : 500,
-        maxHeight: isMobile ? 480 : 880,
+        width:     isMobile ? "clamp(220px,72vw,320px)" : "clamp(340px,44vw,680px)",
+        height:    isMobile ? "clamp(220px,72vw,320px)" : "clamp(340px,44vw,680px)",
+        maxWidth:  isMobile ? 320 : 700,
+        maxHeight: isMobile ? 320 : 700,
         zIndex: 10,
         pointerEvents: "none",
       }}
@@ -343,8 +346,6 @@ export function Section04_Features() {
     return () => window.removeEventListener("resize", check)
   }, [])
 
-  const introOpacity = useTransform(scrollYProgress, [0, 0.06, 0.10], [1, 1, 0])
-  const introY       = useTransform(scrollYProgress, [0, 0.10], [0, -40])
   const canvasFloat  = useTransform(scrollYProgress, [0.76, 1.0], [0, -110])
   const outroOpacity = useTransform(scrollYProgress, [0.88, 0.95], [0, 1])
   const outroY       = useTransform(scrollYProgress, [0.88, 0.96], [48, 0])
@@ -361,30 +362,6 @@ export function Section04_Features() {
           position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
           background: "radial-gradient(ellipse 70% 60% at 60% 52%, rgba(122,107,145,0.26) 0%, transparent 65%)",
         }} />
-
-        {/* ── INTRO ── */}
-        <motion.div style={{
-          position: "absolute", top: "50%", left: "50%",
-          translateX: "-50%", translateY: "-50%",
-          textAlign: "center", opacity: introOpacity, y: introY,
-          zIndex: 15, pointerEvents: "none",
-        }}>
-          <p className="font-ekstra uppercase" style={{
-            color: MUTED, fontSize: "clamp(9px,0.65vw,11px)",
-            letterSpacing: "0.26em", margin: "0 0 16px",
-          }}>
-            Warum WEED FOR FRIENDS
-          </p>
-          <h2 className="font-druk-wide uppercase" style={{
-            fontSize: "clamp(34px,5.4vw,88px)",
-            lineHeight: 0.88, letterSpacing: "-0.03em", margin: 0,
-          }}>
-            <span style={{ display: "block", color: "transparent", WebkitTextStroke: `clamp(1.5px,0.12vw,2px) ${TEXT}` }}>
-              DAS BESTE
-            </span>
-            <span style={{ display: "block", color: TEXT }}>ERLEBNIS</span>
-          </h2>
-        </motion.div>
 
         {/* ── PRODUCT ANIMATION ── */}
         <FrameScrubber sectionRef={sectionRef} isMobile={isMobile} floatY={canvasFloat} />

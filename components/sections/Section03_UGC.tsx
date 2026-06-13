@@ -212,19 +212,19 @@ export function Section03_UGC() {
         aria-hidden
         style={{
           position: "absolute",
-          bottom: "-48px",
-          right: "clamp(100px,14vw,240px)",
-          transform: "rotate(4deg)",
+          bottom: "-80px",
+          right: "clamp(60px,10vw,180px)",
+          transform: "rotate(3deg)",
           zIndex: 30, pointerEvents: "none", userSelect: "none",
           textAlign: "right",
         }}
       >
-        <p className="font-mindflow" style={{ color: "#eddc8c", fontSize: "clamp(14px,1.8vw,26px)", lineHeight: 1.55 }}>
+        <p className="font-mindflow" style={{ color: "#eddc8c", fontSize: "clamp(32px,5.5vw,88px)", lineHeight: 1.3 }}>
           Why People love<br />our products
         </p>
-        <svg width="36" height="42" viewBox="0 0 36 42" style={{ marginTop: 4, display: "block", marginLeft: "auto" }}>
-          <path d="M28 4 Q18 20 8 36" fill="none" stroke="#eddc8c" strokeWidth="1.2" strokeLinecap="round" />
-          <path d="M8 36L6 26M8 36L16 32" fill="none" stroke="#eddc8c" strokeWidth="1.2" strokeLinecap="round" />
+        <svg width="64" height="72" viewBox="0 0 64 72" style={{ marginTop: 6, display: "block", marginLeft: "auto" }}>
+          <path d="M52 6 Q32 34 14 62" fill="none" stroke="#eddc8c" strokeWidth="2" strokeLinecap="round" />
+          <path d="M14 62L10 46M14 62L28 56" fill="none" stroke="#eddc8c" strokeWidth="2" strokeLinecap="round" />
         </svg>
       </motion.div>
 
