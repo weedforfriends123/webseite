@@ -1,7 +1,8 @@
 "use client"
 
 import { useRef, useEffect, useState, useCallback } from "react"
-import { motion, useScroll, useTransform, useMotionValueEvent, MotionValue } from "framer-motion"
+import { motion, useScroll, useTransform, MotionValue } from "framer-motion"
+import { smoothScrollTarget } from "@/components/SmoothScroll"
 
 const BG    = "#bcc0ca"
 const TEXT  = "#35383f"
@@ -248,10 +249,10 @@ function FeatureCounter({
 }
 
 function FrameScrubber({
-  scrollYProgress,
+  sectionRef,
   isMobile,
 }: {
-  scrollYProgress: MotionValue<number>
+  sectionRef: React.RefObject<HTMLElement | null>
   isMobile: boolean
 }) {
   const wrapRef    = useRef<HTMLDivElement>(null)
@@ -279,6 +280,16 @@ function FrameScrubber({
     const h = img.naturalHeight * sc
     ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h)
   }, [])
+
+  const getIdx = useCallback((scrollY: number) => {
+    const section = sectionRef.current
+    if (!section) return 0
+    const top = section.offsetTop
+    const scrollable = section.offsetHeight - window.innerHeight
+    if (scrollable <= 0) return 0
+    const v = Math.max(0, Math.min(1, (scrollY - top) / scrollable))
+    return Math.max(0, Math.min(FRAME_COUNT - 1, Math.floor(v * FRAME_COUNT)))
+  }, [sectionRef])
 
   useEffect(() => {
     imgsRef.current = Array.from({ length: FRAME_COUNT }, (_, i) => {
@@ -308,11 +319,26 @@ function FrameScrubber({
     return () => ro.disconnect()
   }, [draw])
 
-  useMotionValueEvent(scrollYProgress, "change", (v) => {
-    const idx = Math.max(0, Math.min(FRAME_COUNT - 1, Math.floor(v * FRAME_COUNT)))
-    currentRef.current = idx
-    draw(idx)
-  })
+  useEffect(() => {
+    // wheel → use pre-spring target for zero-lag response
+    const onWheel = () => {
+      const idx = getIdx(smoothScrollTarget.current)
+      currentRef.current = idx
+      draw(idx)
+    }
+    // scroll → fallback for touch / keyboard / programmatic
+    const onScroll = () => {
+      const idx = getIdx(window.scrollY)
+      currentRef.current = idx
+      draw(idx)
+    }
+    window.addEventListener("wheel",  onWheel,  { passive: true })
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => {
+      window.removeEventListener("wheel",  onWheel)
+      window.removeEventListener("scroll", onScroll)
+    }
+  }, [draw, getIdx])
 
   return (
     <div
@@ -321,22 +347,23 @@ function FrameScrubber({
         position: "absolute",
         left: "50%", top: "50%",
         transform: "translate(-50%, -50%)",
-        width:  isMobile ? "clamp(210px,58vw,320px)" : "clamp(280px,30vw,460px)",
-        height: isMobile ? "clamp(360px,76vh,600px)" : "clamp(540px,92vh,1200px)",
+        width:  isMobile ? "clamp(180px,46vw,280px)" : "clamp(260px,28vw,420px)",
+        height: isMobile ? "42vh" : "68vh",
+        maxHeight: isMobile ? 400 : 820,
         zIndex: 10,
         pointerEvents: "none",
       }}
     >
-      {/* Ambient glow — follows the product's bottom */}
+      {/* Ambient glow behind product */}
       <div aria-hidden style={{
         position: "absolute",
-        bottom: "-6%", left: "50%",
+        bottom: "-8%", left: "50%",
         transform: "translateX(-50%)",
-        width: "130%", height: "38%",
-        background: "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(68,52,115,0.32) 0%, transparent 70%)",
+        width: "120%", height: "35%",
+        background: "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(68,52,115,0.28) 0%, transparent 70%)",
         pointerEvents: "none",
         zIndex: 0,
-        filter: "blur(24px)",
+        filter: "blur(20px)",
       }} />
       <canvas
         ref={canvasRef}
@@ -345,7 +372,7 @@ function FrameScrubber({
           display: "block",
           position: "relative",
           zIndex: 1,
-          filter: "drop-shadow(0 70px 90px rgba(30,20,55,0.55)) drop-shadow(0 22px 36px rgba(30,20,55,0.30))",
+          filter: "drop-shadow(0 50px 70px rgba(30,20,55,0.50)) drop-shadow(0 16px 28px rgba(30,20,55,0.25))",
         }}
       />
     </div>
@@ -428,7 +455,7 @@ export function Section04_Features() {
         </motion.div>
 
         {/* ── CENTER frame scrubber ── */}
-        <FrameScrubber scrollYProgress={scrollYProgress} isMobile={isMobile} />
+        <FrameScrubber sectionRef={sectionRef} isMobile={isMobile} />
 
         {/* ── FEATURES ── */}
         {FEATURES.map((f, i) => (

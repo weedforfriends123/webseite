@@ -8,6 +8,9 @@ const STIFFNESS = 130
 const DAMPING   = 28
 const MASS      = 1.0
 
+// Exposed so other components can read the pre-spring scroll target
+export const smoothScrollTarget = { current: 0 }
+
 export function SmoothScroll() {
   const targetRef  = useRef(0)
   const currentRef = useRef(0)
@@ -16,11 +19,12 @@ export function SmoothScroll() {
 
   useEffect(() => {
     const y0 = window.scrollY
-    targetRef.current = currentRef.current = oursRef.current = y0
+    targetRef.current = currentRef.current = oursRef.current = smoothScrollTarget.current = y0
 
     const onWheel = (e: WheelEvent) => {
       const max = document.documentElement.scrollHeight - window.innerHeight
       targetRef.current = Math.max(0, Math.min(max, targetRef.current + e.deltaY))
+      smoothScrollTarget.current = targetRef.current
     }
 
     // Detect external scrolls (touch, keyboard, programmatic Link clicks) and snap
