@@ -3,10 +3,10 @@
 import { useEffect, useRef } from "react"
 import { useAnimationFrame } from "framer-motion"
 
-// Spring constants — overdamped (no oscillation), settles in ~220ms
-const STIFFNESS = 130
-const DAMPING   = 28
-const MASS      = 1.0
+// Spring constants — smooth/liquid feel, settles in ~280ms
+const STIFFNESS = 95
+const DAMPING   = 20
+const MASS      = 0.9
 
 // Exposed so other components can read the pre-spring scroll target
 export const smoothScrollTarget = { current: 0 }
