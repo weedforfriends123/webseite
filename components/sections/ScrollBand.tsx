@@ -63,7 +63,7 @@ export function ScrollBand() {
           fill={TEXT_CLR}
           fontSize="54"
           letterSpacing="-0.5"
-          dominantBaseline="middle"
+          dy="20"
         >
           <textPath
             ref={textPathRef}

@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useEffect, useState } from "react"
-import { motion, useReducedMotion, useScroll, useTransform, useSpring } from "framer-motion"
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion"
 
 const BG    = "#bcc0ca"
 const TEXT  = "#35383f"
@@ -122,8 +122,9 @@ export function Section03_UGC() {
     return () => window.removeEventListener("resize", measure)
   }, [])
 
-  const rawX = useTransform(scrollYProgress, [0, 1], [0, -totalShift])
-  const x    = useSpring(rawX, { stiffness: 55, damping: 18 })
+  // Complete translation by 70% scroll progress — all cards visible before section exits
+  // No spring: direct follow so strip keeps up with the user's scroll
+  const x = useTransform(scrollYProgress, [0.04, 0.70], [0, -totalShift])
 
   return (
     <section style={{ background: BG, position: "relative" }}>
