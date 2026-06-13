@@ -321,15 +321,32 @@ function FrameScrubber({
         position: "absolute",
         left: "50%", top: "50%",
         transform: "translate(-50%, -50%)",
-        width:  isMobile ? "clamp(220px,62vw,360px)" : "clamp(300px,36vw,520px)",
-        height: isMobile ? "clamp(280px,56vh,440px)" : "clamp(400px,72vh,920px)",
+        width:  isMobile ? "clamp(210px,58vw,320px)" : "clamp(280px,30vw,460px)",
+        height: isMobile ? "clamp(360px,76vh,600px)" : "clamp(540px,92vh,1200px)",
         zIndex: 10,
         pointerEvents: "none",
       }}
     >
+      {/* Ambient glow — follows the product's bottom */}
+      <div aria-hidden style={{
+        position: "absolute",
+        bottom: "-6%", left: "50%",
+        transform: "translateX(-50%)",
+        width: "130%", height: "38%",
+        background: "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(68,52,115,0.32) 0%, transparent 70%)",
+        pointerEvents: "none",
+        zIndex: 0,
+        filter: "blur(24px)",
+      }} />
       <canvas
         ref={canvasRef}
-        style={{ width: "100%", height: "100%", display: "block" }}
+        style={{
+          width: "100%", height: "100%",
+          display: "block",
+          position: "relative",
+          zIndex: 1,
+          filter: "drop-shadow(0 70px 90px rgba(30,20,55,0.55)) drop-shadow(0 22px 36px rgba(30,20,55,0.30))",
+        }}
       />
     </div>
   )
