@@ -129,40 +129,71 @@ export function LoadingScreen() {
           alignItems: "center",
           justifyContent: "center",
           pointerEvents: "none",
-          // On desktop bias slightly left toward logo
-          paddingRight: isMobileRef.current ? 0 : "clamp(0px,8vw,100px)",
         }}
       >
-        <p
-          className="font-druk-wide uppercase"
-          style={{
-            // Smaller on mobile so it fits without wrapping
-            fontSize: isMobileRef.current
-              ? "clamp(28px,8.5vw,48px)"
-              : "clamp(38px,6.2vw,82px)",
-            color: "#e8e4dc",
-            letterSpacing: "0.06em",
-            margin: 0,
-            lineHeight: 1,
-            // Prevent wrapping on very small screens
-            whiteSpace: "nowrap",
-          }}
-        >
-          {LETTERS.map((letter, i) => (
-            <span
-              key={i}
-              style={{
-                display: "inline-block",
-                // clip sweeps left→right: pen-stroke reveal
-                clipPath: triggered > i ? "inset(0 0% 0 0)" : "inset(0 100% 0 0)",
-                // transition always defined so wipe animates when clip changes
-                transition: "clip-path 220ms cubic-bezier(0.4, 0, 0.4, 1)",
-              }}
-            >
-              {letter}
-            </span>
-          ))}
-        </p>
+        {isMobileRef.current ? (
+          // ── Mobile: two stacked lines so nothing gets clipped ──
+          // "WEEDFOR" (outline) + "FRIENDS" (filled) — mirrors Section 1 style
+          <div style={{ textAlign: "center", lineHeight: 0.88 }}>
+            {(["WEEDFOR", "FRIENDS"] as const).map((word, lineIdx) => {
+              const offset = lineIdx * 7  // letter indices 0–6 / 7–13
+              const isOutline = lineIdx === 0
+              return (
+                <div key={lineIdx} className="font-druk-wide uppercase" style={{
+                  display: "block",
+                  fontSize: "clamp(44px,13.5vw,64px)",
+                  letterSpacing: "0.04em",
+                  color: isOutline ? "transparent" : "#e8e4dc",
+                  WebkitTextStroke: isOutline ? "1.5px #e8e4dc" : undefined,
+                  whiteSpace: "nowrap",
+                }}>
+                  {word.split("").map((letter, j) => {
+                    const i = offset + j
+                    return (
+                      <span
+                        key={i}
+                        style={{
+                          display: "inline-block",
+                          clipPath: triggered > i ? "inset(0 0% 0 0)" : "inset(0 100% 0 0)",
+                          transition: "clip-path 220ms cubic-bezier(0.4, 0, 0.4, 1)",
+                        }}
+                      >
+                        {letter}
+                      </span>
+                    )
+                  })}
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          // ── Desktop: single line ──
+          <p
+            className="font-druk-wide uppercase"
+            style={{
+              fontSize: "clamp(38px,6.2vw,82px)",
+              color: "#e8e4dc",
+              letterSpacing: "0.06em",
+              margin: 0,
+              lineHeight: 1,
+              whiteSpace: "nowrap",
+              paddingRight: "clamp(0px,8vw,100px)",
+            }}
+          >
+            {LETTERS.map((letter, i) => (
+              <span
+                key={i}
+                style={{
+                  display: "inline-block",
+                  clipPath: triggered > i ? "inset(0 0% 0 0)" : "inset(0 100% 0 0)",
+                  transition: "clip-path 220ms cubic-bezier(0.4, 0, 0.4, 1)",
+                }}
+              >
+                {letter}
+              </span>
+            ))}
+          </p>
+        )}
       </motion.div>
     </>
   )
