@@ -12,45 +12,14 @@ const MUTED = "rgba(53,56,63,0.52)"
 const FRAME_COUNT = 100
 
 const FEATURES = [
-  {
-    side: "left"  as const,
-    big:  "600",
-    tag:  "PUFFS",
-    desc: "Smooth bis zum letzten Zug.\nKein Absatz. Kein Nachlassen.",
-  },
-  {
-    side: "right" as const,
-    big:  "0%",
-    tag:  "NIKOTIN",
-    desc: "100% tabakfrei · nikotinfrei.\nEU-zertifiziert und laborgeprüft.",
-  },
-  {
-    side: "left"  as const,
-    big:  "ECHT",
-    tag:  "TERPENE",
-    desc: "Echter Geschmack. Echte Aromen.\nSmooth und aromatisch, Zug für Zug.",
-  },
-  {
-    side: "right" as const,
-    big:  "LAB",
-    tag:  "TESTED",
-    desc: "Apothekenqualität.\nStrenge EU-Standards. Kein Kompromiss.",
-  },
-  {
-    side: "left"  as const,
-    big:  "6",
-    tag:  "FLAVOURS",
-    desc: "Northern Lights · Purple Haze · Ice Cream Cookies\nAmnesia Haze · Gelato · Girl Scout Cookies",
-  },
-  {
-    side: "right" as const,
-    big:  "EU",
-    tag:  "ZERTIFIZIERT",
-    desc: "Hergestellt in der EU.\nKontrollierte Qualität. Kein Kompromiss.",
-  },
+  { side: "left"  as const, big: "600",  tag: "PUFFS",       desc: "Smooth bis zum letzten Zug.\nKein Absatz. Kein Nachlassen." },
+  { side: "right" as const, big: "0%",   tag: "NIKOTIN",     desc: "100% tabakfrei · nikotinfrei.\nEU-zertifiziert und laborgeprüft." },
+  { side: "left"  as const, big: "ECHT", tag: "TERPENE",     desc: "Echter Geschmack. Echte Aromen.\nSmooth und aromatisch, Zug für Zug." },
+  { side: "right" as const, big: "LAB",  tag: "TESTED",      desc: "Apothekenqualität.\nStrenge EU-Standards. Kein Kompromiss." },
+  { side: "left"  as const, big: "6",    tag: "FLAVOURS",    desc: "Northern Lights · Purple Haze · Ice Cream Cookies\nAmnesia Haze · Gelato · Girl Scout Cookies" },
+  { side: "right" as const, big: "EU",   tag: "ZERTIFIZIERT",desc: "Hergestellt in der EU.\nKontrollierte Qualität. Kein Kompromiss." },
 ] as const
 
-// scroll layout: intro 0–0.10, 6×features each 13%, outro 0.88–1.00
 const fStart = (i: number) => 0.10 + i * 0.13
 const fEnd   = (i: number) => fStart(i) + 0.13
 const RAMP   = 0.025
@@ -70,115 +39,63 @@ function FeatureBlock({
   const isLeft = feature.side === "left"
 
   const opacity = useTransform(scrollYProgress, [s, s + RAMP, e - RAMP, e], [0, 1, 1, 0])
-  const x       = useTransform(
+  const x = useTransform(
     scrollYProgress, [s, s + RAMP, e - RAMP, e],
-    isMobile ? [0, 0, 0, 0] : [isLeft ? -100 : 100, 0, 0, isLeft ? -60 : 60],
+    isMobile ? [0,0,0,0] : [isLeft ? -100 : 100, 0, 0, isLeft ? -60 : 60],
   )
   const y = useTransform(
     scrollYProgress, [s, s + RAMP, e - RAMP, e],
-    isMobile ? [40, 0, 0, 40] : [0, 0, 0, 0],
+    isMobile ? [40,0,0,40] : [0,0,0,0],
   )
 
-  // ── Mobile ──
   if (isMobile) {
     return (
-      <motion.div
-        style={{
-          position: "absolute",
-          bottom: "clamp(32px,6vh,72px)",
-          left: 0, right: 0,
-          textAlign: "center",
-          opacity, y,
-          zIndex: 5,
-          pointerEvents: "none",
-          padding: "0 28px",
-        }}
-      >
+      <motion.div style={{
+        position: "absolute", bottom: "clamp(28px,5vh,64px)",
+        left: 0, right: 0, textAlign: "center",
+        opacity, y, zIndex: 5, pointerEvents: "none", padding: "0 24px",
+      }}>
         <p className="font-druk" style={{
-          fontSize: "clamp(60px,17vw,100px)", color: TEXT,
+          fontSize: "clamp(56px,16vw,96px)", color: TEXT,
           lineHeight: 0.85, letterSpacing: "-0.04em", margin: "0 0 2px",
-        }}>
-          {feature.big}
-        </p>
+        }}>{feature.big}</p>
         <p className="font-druk-wide uppercase" style={{
-          fontSize: "clamp(15px,4.4vw,24px)", lineHeight: 1,
-          color: "transparent", WebkitTextStroke: `clamp(1.2px,0.1vw,1.6px) ${TEXT}`,
-          letterSpacing: "0.06em", margin: "0 0 10px",
-        }}>
-          {feature.tag}
-        </p>
-        <p style={{
-          color: MUTED, fontSize: "clamp(11px,2.8vw,14px)",
-          lineHeight: 1.65, margin: 0, whiteSpace: "pre-line",
-        }}>
+          fontSize: "clamp(14px,4vw,22px)", lineHeight: 1,
+          color: "transparent", WebkitTextStroke: `1.2px ${TEXT}`,
+          letterSpacing: "0.06em", margin: "0 0 8px",
+        }}>{feature.tag}</p>
+        <p style={{ color: MUTED, fontSize: "clamp(11px,2.6vw,13px)", lineHeight: 1.65, margin: 0, whiteSpace: "pre-line" }}>
           {feature.desc}
         </p>
       </motion.div>
     )
   }
 
-  // ── Desktop ──
-  const edge = "clamp(32px,3.5vw,64px)"
-
+  const edge = "clamp(28px,3vw,60px)"
   return (
-    <motion.div
-      style={{
-        position: "absolute",
-        top: "50%",
-        translateY: "-50%",
-        [isLeft ? "left" : "right"]: edge,
-        opacity, x,
-        zIndex: 5,
-        pointerEvents: "none",
-        maxWidth: "clamp(190px,22vw,340px)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: isLeft ? "flex-start" : "flex-end",
-        gap: "clamp(8px,1vh,14px)",
-      }}
-    >
-      {/* Big number + outline tag */}
+    <motion.div style={{
+      position: "absolute", top: "50%", translateY: "-50%",
+      [isLeft ? "left" : "right"]: edge,
+      opacity, x, zIndex: 5, pointerEvents: "none",
+      maxWidth: "clamp(180px,21vw,320px)",
+      display: "flex", flexDirection: "column",
+      alignItems: isLeft ? "flex-start" : "flex-end",
+      gap: "clamp(6px,0.9vh,12px)",
+    }}>
       <div style={{ textAlign: isLeft ? "left" : "right" }}>
         <p className="font-druk" style={{
-          fontSize: "clamp(72px,9.5vw,152px)",
-          color: TEXT,
-          lineHeight: 0.84,
-          letterSpacing: "-0.04em",
-          margin: "0 0 2px",
-        }}>
-          {feature.big}
-        </p>
+          fontSize: "clamp(68px,9vw,148px)", color: TEXT,
+          lineHeight: 0.84, letterSpacing: "-0.04em", margin: "0 0 2px",
+        }}>{feature.big}</p>
         <p className="font-druk-wide uppercase" style={{
-          fontSize: "clamp(15px,1.9vw,32px)",
-          color: "transparent",
-          WebkitTextStroke: `clamp(1.2px,0.09vw,1.6px) ${TEXT}`,
-          letterSpacing: "0.08em",
-          lineHeight: 1,
-          margin: 0,
-        }}>
-          {feature.tag}
-        </p>
+          fontSize: "clamp(14px,1.8vw,30px)", color: "transparent",
+          WebkitTextStroke: `clamp(1.1px,0.08vw,1.5px) ${TEXT}`,
+          letterSpacing: "0.08em", lineHeight: 1, margin: 0,
+        }}>{feature.tag}</p>
       </div>
-
-      {/* Accent line + description */}
-      <div style={{
-        display: "flex",
-        flexDirection: isLeft ? "row" : "row-reverse",
-        alignItems: "flex-start",
-        gap: 10,
-      }}>
-        <div style={{
-          width: 2, alignSelf: "stretch", minHeight: 28,
-          background: "rgba(53,56,63,0.16)", borderRadius: 1,
-          flexShrink: 0, marginTop: 3,
-        }} />
-        <p style={{
-          color: MUTED,
-          fontSize: "clamp(11px,0.8vw,13px)",
-          lineHeight: 1.85, margin: 0,
-          whiteSpace: "pre-line",
-          textAlign: isLeft ? "left" : "right",
-        }}>
+      <div style={{ display: "flex", flexDirection: isLeft ? "row" : "row-reverse", alignItems: "flex-start", gap: 10 }}>
+        <div style={{ width: 2, alignSelf: "stretch", minHeight: 24, background: "rgba(53,56,63,0.16)", borderRadius: 1, flexShrink: 0, marginTop: 3 }} />
+        <p style={{ color: MUTED, fontSize: "clamp(10px,0.78vw,12px)", lineHeight: 1.85, margin: 0, whiteSpace: "pre-line", textAlign: isLeft ? "left" : "right" }}>
           {feature.desc}
         </p>
       </div>
@@ -186,52 +103,39 @@ function FeatureBlock({
   )
 }
 
-// ── FeatureCounter (dot row — pure DOM, zero React re-renders) ────────────────
+// ── FeatureCounter — zero React re-renders ────────────────────────────────────
 
 function FeatureCounter({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const dots = containerRef.current?.children
-    if (!dots) return
-
     const unsub = scrollYProgress.on("change", (v) => {
       let found = -1
       for (let i = 0; i < FEATURES.length; i++) {
         if (v >= fStart(i) && v < fEnd(i)) { found = i; break }
       }
+      const dots = containerRef.current?.children
+      if (!dots) return
       Array.from(dots).forEach((dot, i) => {
         const el = dot as HTMLElement
         el.style.width   = i === found ? "26px" : "8px"
-        el.style.opacity = i === found ? "1" : "0.22"
+        el.style.opacity = i === found ? "1"    : "0.22"
       })
     })
     return unsub
   }, [scrollYProgress])
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        position: "absolute",
-        bottom: "clamp(24px,3.5vh,44px)",
-        right: "clamp(24px,3.5vw,52px)",
-        zIndex: 20,
-        pointerEvents: "none",
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-      }}
-    >
+    <div ref={containerRef} style={{
+      position: "absolute", bottom: "clamp(20px,3vh,40px)", right: "clamp(20px,3vw,48px)",
+      zIndex: 20, pointerEvents: "none", display: "flex", alignItems: "center", gap: 8,
+    }}>
       {FEATURES.map((_, i) => (
-        <div
-          key={i}
-          style={{
-            height: 5, borderRadius: 99, background: TEXT,
-            width: 8, opacity: 0.22,
-            transition: "width 0.28s cubic-bezier(0.16,1,0.3,1), opacity 0.28s",
-          }}
-        />
+        <div key={i} style={{
+          height: 5, borderRadius: 99, background: TEXT,
+          width: 8, opacity: 0.22,
+          transition: "width 0.28s cubic-bezier(0.16,1,0.3,1), opacity 0.28s",
+        }} />
       ))}
     </div>
   )
@@ -248,87 +152,122 @@ function FrameScrubber({
   isMobile: boolean
   floatY: MotionValue<number>
 }) {
-  const wrapRef    = useRef<HTMLDivElement>(null)
-  const canvasRef  = useRef<HTMLCanvasElement>(null)
-  const imgsRef    = useRef<HTMLImageElement[]>([])
-  const loadedRef  = useRef(new Set<number>())
-  const currentRef = useRef(0)
-  const rafRef     = useRef(0)
+  const wrapRef   = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const imgsRef   = useRef<HTMLImageElement[]>([])
+  const loadedRef = useRef(new Set<number>())
 
-  const draw = useCallback((idx: number) => {
+  // Smooth interpolation state — floats, not integer
+  const targetRef = useRef(0)  // target frame (from scroll)
+  const smoothRef = useRef(0)  // animated frame (lerped toward target)
+  const animRaf   = useRef(0)
+
+  // Track last wheel event to prevent onScroll overriding it
+  const lastWheelMs = useRef(0)
+
+  // ── Draw with frame blending (cross-fade A→B) ─────────────────────────────
+  const drawAt = useCallback((floatIdx: number) => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext("2d")
     if (!ctx) return
-    let img: HTMLImageElement | null = null
-    for (let d = 0; d < FRAME_COUNT; d++) {
-      const a = idx - d
-      const b = idx + d
-      if (a >= 0 && loadedRef.current.has(a))             { img = imgsRef.current[a]; break }
-      if (b !== a && b < FRAME_COUNT && loadedRef.current.has(b)) { img = imgsRef.current[b]; break }
-    }
-    if (!img) return
+
+    const a = Math.max(0, Math.min(FRAME_COUNT - 1, Math.floor(floatIdx)))
+    const b = Math.min(FRAME_COUNT - 1, a + 1)
+    const t = floatIdx - Math.floor(floatIdx)  // 0–1 blend factor
+
+    const imgA = loadedRef.current.has(a) ? imgsRef.current[a] : null
+    if (!imgA) return
+
     ctx.imageSmoothingEnabled = true
     ctx.imageSmoothingQuality = "high"
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    const sc = Math.min(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight)
-    const w  = img.naturalWidth  * sc
-    const h  = img.naturalHeight * sc
-    ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h)
+
+    const stamp = (img: HTMLImageElement, alpha: number) => {
+      const sc = Math.min(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight)
+      const w  = img.naturalWidth  * sc
+      const h  = img.naturalHeight * sc
+      ctx.globalAlpha = alpha
+      ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h)
+    }
+
+    const imgB = (t > 0.02 && loadedRef.current.has(b)) ? imgsRef.current[b] : null
+    if (imgB) {
+      stamp(imgA, 1 - t)
+      stamp(imgB, t)
+    } else {
+      stamp(imgA, 1)
+    }
+    ctx.globalAlpha = 1
   }, [])
 
-  // Batched draw — only one canvas update per animation frame
-  const scheduleDraw = useCallback((idx: number) => {
-    currentRef.current = idx
-    cancelAnimationFrame(rafRef.current)
-    rafRef.current = requestAnimationFrame(() => draw(idx))
-  }, [draw])
+  // ── Continuous 60fps lerp loop — makes it feel like a real video ──────────
+  useEffect(() => {
+    const tick = () => {
+      const diff = targetRef.current - smoothRef.current
+      if (Math.abs(diff) > 0.05) {
+        // Lerp toward target: 22% per frame at 60fps → catches up in ~5 frames
+        smoothRef.current += diff * 0.22
+        drawAt(smoothRef.current)
+      }
+      animRaf.current = requestAnimationFrame(tick)
+    }
+    animRaf.current = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(animRaf.current)
+  }, [drawAt])
 
-  const getIdx = useCallback((scrollY: number) => {
-    const section = sectionRef.current
-    if (!section) return 0
-    const top       = section.offsetTop
-    const scrollable = section.offsetHeight - window.innerHeight
-    if (scrollable <= 0) return 0
-    const v = Math.max(0, Math.min(1, (scrollY - top) / scrollable))
-    return Math.max(0, Math.min(FRAME_COUNT - 1, Math.floor(v * FRAME_COUNT)))
-  }, [sectionRef])
-
+  // ── Preload all frames ────────────────────────────────────────────────────
   useEffect(() => {
     imgsRef.current = Array.from({ length: FRAME_COUNT }, (_, i) => {
       const img = new Image()
       img.onload = () => {
         loadedRef.current.add(i)
-        if (i === 0 || i === currentRef.current) scheduleDraw(currentRef.current)
+        if (i === 0) drawAt(0)
       }
       img.src = `/frames/frame_${String(i).padStart(3, "0")}.webp`
       return img
     })
-  }, [scheduleDraw])
+  }, [drawAt])
 
+  // ── Canvas resize — high-DPR aware ───────────────────────────────────────
   useEffect(() => {
-    const wrap   = wrapRef.current
+    const wrap = wrapRef.current
     const canvas = canvasRef.current
     if (!wrap || !canvas) return
     const sync = () => {
-      const dpr    = window.devicePixelRatio || 1
+      const dpr     = window.devicePixelRatio || 1
       canvas.width  = wrap.offsetWidth  * dpr
       canvas.height = wrap.offsetHeight * dpr
-      draw(currentRef.current)
+      drawAt(smoothRef.current)
     }
     sync()
     const ro = new ResizeObserver(sync)
     ro.observe(wrap)
     return () => ro.disconnect()
-  }, [draw])
+  }, [drawAt])
 
+  // ── Section scroll → frame index ─────────────────────────────────────────
+  const getIdx = useCallback((scrollY: number) => {
+    const section = sectionRef.current
+    if (!section) return 0
+    const top      = section.offsetTop
+    const scrollable = section.offsetHeight - window.innerHeight
+    if (scrollable <= 0) return 0
+    const v = Math.max(0, Math.min(1, (scrollY - top) / scrollable))
+    return Math.max(0, Math.min(FRAME_COUNT - 1, v * (FRAME_COUNT - 1)))
+  }, [sectionRef])
+
+  // ── Scroll listeners ──────────────────────────────────────────────────────
   useEffect(() => {
     const onWheel = () => {
-      scheduleDraw(getIdx(smoothScrollTarget.current))
+      lastWheelMs.current = Date.now()
+      targetRef.current = getIdx(smoothScrollTarget.current)
     }
     const onScroll = () => {
-      // only fires for touch / keyboard — wheel already handled above
-      scheduleDraw(getIdx(window.scrollY))
+      // Only handle scroll events that are NOT from our wheel handler
+      // (touch / keyboard / programmatic). Skip if wheel fired < 300ms ago.
+      if (Date.now() - lastWheelMs.current < 300) return
+      targetRef.current = getIdx(window.scrollY)
     }
     window.addEventListener("wheel",  onWheel,  { passive: true })
     window.addEventListener("scroll", onScroll, { passive: true })
@@ -336,7 +275,7 @@ function FrameScrubber({
       window.removeEventListener("wheel",  onWheel)
       window.removeEventListener("scroll", onScroll)
     }
-  }, [scheduleDraw, getIdx])
+  }, [getIdx])
 
   return (
     <motion.div
@@ -346,29 +285,40 @@ function FrameScrubber({
         left: "50%", top: "44%",
         translateX: "-50%", translateY: "-50%",
         y: floatY,
-        width:     isMobile ? "52vh" : "80vh",
-        height:    isMobile ? "52vh" : "80vh",
-        maxWidth:  isMobile ? 420 : 920,
-        maxHeight: isMobile ? 420 : 920,
+        // Portrait-ish container to match Section01 pouch proportions
+        width:     isMobile ? "46vw" : "clamp(220px,26vw,420px)",
+        height:    isMobile ? "56vh" : "78vh",
+        maxWidth:  isMobile ? 260 : 500,
+        maxHeight: isMobile ? 480 : 880,
         zIndex: 10,
         pointerEvents: "none",
       }}
     >
-      {/* Ambient glow */}
+      {/* Ambient purple glow below product */}
       <div aria-hidden style={{
-        position: "absolute",
-        bottom: "-6%", left: "50%",
+        position: "absolute", bottom: "-10%", left: "50%",
         transform: "translateX(-50%)",
-        width: "110%", height: "32%",
-        background: "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(68,52,115,0.26) 0%, transparent 70%)",
-        pointerEvents: "none", zIndex: 0, filter: "blur(18px)",
+        width: "140%", height: "30%",
+        background: "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(68,52,115,0.22) 0%, transparent 70%)",
+        zIndex: 0, filter: "blur(22px)", pointerEvents: "none",
       }} />
+
+      {/*
+        Shadow is on this wrapper div (box-shadow = no DPR degradation).
+        The canvas itself has no filter — keeps canvas pixel-perfect on Retina.
+      */}
+      <div style={{
+        position: "absolute", inset: 0, zIndex: 1,
+        boxShadow: "0 40px 80px rgba(30,20,55,0.32), 0 12px 30px rgba(30,20,55,0.18)",
+        borderRadius: 8, pointerEvents: "none",
+      }} />
+
       <canvas
         ref={canvasRef}
         style={{
-          width: "100%", height: "100%", display: "block",
-          position: "relative", zIndex: 1,
-          filter: "drop-shadow(0 48px 68px rgba(30,20,55,0.48)) drop-shadow(0 14px 26px rgba(30,20,55,0.22))",
+          width: "100%", height: "100%",
+          display: "block", position: "relative", zIndex: 2,
+          // No filter — keeps rendering pixel-perfect on Retina displays
         }}
       />
     </motion.div>
@@ -378,7 +328,7 @@ function FrameScrubber({
 // ── Section04_Features ────────────────────────────────────────────────────────
 
 export function Section04_Features() {
-  const sectionRef  = useRef<HTMLElement>(null)
+  const sectionRef = useRef<HTMLElement>(null)
   const [isMobile, setIsMobile] = useState(false)
 
   const { scrollYProgress } = useScroll({
@@ -393,16 +343,11 @@ export function Section04_Features() {
     return () => window.removeEventListener("resize", check)
   }, [])
 
-  // Intro
   const introOpacity = useTransform(scrollYProgress, [0, 0.06, 0.10], [1, 1, 0])
   const introY       = useTransform(scrollYProgress, [0, 0.10], [0, -40])
-
-  // Canvas floats up as outro approaches
   const canvasFloat  = useTransform(scrollYProgress, [0.76, 1.0], [0, -110])
-
-  // Outro CTA
   const outroOpacity = useTransform(scrollYProgress, [0.88, 0.95], [0, 1])
-  const outroY       = useTransform(scrollYProgress, [0.88, 0.96], [50, 0])
+  const outroY       = useTransform(scrollYProgress, [0.88, 0.96], [48, 0])
 
   return (
     <section
@@ -419,13 +364,10 @@ export function Section04_Features() {
 
         {/* ── INTRO ── */}
         <motion.div style={{
-          position: "absolute",
-          top: "50%", left: "50%",
+          position: "absolute", top: "50%", left: "50%",
           translateX: "-50%", translateY: "-50%",
-          textAlign: "center",
-          opacity: introOpacity, y: introY,
-          zIndex: 15,
-          pointerEvents: "none",
+          textAlign: "center", opacity: introOpacity, y: introY,
+          zIndex: 15, pointerEvents: "none",
         }}>
           <p className="font-ekstra uppercase" style={{
             color: MUTED, fontSize: "clamp(9px,0.65vw,11px)",
@@ -440,61 +382,44 @@ export function Section04_Features() {
             <span style={{ display: "block", color: "transparent", WebkitTextStroke: `clamp(1.5px,0.12vw,2px) ${TEXT}` }}>
               DAS BESTE
             </span>
-            <span style={{ display: "block", color: TEXT }}>
-              ERLEBNIS
-            </span>
+            <span style={{ display: "block", color: TEXT }}>ERLEBNIS</span>
           </h2>
         </motion.div>
 
-        {/* ── CENTER canvas — floats up toward outro ── */}
+        {/* ── PRODUCT ANIMATION ── */}
         <FrameScrubber sectionRef={sectionRef} isMobile={isMobile} floatY={canvasFloat} />
 
         {/* ── FEATURES ── */}
         {FEATURES.map((f, i) => (
-          <FeatureBlock
-            key={f.big + i}
-            feature={f}
-            index={i}
-            isMobile={isMobile}
-            scrollYProgress={scrollYProgress}
-          />
+          <FeatureBlock key={f.big + i} feature={f} index={i} isMobile={isMobile} scrollYProgress={scrollYProgress} />
         ))}
 
-        {/* ── OUTRO / CTA — anchored below product ── */}
+        {/* ── OUTRO CTA — below the floating product ── */}
         <motion.div style={{
           position: "absolute",
-          bottom: "clamp(52px,9vh,100px)",
-          left: "50%",
+          bottom: "clamp(48px,8vh,96px)", left: "50%",
           translateX: "-50%",
-          textAlign: "center",
-          opacity: outroOpacity, y: outroY,
-          zIndex: 15,
-          pointerEvents: "none",
-          width: "clamp(260px,56vw,640px)",
+          textAlign: "center", opacity: outroOpacity, y: outroY,
+          zIndex: 15, pointerEvents: "none",
+          width: "clamp(240px,52vw,600px)",
         }}>
           <h2 className="font-druk-wide uppercase" style={{
-            fontSize: "clamp(28px,4.4vw,72px)",
+            fontSize: "clamp(26px,4vw,68px)",
             lineHeight: 0.88, letterSpacing: "-0.03em",
-            margin: "0 0 clamp(20px,3vh,38px)",
+            margin: "0 0 clamp(18px,2.8vh,36px)",
           }}>
             <span style={{ display: "block", color: "transparent", WebkitTextStroke: `clamp(1.5px,0.12vw,2px) ${TEXT}` }}>
               ÜBERZEUG DICH
             </span>
-            <span style={{ display: "block", color: TEXT }}>
-              SELBST
-            </span>
+            <span style={{ display: "block", color: TEXT }}>SELBST</span>
           </h2>
-          <a
-            href="/shop"
-            className="font-druk-wide uppercase"
-            style={{
-              display: "inline-flex", alignItems: "center",
-              background: TEXT, color: LIGHT, borderRadius: 999,
-              padding: "4px 32px 4px 4px",
-              fontSize: "clamp(12px,1vw,15px)", letterSpacing: "0.03em",
-              textDecoration: "none", pointerEvents: "auto",
-            }}
-          >
+          <a href="/shop" className="font-druk-wide uppercase" style={{
+            display: "inline-flex", alignItems: "center",
+            background: TEXT, color: LIGHT, borderRadius: 999,
+            padding: "4px 32px 4px 4px",
+            fontSize: "clamp(12px,1vw,15px)", letterSpacing: "0.03em",
+            textDecoration: "none", pointerEvents: "auto",
+          }}>
             <span style={{
               width: 44, height: 44, borderRadius: "50%",
               background: LIGHT, display: "inline-flex",
