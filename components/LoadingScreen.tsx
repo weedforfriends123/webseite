@@ -2,12 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import dynamic from "next/dynamic"
-
-const LoadingScene = dynamic(
-  () => import("./LoadingScene").then(m => ({ default: m.LoadingScene })),
-  { ssr: false, loading: () => null },
-)
 
 const MIN_MS = 2000    // always show at least 2 seconds
 const MAX_MS = 12_000  // force-complete after 12 seconds (fallback)
@@ -95,26 +89,33 @@ export function LoadingScreen() {
             src="/logo.webp"
             alt="WEEDFORFRIENDS"
             style={{
-              width: "clamp(36px,5vw,52px)",
+              width: "clamp(72px,12vw,120px)",
               filter: "brightness(0) invert(1)",
-              opacity: 0.85,
-              marginBottom: "clamp(28px,5vh,48px)",
+              opacity: 0.90,
+              marginBottom: "clamp(40px,7vh,72px)",
             }}
           />
 
-          {/* 3D spinning gem */}
-          <div style={{
-            width:  "clamp(140px,22vw,200px)",
-            height: "clamp(140px,22vw,200px)",
-          }}>
-            <LoadingScene />
-          </div>
+          {/* Percentage — font-druk like Section 1 numbers */}
+          <p
+            className="font-druk"
+            style={{
+              fontSize: "clamp(64px,14vw,120px)",
+              color: "#e8e4dc",
+              lineHeight: 1,
+              letterSpacing: "-0.03em",
+              margin: "0 0 clamp(20px,3.5vh,36px)",
+              fontVariantNumeric: "tabular-nums",
+            }}
+          >
+            {String(progress).padStart(3, "0")}
+          </p>
 
-          {/* Progress bar + percentage */}
-          <div style={{ marginTop: "clamp(20px,3.5vh,36px)", width: "clamp(180px,28vw,300px)" }}>
+          {/* Progress bar */}
+          <div style={{ width: "clamp(200px,32vw,340px)" }}>
             <div style={{
               width: "100%", height: 1,
-              background: "rgba(255,255,255,0.10)",
+              background: "rgba(255,255,255,0.12)",
               borderRadius: 99, overflow: "hidden", position: "relative",
             }}>
               <motion.div
@@ -123,20 +124,11 @@ export function LoadingScreen() {
                 style={{
                   position: "absolute", left: 0, top: 0,
                   height: "100%",
-                  background: "rgba(232,228,220,0.80)",
+                  background: "rgba(232,228,220,0.75)",
                   borderRadius: 99,
                 }}
               />
             </div>
-            <p style={{
-              marginTop: 10, textAlign: "center",
-              fontSize: 10, letterSpacing: "0.28em",
-              color: "rgba(232,228,220,0.30)",
-              fontFamily: "var(--font-space-mono, monospace)",
-              fontVariantNumeric: "tabular-nums",
-            }}>
-              {String(progress).padStart(3, "0")}%
-            </p>
           </div>
         </motion.div>
       )}
