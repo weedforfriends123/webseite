@@ -221,7 +221,7 @@ function FrameScrubber({
         loadedRef.current.add(i)
         if (i === 0) drawAt(0)
       }
-      img.src = `/frames/frame_${String(i).padStart(3, "0")}.webp?v=5`
+      img.src = `/frames/frame_${String(i).padStart(3, "0")}.webp?v=6`
       return img
     })
   }, [drawAt])
