@@ -228,9 +228,10 @@ function FrameScrubber({
     const canvas = canvasRef.current
     if (!wrap || !canvas) return
     const sync = () => {
-      const dpr     = window.devicePixelRatio || 1
-      canvas.width  = wrap.offsetWidth  * dpr
-      canvas.height = wrap.offsetHeight * dpr
+      const dpr = window.devicePixelRatio || 1
+      // Cap physical size at 1440 (max source resolution) to avoid over-upscaling
+      canvas.width  = Math.min(wrap.offsetWidth  * dpr, 1440)
+      canvas.height = Math.min(wrap.offsetHeight * dpr, 1440)
       drawAt(smoothRef.current)
     }
     sync()
