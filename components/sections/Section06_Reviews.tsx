@@ -186,7 +186,6 @@ export function Section06_Reviews() {
           lineHeight:    0.95,
           color:         TEXT,
           margin:        0,
-          whiteSpace:    "nowrap",
         }}>
           Was unsere Kunden sagen.
         </h2>

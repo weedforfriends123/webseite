@@ -143,6 +143,7 @@ function PointCard({ point, index, progress }: PointProps) {
             lineHeight:    1.0,
             color:         "#e8e4dc",
             marginBottom:  "clamp(14px, 2.2vh, 30px)",
+            width:         "100%",
           }}
         >
           {point.label}
@@ -302,21 +303,23 @@ export function Section05() {
             Das sind wir
           </p>
           <h2 className="font-druk-wide uppercase" style={{
-            fontSize:      "clamp(1.1rem, 7.8vw, 9rem)",
+            fontSize:      "clamp(1.1rem, 7vw, 9rem)",
             letterSpacing: "-0.03em",
             lineHeight:    0.96,
             color:         "#e8e4dc",
             marginBottom:  "clamp(8px, 1.2vh, 16px)",
+            width:         "100%",
           }}>
             WeedForFriends.
           </h2>
           <h2 className="font-druk-wide uppercase" style={{
-            fontSize:         "clamp(1.1rem, 7.8vw, 9rem)",
+            fontSize:         "clamp(1.1rem, 7vw, 9rem)",
             letterSpacing:    "-0.03em",
             lineHeight:       0.96,
             color:            "transparent",
             WebkitTextStroke: "clamp(1.5px, 0.1vw, 2.5px) rgba(232,228,220,0.25)",
             marginBottom:     "clamp(32px, 5dvh, 56px)",
+            width:            "100%",
           }}>
             Mehr als ein Produkt.
           </h2>
