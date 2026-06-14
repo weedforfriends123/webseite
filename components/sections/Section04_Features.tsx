@@ -275,13 +275,13 @@ function FrameScrubber({
       ref={wrapRef}
       style={{
         position: "absolute",
-        left: "50%", top: isMobile ? "38%" : "44%",
+        left: "50%", top: isMobile ? "36%" : "50%",
         translateX: "-50%", translateY: "-50%",
         y: floatY,
-        width:     isMobile ? "clamp(200px,60vw,300px)" : "clamp(320px,64vh,780px)",
-        height:    isMobile ? "clamp(200px,60vw,300px)" : "clamp(320px,64vh,780px)",
-        maxWidth:  isMobile ? 300 : 800,
-        maxHeight: isMobile ? 300 : 800,
+        width:     isMobile ? "clamp(220px,70vw,340px)" : "clamp(400px,55vw,820px)",
+        height:    isMobile ? "clamp(220px,70vw,340px)" : "clamp(400px,55vw,820px)",
+        maxWidth:  isMobile ? 340 : 840,
+        maxHeight: isMobile ? 340 : 840,
         zIndex: 10,
         pointerEvents: "none",
       }}
