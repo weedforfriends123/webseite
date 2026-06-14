@@ -183,13 +183,17 @@ function FrameScrubber({
     const img = loadedRef.current.has(idx) ? imgsRef.current[idx] : null
     if (!img) return
 
-    ctx.imageSmoothingEnabled = true
-    ctx.imageSmoothingQuality = "high"
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     const sc = Math.min(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight)
     const w  = img.naturalWidth  * sc
     const h  = img.naturalHeight * sc
+
+    // Only enable smoothing when upscaling — downscaling with smoothing off is sharper
+    const upscaling = sc > 1
+    ctx.imageSmoothingEnabled = upscaling
+    if (upscaling) ctx.imageSmoothingQuality = "high"
+
     ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h)
   }, [])
 
@@ -229,9 +233,8 @@ function FrameScrubber({
     if (!wrap || !canvas) return
     const sync = () => {
       const dpr = window.devicePixelRatio || 1
-      // Cap physical size at 1440 (max source resolution) to avoid over-upscaling
-      canvas.width  = Math.min(wrap.offsetWidth  * dpr, 1440)
-      canvas.height = Math.min(wrap.offsetHeight * dpr, 1440)
+      canvas.width  = wrap.offsetWidth  * dpr
+      canvas.height = wrap.offsetHeight * dpr
       drawAt(smoothRef.current)
     }
     sync()
