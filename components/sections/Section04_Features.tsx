@@ -145,6 +145,8 @@ function FeatureCounter({ scrollYProgress }: { scrollYProgress: MotionValue<numb
 
 // ── FrameScrubber ─────────────────────────────────────────────────────────────
 
+const SMOOTH = 0.18
+
 function FrameScrubber({
   sectionRef,
   isMobile,
@@ -154,137 +156,133 @@ function FrameScrubber({
   isMobile: boolean
   floatY: MotionValue<number>
 }) {
-  const wrapRef      = useRef<HTMLDivElement>(null)
-  const canvasRef    = useRef<HTMLCanvasElement>(null)
-  const imgsRef      = useRef<HTMLImageElement[]>([])
-  const loadedRef    = useRef(new Set<number>())
-  const lastDrawnRef = useRef(-1)
+  const wrapRef   = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const imgsRef   = useRef<HTMLImageElement[]>([])
+  const readyRef  = useRef(false)      // true once all frames are decoded
+  const targetRef = useRef(0)          // raw target from scroll
+  const currentRef = useRef(0)         // lerp-smoothed position
+  const rafRef    = useRef(0)
 
-  // Smooth interpolation — spring physics in frame-space
-  const targetRef = useRef(0)   // target frame (from scroll)
-  const smoothRef = useRef(0)   // current animated position
-  const velRef    = useRef(0)   // velocity (frames/frame)
-  const animRaf   = useRef(0)
+  const isMobileRef     = useRef(isMobile)
+  const reducedMotion   = useRef(false)
 
-  // Mirror isMobile into a ref so drawAt (stable callback) can read it
-  const isMobileRef = useRef(isMobile)
   useEffect(() => { isMobileRef.current = isMobile }, [isMobile])
+  useEffect(() => {
+    reducedMotion.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  }, [])
 
-  // ── Draw single frame — keeps last frame visible if target not loaded yet ──
-  const drawAt = useCallback((floatIdx: number) => {
+  // ── Draw with inter-frame blending (floor@1 + ceil@frac) ─────────────────
+  const draw = useCallback((floatIdx: number) => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext("2d")
-    if (!ctx) return
+    if (!ctx || !readyRef.current) return
 
-    const step = isMobileRef.current ? 2 : 1
-    const raw  = Math.max(0, Math.min(FRAME_COUNT - 1, Math.round(floatIdx)))
-    const idx  = Math.max(0, Math.min(FRAME_COUNT - 1, Math.round(raw / step) * step))
+    const clamped = Math.max(0, Math.min(FRAME_COUNT - 1, floatIdx))
+    const lo      = Math.floor(clamped)
+    const hi      = Math.min(FRAME_COUNT - 1, lo + 1)
+    const frac    = clamped - lo
 
-    // Don't blank the canvas while waiting for a frame to load — keep last visible
-    if (!loadedRef.current.has(idx)) return
-    if (idx === lastDrawnRef.current) return
-    lastDrawnRef.current = idx
+    const imgLo = imgsRef.current[lo]
+    const imgHi = imgsRef.current[hi]
+    if (!imgLo) return
 
-    const img = imgsRef.current[idx]
-    if (!img) return
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    // Mobile zoom 1.5× — enough to fill the canvas while keeping full product visible
+    const { width: cw, height: ch } = canvas
     const zoom = isMobileRef.current ? 1.5 : 1.0
-    const sc = Math.min(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight) * zoom
-    const w  = img.naturalWidth  * sc
-    const h  = img.naturalHeight * sc
+    const sc   = Math.min(cw / imgLo.naturalWidth, ch / imgLo.naturalHeight) * zoom
+    const dw   = imgLo.naturalWidth  * sc
+    const dh   = imgLo.naturalHeight * sc
+    const dx   = (cw - dw) / 2
+    const dy   = (ch - dh) / 2
 
     ctx.imageSmoothingEnabled = true
     ctx.imageSmoothingQuality = "high"
 
-    ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h)
+    ctx.clearRect(0, 0, cw, ch)
+
+    ctx.globalAlpha = 1
+    ctx.drawImage(imgLo, dx, dy, dw, dh)
+
+    if (frac > 0 && imgHi && hi !== lo) {
+      ctx.globalAlpha = frac
+      ctx.drawImage(imgHi, dx, dy, dw, dh)
+      ctx.globalAlpha = 1
+    }
   }, [])
 
-  // ── 60fps spring loop — overdamped (k=0.22, d=1.0: critical=2√0.22≈0.939 < 1.0) ──
+  // ── rAF loop — lerp current → target, then draw ──────────────────────────
   useEffect(() => {
     const tick = () => {
-      const diff = targetRef.current - smoothRef.current
-      if (Math.abs(diff) > 0.1 || Math.abs(velRef.current) > 0.1) {
-        const acc = diff * 0.22 - velRef.current * 1.0
-        velRef.current = Math.max(-10, Math.min(10, velRef.current + acc))
-        const next = smoothRef.current + velRef.current
-        // Hard boundary: absorb velocity when hitting frame limits (prevents overshoot jump)
-        if (next < 0) {
-          smoothRef.current = 0
-          velRef.current    = 0
-        } else if (next > FRAME_COUNT - 1) {
-          smoothRef.current = FRAME_COUNT - 1
-          velRef.current    = 0
-        } else {
-          smoothRef.current = next
-        }
-        drawAt(smoothRef.current)
+      if (readyRef.current) {
+        currentRef.current = reducedMotion.current
+          ? targetRef.current
+          : currentRef.current + (targetRef.current - currentRef.current) * SMOOTH
+        draw(currentRef.current)
       }
-      animRaf.current = requestAnimationFrame(tick)
+      rafRef.current = requestAnimationFrame(tick)
     }
-    animRaf.current = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(animRaf.current)
-  }, [drawAt])
+    rafRef.current = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [draw])
 
-  // ── Lazy-load frames — starts only when section enters viewport ──────────
+  // ── Preload ALL frames + await decode() before enabling scrub ─────────────
   useEffect(() => {
-    // Create image objects without src first (no network requests yet)
-    imgsRef.current = Array.from({ length: FRAME_COUNT }, (_, i) => {
-      const img = new Image()
-      img.onload = () => {
-        loadedRef.current.add(i)
-        if (i === 0) drawAt(0)
-      }
-      return img
-    })
-
     const section = sectionRef.current
     if (!section) return
 
+    let cancelled = false
     const dir = isMobile ? "frames-mobile" : "frames"
-    const loadRange = (start: number, end: number, step: number) => {
-      for (let i = start; i < end; i += step) {
-        if (!imgsRef.current[i].src)
-          imgsRef.current[i].src = `/${dir}/frame_${String(i).padStart(3, "0")}.webp?v=11`
+
+    const loadAll = async () => {
+      const imgs: HTMLImageElement[] = Array.from({ length: FRAME_COUNT }, (_, i) => {
+        const img = new Image()
+        img.src = `/${dir}/frame_${String(i).padStart(3, "0")}.webp`
+        return img
+      })
+      imgsRef.current = imgs
+
+      await Promise.all(imgs.map(img => img.decode().catch(() => {})))
+
+      if (!cancelled) {
+        readyRef.current = true
+        draw(0)
       }
     }
 
-    // Mobile: every 2nd frame (50 frames). Desktop: all 100.
-    const frameStep = isMobile ? 2 : 1
+    // Start loading 1000px before section scrolls into view
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return
+        obs.disconnect()
+        loadAll()
+      },
+      { rootMargin: "1000px" }
+    )
+    obs.observe(section)
 
-    // Trigger 600px before section enters viewport so frames are ready when user arrives
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return
-      observer.disconnect()
-      loadRange(0, 20, frameStep)                                  // first batch immediately
-      setTimeout(() => loadRange(20, FRAME_COUNT, frameStep), 300) // rest after brief delay
-    }, { rootMargin: "600px" })
+    return () => { cancelled = true; obs.disconnect() }
+  }, [draw, sectionRef, isMobile])
 
-    observer.observe(section)
-    return () => observer.disconnect()
-  }, [drawAt, sectionRef, isMobile])
-
-  // ── Canvas resize — high-DPR aware ───────────────────────────────────────
+  // ── Canvas resize — DPR capped at 2 ──────────────────────────────────────
   useEffect(() => {
-    const wrap = wrapRef.current
+    const wrap   = wrapRef.current
     const canvas = canvasRef.current
     if (!wrap || !canvas) return
+
     const sync = () => {
-      const dpr = window.devicePixelRatio || 1
+      const dpr     = Math.min(window.devicePixelRatio || 1, 2)
       canvas.width  = wrap.offsetWidth  * dpr
       canvas.height = wrap.offsetHeight * dpr
-      drawAt(smoothRef.current)
+      draw(currentRef.current)
     }
     sync()
     const ro = new ResizeObserver(sync)
     ro.observe(wrap)
     return () => ro.disconnect()
-  }, [drawAt])
+  }, [draw])
 
-  // ── Section scroll → frame index (via getBoundingClientRect — reliable across layouts) ──
+  // ── Scroll → target (never write currentRef here) ────────────────────────
   const getIdx = useCallback(() => {
     const section = sectionRef.current
     if (!section) return 0
@@ -292,10 +290,9 @@ function FrameScrubber({
     if (scrollable <= 0) return 0
     const scrolled = -section.getBoundingClientRect().top
     const v = Math.max(0, Math.min(1, scrolled / scrollable))
-    return Math.max(0, Math.min(FRAME_COUNT - 1, v * (FRAME_COUNT - 1)))
+    return v * (FRAME_COUNT - 1)
   }, [sectionRef])
 
-  // ── Scroll listener — single unified handler for wheel + touch + keyboard ──
   useEffect(() => {
     const onScroll = () => { targetRef.current = getIdx() }
     window.addEventListener("scroll", onScroll, { passive: true })
@@ -318,7 +315,6 @@ function FrameScrubber({
         pointerEvents: "none",
       }}
     >
-      {/* Ambient purple glow below product */}
       <div aria-hidden style={{
         position: "absolute", bottom: "-10%", left: "50%",
         transform: "translateX(-50%)",
@@ -326,13 +322,9 @@ function FrameScrubber({
         background: "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(68,52,115,0.22) 0%, transparent 70%)",
         zIndex: 0, filter: "blur(22px)", pointerEvents: "none",
       }} />
-
       <canvas
         ref={canvasRef}
-        style={{
-          width: "100%", height: "100%",
-          display: "block", position: "relative", zIndex: 1,
-        }}
+        style={{ width: "100%", height: "100%", display: "block", position: "relative", zIndex: 1 }}
       />
     </motion.div>
   )
