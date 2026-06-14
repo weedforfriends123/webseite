@@ -2,7 +2,6 @@
 
 import { useRef, useEffect, useState, useCallback } from "react"
 import { motion, useScroll, useTransform, MotionValue } from "framer-motion"
-import { smoothScrollTarget } from "@/components/SmoothScroll"
 
 const BG    = "#bcc0ca"
 const TEXT  = "#35383f"
@@ -155,10 +154,11 @@ function FrameScrubber({
   isMobile: boolean
   floatY: MotionValue<number>
 }) {
-  const wrapRef   = useRef<HTMLDivElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const imgsRef   = useRef<HTMLImageElement[]>([])
-  const loadedRef = useRef(new Set<number>())
+  const wrapRef      = useRef<HTMLDivElement>(null)
+  const canvasRef    = useRef<HTMLCanvasElement>(null)
+  const imgsRef      = useRef<HTMLImageElement[]>([])
+  const loadedRef    = useRef(new Set<number>())
+  const lastDrawnRef = useRef(-1)
 
   // Smooth interpolation — spring physics in frame-space
   const targetRef = useRef(0)   // target frame (from scroll)
@@ -166,25 +166,27 @@ function FrameScrubber({
   const velRef    = useRef(0)   // velocity (frames/frame)
   const animRaf   = useRef(0)
 
-  // Track last wheel event to prevent onScroll overriding it
-  const lastWheelMs = useRef(0)
-
   // Mirror isMobile into a ref so drawAt (stable callback) can read it
   const isMobileRef = useRef(isMobile)
   useEffect(() => { isMobileRef.current = isMobile }, [isMobile])
 
-  // ── Draw single frame — no globalAlpha blending (avoids white-flash on RGBA frames) ──
+  // ── Draw single frame — keeps last frame visible if target not loaded yet ──
   const drawAt = useCallback((floatIdx: number) => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    // On mobile load only every 4th frame — snap to nearest loaded frame
-    const step = isMobileRef.current ? 4 : 1
+    const step = isMobileRef.current ? 2 : 1
     const raw  = Math.max(0, Math.min(FRAME_COUNT - 1, Math.round(floatIdx)))
     const idx  = Math.max(0, Math.min(FRAME_COUNT - 1, Math.round(raw / step) * step))
-    const img  = loadedRef.current.has(idx) ? imgsRef.current[idx] : null
+
+    // Don't blank the canvas while waiting for a frame to load — keep last visible
+    if (!loadedRef.current.has(idx)) return
+    if (idx === lastDrawnRef.current) return
+    lastDrawnRef.current = idx
+
+    const img = imgsRef.current[idx]
     if (!img) return
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -250,8 +252,8 @@ function FrameScrubber({
       }
     }
 
-    // Mobile: only every 4th frame (25 frames, ~600KB). Desktop: all 100.
-    const frameStep = isMobile ? 4 : 1
+    // Mobile: every 2nd frame (50 frames). Desktop: all 100.
+    const frameStep = isMobile ? 2 : 1
 
     // Trigger 600px before section enters viewport so frames are ready when user arrives
     const observer = new IntersectionObserver(([entry]) => {
@@ -282,35 +284,22 @@ function FrameScrubber({
     return () => ro.disconnect()
   }, [drawAt])
 
-  // ── Section scroll → frame index ─────────────────────────────────────────
-  const getIdx = useCallback((scrollY: number) => {
+  // ── Section scroll → frame index (via getBoundingClientRect — reliable across layouts) ──
+  const getIdx = useCallback(() => {
     const section = sectionRef.current
     if (!section) return 0
-    const top      = section.offsetTop
     const scrollable = section.offsetHeight - window.innerHeight
     if (scrollable <= 0) return 0
-    const v = Math.max(0, Math.min(1, (scrollY - top) / scrollable))
+    const scrolled = -section.getBoundingClientRect().top
+    const v = Math.max(0, Math.min(1, scrolled / scrollable))
     return Math.max(0, Math.min(FRAME_COUNT - 1, v * (FRAME_COUNT - 1)))
   }, [sectionRef])
 
-  // ── Scroll listeners ──────────────────────────────────────────────────────
+  // ── Scroll listener — single unified handler for wheel + touch + keyboard ──
   useEffect(() => {
-    const onWheel = () => {
-      lastWheelMs.current = Date.now()
-      targetRef.current = getIdx(smoothScrollTarget.current)
-    }
-    const onScroll = () => {
-      // Only handle scroll events that are NOT from our wheel handler
-      // (touch / keyboard / programmatic). Skip if wheel fired < 300ms ago.
-      if (Date.now() - lastWheelMs.current < 300) return
-      targetRef.current = getIdx(window.scrollY)
-    }
-    window.addEventListener("wheel",  onWheel,  { passive: true })
+    const onScroll = () => { targetRef.current = getIdx() }
     window.addEventListener("scroll", onScroll, { passive: true })
-    return () => {
-      window.removeEventListener("wheel",  onWheel)
-      window.removeEventListener("scroll", onScroll)
-    }
+    return () => window.removeEventListener("scroll", onScroll)
   }, [getIdx])
 
   return (
