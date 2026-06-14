@@ -303,7 +303,7 @@ export function Section05() {
             Das sind wir
           </p>
           <h2 className="font-druk-wide uppercase" style={{
-            fontSize:      "clamp(1.1rem, 7vw, 9rem)",
+            fontSize:      "clamp(1rem, 5vw, 9rem)",
             letterSpacing: "-0.03em",
             lineHeight:    0.96,
             color:         "#e8e4dc",
@@ -313,7 +313,7 @@ export function Section05() {
             WeedForFriends.
           </h2>
           <h2 className="font-druk-wide uppercase" style={{
-            fontSize:         "clamp(1.1rem, 7vw, 9rem)",
+            fontSize:         "clamp(1rem, 5vw, 9rem)",
             letterSpacing:    "-0.03em",
             lineHeight:       0.96,
             color:            "transparent",

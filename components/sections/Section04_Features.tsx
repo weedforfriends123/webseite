@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useState, useCallback } from "react"
+import { useRef, useEffect, useState } from "react"
 import { motion, useScroll, useTransform, MotionValue } from "framer-motion"
 
 const BG    = "#bcc0ca"
@@ -8,7 +8,6 @@ const TEXT  = "#35383f"
 const LIGHT = "#e8e4dc"
 const MUTED = "rgba(53,56,63,0.52)"
 
-const FRAME_COUNT = 100
 
 const FEATURES = [
   { side: "left"  as const, big: "600",  tag: "PUFFS",
@@ -143,193 +142,6 @@ function FeatureCounter({ scrollYProgress }: { scrollYProgress: MotionValue<numb
   )
 }
 
-// ── FrameScrubber ─────────────────────────────────────────────────────────────
-
-const SMOOTH = 0.18
-
-function FrameScrubber({
-  sectionRef,
-  isMobile,
-  floatY,
-}: {
-  sectionRef: React.RefObject<HTMLElement | null>
-  isMobile: boolean
-  floatY: MotionValue<number>
-}) {
-  const wrapRef   = useRef<HTMLDivElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const imgsRef   = useRef<HTMLImageElement[]>([])
-  const readyRef  = useRef(false)      // true once all frames are decoded
-  const targetRef = useRef(0)          // raw target from scroll
-  const currentRef = useRef(0)         // lerp-smoothed position
-  const rafRef    = useRef(0)
-
-  const isMobileRef     = useRef(isMobile)
-  const reducedMotion   = useRef(false)
-
-  useEffect(() => { isMobileRef.current = isMobile }, [isMobile])
-  useEffect(() => {
-    reducedMotion.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  }, [])
-
-  // ── Draw with inter-frame blending (floor@1 + ceil@frac) ─────────────────
-  const draw = useCallback((floatIdx: number) => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext("2d")
-    if (!ctx || !readyRef.current) return
-
-    const clamped = Math.max(0, Math.min(FRAME_COUNT - 1, floatIdx))
-    const lo      = Math.floor(clamped)
-    const hi      = Math.min(FRAME_COUNT - 1, lo + 1)
-    const frac    = clamped - lo
-
-    const imgLo = imgsRef.current[lo]
-    const imgHi = imgsRef.current[hi]
-    if (!imgLo) return
-
-    const { width: cw, height: ch } = canvas
-    const zoom = isMobileRef.current ? 1.5 : 1.0
-    const sc   = Math.min(cw / imgLo.naturalWidth, ch / imgLo.naturalHeight) * zoom
-    const dw   = imgLo.naturalWidth  * sc
-    const dh   = imgLo.naturalHeight * sc
-    const dx   = (cw - dw) / 2
-    const dy   = (ch - dh) / 2
-
-    ctx.imageSmoothingEnabled = true
-    ctx.imageSmoothingQuality = "high"
-
-    ctx.clearRect(0, 0, cw, ch)
-
-    ctx.globalAlpha = 1
-    ctx.drawImage(imgLo, dx, dy, dw, dh)
-
-    if (frac > 0 && imgHi && hi !== lo) {
-      ctx.globalAlpha = frac
-      ctx.drawImage(imgHi, dx, dy, dw, dh)
-      ctx.globalAlpha = 1
-    }
-  }, [])
-
-  // ── rAF loop — lerp current → target, then draw ──────────────────────────
-  useEffect(() => {
-    const tick = () => {
-      if (readyRef.current) {
-        currentRef.current = reducedMotion.current
-          ? targetRef.current
-          : currentRef.current + (targetRef.current - currentRef.current) * SMOOTH
-        draw(currentRef.current)
-      }
-      rafRef.current = requestAnimationFrame(tick)
-    }
-    rafRef.current = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(rafRef.current)
-  }, [draw])
-
-  // ── Preload ALL frames + await decode() before enabling scrub ─────────────
-  useEffect(() => {
-    const section = sectionRef.current
-    if (!section) return
-
-    let cancelled = false
-    const dir = isMobile ? "frames-mobile" : "frames"
-
-    const loadAll = async () => {
-      const imgs: HTMLImageElement[] = Array.from({ length: FRAME_COUNT }, (_, i) => {
-        const img = new Image()
-        img.src = `/${dir}/frame_${String(i).padStart(3, "0")}.webp`
-        return img
-      })
-      imgsRef.current = imgs
-
-      await Promise.all(imgs.map(img => img.decode().catch(() => {})))
-
-      if (!cancelled) {
-        readyRef.current = true
-        draw(0)
-      }
-    }
-
-    // Start loading 1000px before section scrolls into view
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return
-        obs.disconnect()
-        loadAll()
-      },
-      { rootMargin: "1000px" }
-    )
-    obs.observe(section)
-
-    return () => { cancelled = true; obs.disconnect() }
-  }, [draw, sectionRef, isMobile])
-
-  // ── Canvas resize — DPR capped at 2 ──────────────────────────────────────
-  useEffect(() => {
-    const wrap   = wrapRef.current
-    const canvas = canvasRef.current
-    if (!wrap || !canvas) return
-
-    const sync = () => {
-      const dpr     = Math.min(window.devicePixelRatio || 1, 2)
-      canvas.width  = wrap.offsetWidth  * dpr
-      canvas.height = wrap.offsetHeight * dpr
-      draw(currentRef.current)
-    }
-    sync()
-    const ro = new ResizeObserver(sync)
-    ro.observe(wrap)
-    return () => ro.disconnect()
-  }, [draw])
-
-  // ── Scroll → target (never write currentRef here) ────────────────────────
-  const getIdx = useCallback(() => {
-    const section = sectionRef.current
-    if (!section) return 0
-    const scrollable = section.offsetHeight - window.innerHeight
-    if (scrollable <= 0) return 0
-    const scrolled = -section.getBoundingClientRect().top
-    const v = Math.max(0, Math.min(1, scrolled / scrollable))
-    return v * (FRAME_COUNT - 1)
-  }, [sectionRef])
-
-  useEffect(() => {
-    const onScroll = () => { targetRef.current = getIdx() }
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => window.removeEventListener("scroll", onScroll)
-  }, [getIdx])
-
-  return (
-    <motion.div
-      ref={wrapRef}
-      style={{
-        position: "absolute",
-        left: "50%", top: isMobile ? "34%" : "50%",
-        translateX: "-50%", translateY: "-50%",
-        y: floatY,
-        width:     isMobile ? "78vw" : "min(86vh, 64vw)",
-        height:    isMobile ? "78vw" : "min(86vh, 64vw)",
-        maxWidth:  isMobile ? 380 : 960,
-        maxHeight: isMobile ? 380 : 960,
-        zIndex: 10,
-        pointerEvents: "none",
-      }}
-    >
-      <div aria-hidden style={{
-        position: "absolute", bottom: "-10%", left: "50%",
-        transform: "translateX(-50%)",
-        width: "140%", height: "30%",
-        background: "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(68,52,115,0.22) 0%, transparent 70%)",
-        zIndex: 0, filter: "blur(22px)", pointerEvents: "none",
-      }} />
-      <canvas
-        ref={canvasRef}
-        style={{ width: "100%", height: "100%", display: "block", position: "relative", zIndex: 1 }}
-      />
-    </motion.div>
-  )
-}
-
 // ── Section04_Features ────────────────────────────────────────────────────────
 
 export function Section04_Features() {
@@ -366,7 +178,31 @@ export function Section04_Features() {
         }} />
 
         {/* ── PRODUCT ANIMATION ── */}
-        <FrameScrubber sectionRef={sectionRef} isMobile={isMobile} floatY={canvasFloat} />
+        <motion.div
+          style={{
+            position: "absolute",
+            left: "50%", top: isMobile ? "34%" : "50%",
+            translateX: "-50%", translateY: "-50%",
+            y: canvasFloat,
+            width:    isMobile ? "78vw" : "min(86vh, 64vw)",
+            maxWidth: isMobile ? 380 : 960,
+            zIndex: 10,
+            pointerEvents: "none",
+          }}
+        >
+          <div aria-hidden style={{
+            position: "absolute", bottom: "-10%", left: "50%",
+            transform: "translateX(-50%)",
+            width: "140%", height: "30%",
+            background: "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(68,52,115,0.22) 0%, transparent 70%)",
+            zIndex: 0, filter: "blur(22px)", pointerEvents: "none",
+          }} />
+          <video
+            autoPlay muted loop playsInline
+            style={{ width: "100%", display: "block", position: "relative", zIndex: 1 }}
+            src="/product-anim.mp4"
+          />
+        </motion.div>
 
         {/* ── FEATURES ── */}
         {FEATURES.map((f, i) => (
