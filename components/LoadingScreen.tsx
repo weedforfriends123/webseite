@@ -23,8 +23,7 @@ export function LoadingScreen() {
 
   useEffect(() => {
     isMobileRef.current = window.innerWidth < 768
-    // Skip 3MB video on mobile — solid dark bg is sufficient
-    if (!isMobileRef.current) setShowVideo(true)
+    setShowVideo(true)
     if (!isMobileRef.current) {
       const fh = Math.min(80, Math.max(36, window.innerWidth * 0.06))
       exitY.current     = -(window.innerHeight / 2 - 28)
@@ -93,7 +92,7 @@ export function LoadingScreen() {
               objectFit: "cover",
             }}
           >
-            <source src="/loading-bg.mp4" type="video/mp4" />
+            <source src={isMobileRef.current ? "/loading-bg-mobile.mp4" : "/loading-bg.mp4"} type="video/mp4" />
           </video>
         )}
 
