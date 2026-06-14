@@ -308,7 +308,6 @@ function FrameScrubber({
         style={{
           width: "100%", height: "100%",
           display: "block", position: "relative", zIndex: 1,
-          background: BG,
         }}
       />
     </motion.div>
@@ -342,7 +341,7 @@ export function Section04_Features() {
       ref={sectionRef}
       style={{ background: BG, minHeight: "700vh", position: "relative" }}
     >
-      <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden" }}>
+      <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden", background: BG }}>
 
         {/* Radial glow */}
         <div aria-hidden style={{

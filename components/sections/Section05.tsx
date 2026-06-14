@@ -1,12 +1,11 @@
 "use client"
 
 import { useRef } from "react"
-import Image from "next/image"
 import { motion, useScroll, useTransform } from "framer-motion"
 
-const BG   = "#bcc0ca"
-const TEXT = "#35383f"
-const DIM  = "rgba(53,56,63,0.10)"
+const BG    = "#bcc0ca"
+const TEXT  = "#35383f"
+const DIM   = "rgba(53,56,63,0.10)"
 const MUTED = "rgba(53,56,63,0.45)"
 
 const ROWS = [
@@ -44,8 +43,7 @@ export function Section05() {
     offset: ["start end", "end start"],
   })
 
-  const imgY    = useTransform(scrollYProgress, [0, 1], [-40, 40])
-  const tableY  = useTransform(scrollYProgress, [0, 1], [24, -24])
+  const contentY = useTransform(scrollYProgress, [0, 1], [30, -30])
 
   return (
     <section
@@ -55,7 +53,7 @@ export function Section05() {
       {/* Ghost text */}
       <div
         aria-hidden
-        className="absolute bottom-0 left-0 pointer-events-none select-none overflow-hidden leading-none"
+        className="absolute bottom-0 right-0 pointer-events-none select-none overflow-hidden leading-none"
         style={{ zIndex: 0 }}
       >
         <p
@@ -71,39 +69,16 @@ export function Section05() {
         </p>
       </div>
 
-      <div
-        className="relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[5fr_7fr] items-stretch"
-        style={{ zIndex: 1, minHeight: "80vh" }}
+      <motion.div
+        style={{ y: contentY, zIndex: 1 }}
+        className="relative max-w-4xl mx-auto"
       >
-
-        {/* ── LEFT — product visual ── */}
-        <motion.div
-          style={{ y: imgY }}
-          className="relative hidden lg:block overflow-hidden"
-          aria-hidden
-        >
-          <Image
-            src="/pouches/purple-haze.webp"
-            alt=""
-            fill
-            sizes="40vw"
-            className="object-cover object-center"
-            style={{ filter: "saturate(0.9) brightness(0.96)" }}
-          />
-          {/* gradient overlay blending into section bg */}
-          <div style={{
-            position: "absolute", inset: 0,
-            background: "linear-gradient(to right, transparent 70%, " + BG + " 100%)",
-          }} />
-        </motion.div>
-
-        {/* ── RIGHT — comparison table ── */}
-        <motion.div
+        <div
+          className="relative"
           style={{
-            y: tableY,
-            padding: "clamp(64px,10vh,120px) clamp(24px,5vw,80px) clamp(64px,10vh,120px) clamp(32px,5vw,72px)",
+            zIndex: 1,
+            padding: "clamp(72px,12vh,140px) clamp(24px,6vw,80px) clamp(72px,12vh,140px)",
           }}
-          className="flex flex-col justify-center"
         >
           {/* Headline */}
           <motion.div
@@ -111,18 +86,18 @@ export function Section05() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            style={{ marginBottom: "clamp(40px,6vh,64px)" }}
           >
             <p className="font-ekstra uppercase" style={{ fontSize: 11, letterSpacing: "0.30em", color: MUTED, marginBottom: 20 }}>
               Der Unterschied
             </p>
             <h2 className="font-druk-wide uppercase leading-none" style={{
-              fontSize: "clamp(2.4rem, 5vw, 5.5rem)",
+              fontSize: "clamp(2.6rem, 5.5vw, 6rem)",
               letterSpacing: "-0.03em",
               color: TEXT,
-              marginBottom: "clamp(36px,5vh,56px)",
             }}>
               Mehr für dich.<br />
-              <span style={{ color: "transparent", WebkitTextStroke: `clamp(1.5px,0.12vw,2.5px) ${TEXT}` }}>
+              <span style={{ color: "transparent", WebkitTextStroke: `clamp(1.5px,0.13vw,2.5px) ${TEXT}` }}>
                 Sieh den Unterschied.
               </span>
             </h2>
@@ -133,12 +108,15 @@ export function Section05() {
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.65, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.65, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           >
             {/* Column headers */}
-            <div className="grid" style={{ gridTemplateColumns: "1fr 80px 80px", paddingBottom: 12, borderBottom: `1.5px solid ${TEXT}` }}>
+            <div
+              className="grid"
+              style={{ gridTemplateColumns: "1fr 100px 100px", paddingBottom: 14, borderBottom: `1.5px solid ${TEXT}` }}
+            >
               <span className="font-ekstra uppercase" style={{ fontSize: 10, letterSpacing: "0.26em", color: MUTED }}>Vorteile</span>
-              <span className="font-druk-wide uppercase text-center" style={{ fontSize: "clamp(0.75rem,1.1vw,0.95rem)", color: TEXT, letterSpacing: "0.04em" }}>WFF</span>
+              <span className="font-druk-wide uppercase text-center" style={{ fontSize: "clamp(0.78rem,1.1vw,1rem)", color: TEXT, letterSpacing: "0.04em" }}>WFF</span>
               <span className="font-ekstra uppercase text-center" style={{ fontSize: 10, letterSpacing: "0.20em", color: MUTED }}>Andere</span>
             </div>
 
@@ -146,31 +124,29 @@ export function Section05() {
             {ROWS.map((label, i) => (
               <motion.div
                 key={label}
-                initial={{ opacity: 0, x: -10 }}
+                initial={{ opacity: 0, x: -8 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.45, delay: 0.06 * i, ease: [0.16, 1, 0.3, 1] }}
+                viewport={{ once: true, margin: "-30px" }}
+                transition={{ duration: 0.4, delay: 0.05 * i, ease: [0.16, 1, 0.3, 1] }}
                 className="grid items-center"
                 style={{
-                  gridTemplateColumns: "1fr 80px 80px",
+                  gridTemplateColumns: "1fr 100px 100px",
                   borderBottom: `1px solid ${DIM}`,
-                  padding: "clamp(14px,1.8vh,20px) 0",
+                  padding: "clamp(16px,2vh,22px) 0",
                 }}
               >
-                <span className="font-ekstra" style={{ fontSize: "clamp(0.82rem,0.95vw,0.95rem)", color: TEXT, lineHeight: 1.4 }}>
+                <span className="font-ekstra" style={{ fontSize: "clamp(0.85rem,1vw,1rem)", color: TEXT, lineHeight: 1.4 }}>
                   {label}
                 </span>
-                {/* WFF checkmark — pill background */}
                 <div className="flex justify-center">
                   <span style={{
                     display: "inline-flex", alignItems: "center", justifyContent: "center",
-                    width: 36, height: 36, borderRadius: "50%",
+                    width: 38, height: 38, borderRadius: "50%",
                     background: "rgba(53,56,63,0.09)",
                   }}>
                     <Check />
                   </span>
                 </div>
-                {/* Competitor X */}
                 <div className="flex justify-center">
                   <Cross />
                 </div>
@@ -184,7 +160,7 @@ export function Section05() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, margin: "-40px" }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            style={{ marginTop: "clamp(28px,4vh,44px)" }}
+            style={{ marginTop: "clamp(32px,5vh,52px)" }}
           >
             <a
               href="/shop"
@@ -208,8 +184,8 @@ export function Section05() {
               Jetzt entdecken
             </a>
           </motion.div>
-        </motion.div>
-      </div>
+        </div>
+      </motion.div>
     </section>
   )
 }
