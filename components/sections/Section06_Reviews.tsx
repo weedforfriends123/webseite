@@ -135,7 +135,7 @@ function MarqueeRow({ reviews, reverse = false }: { reviews: Review[]; reverse?:
   // Duplicate 3× so there are enough cards to fill ultra-wide screens without gaps
   const triple = [...reviews, ...reviews, ...reviews]
   const loopDist = reviews.length * 440  // rough estimate per card+gap; motion handles the rest
-  const duration = reviews.length * 6
+  const duration = reviews.length * 10
 
   return (
     <div style={{ overflow: "hidden", width: "100%" }}>
