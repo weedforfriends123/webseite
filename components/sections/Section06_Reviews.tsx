@@ -89,9 +89,9 @@ type Review = (typeof ROW1)[number]
 function Card({ name, product, text }: Review) {
   return (
     <div style={{
-      width:         "clamp(280px, 22vw, 420px)",
+      width:         "clamp(300px, 24vw, 460px)",
       flexShrink:    0,
-      marginRight:   "clamp(12px, 1.2vw, 20px)",
+      marginRight:   "clamp(14px, 1.4vw, 22px)",
       background:    "rgba(255,255,255,0.65)",
       borderRadius:  "clamp(16px, 1.4vw, 24px)",
       padding:       "clamp(20px, 1.8vw, 30px) clamp(22px, 2vw, 32px) clamp(18px, 1.6vw, 26px)",
@@ -170,7 +170,7 @@ export function Section06_Reviews() {
         y:            headerY,
         textAlign:    "center",
         padding:      "0 clamp(20px,5vw,80px)",
-        marginBottom: "clamp(52px, 8vh, 100px)",
+        marginBottom: "clamp(40px, 6vh, 72px)",
       }}>
         <p className="font-ekstra uppercase" style={{
           fontSize:      "clamp(8px, 0.55vw, 10px)",
@@ -181,21 +181,22 @@ export function Section06_Reviews() {
           Echte Stimmen
         </p>
         <h2 className="font-druk-wide uppercase" style={{
-          fontSize:      "clamp(2.2rem, 6.2vw, 8rem)",
+          fontSize:      "clamp(2rem, 3.8vw, 4.8rem)",
           letterSpacing: "-0.03em",
-          lineHeight:    0.93,
+          lineHeight:    0.95,
           color:         TEXT,
           margin:        0,
+          whiteSpace:    "nowrap",
         }}>
-          Was unsere Kunden<br />sagen.
+          Was unsere Kunden sagen.
         </h2>
         {/* Divider line */}
         <div style={{
-          width:        "clamp(40px, 4vw, 64px)",
+          width:        "clamp(36px, 3.5vw, 56px)",
           height:       2,
           background:   "rgba(53,56,63,0.18)",
           borderRadius: 1,
-          margin:       "clamp(20px, 2.4vh, 32px) auto 0",
+          margin:       "clamp(18px, 2vh, 28px) auto 0",
         }} />
       </motion.div>
 

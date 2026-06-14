@@ -50,7 +50,7 @@ const POINTS = [
 ]
 
 const N     = POINTS.length
-const STEPS = N + 1
+const STEPS = N + 2   // +1 intro, +1 blank outro step for the exit blend
 const S     = 1 / STEPS
 const T     = S * 0.30
 
