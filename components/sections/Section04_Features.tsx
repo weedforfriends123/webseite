@@ -183,8 +183,11 @@ function FrameScrubber({
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    const idx = Math.max(0, Math.min(FRAME_COUNT - 1, Math.round(floatIdx)))
-    const img = loadedRef.current.has(idx) ? imgsRef.current[idx] : null
+    // On mobile load only every 4th frame — snap to nearest loaded frame
+    const step = isMobileRef.current ? 4 : 1
+    const raw  = Math.max(0, Math.min(FRAME_COUNT - 1, Math.round(floatIdx)))
+    const idx  = Math.max(0, Math.min(FRAME_COUNT - 1, Math.round(raw / step) * step))
+    const img  = loadedRef.current.has(idx) ? imgsRef.current[idx] : null
     if (!img) return
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -242,24 +245,27 @@ function FrameScrubber({
     const section = sectionRef.current
     if (!section) return
 
-    const loadRange = (start: number, end: number) => {
-      for (let i = start; i < end; i++) {
+    const loadRange = (start: number, end: number, step: number) => {
+      for (let i = start; i < end; i += step) {
         if (!imgsRef.current[i].src)
           imgsRef.current[i].src = `/frames/frame_${String(i).padStart(3, "0")}.webp?v=10`
       }
     }
 
+    // Mobile: only every 4th frame (25 frames, ~600KB). Desktop: all 100.
+    const frameStep = isMobile ? 4 : 1
+
     // Trigger 600px before section enters viewport so frames are ready when user arrives
     const observer = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting) return
       observer.disconnect()
-      loadRange(0, 15)                                 // first 15 frames immediately
-      setTimeout(() => loadRange(15, FRAME_COUNT), 300) // rest after brief delay
+      loadRange(0, 20, frameStep)                                  // first batch immediately
+      setTimeout(() => loadRange(20, FRAME_COUNT, frameStep), 300) // rest after brief delay
     }, { rootMargin: "600px" })
 
     observer.observe(section)
     return () => observer.disconnect()
-  }, [drawAt, sectionRef])
+  }, [drawAt, sectionRef, isMobile])
 
   // ── Canvas resize — high-DPR aware ───────────────────────────────────────
   useEffect(() => {

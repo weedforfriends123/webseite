@@ -12,6 +12,7 @@ type Phase = "writing" | "waiting" | "exiting" | "done"
 export function LoadingScreen() {
   const [letterCount, setLetterCount] = useState(0)
   const [phase, setPhase]             = useState<Phase>("writing")
+  const [showVideo, setShowVideo]     = useState(false)
 
   const assetsReady    = useRef(false)
   const writingDone    = useRef(false)
@@ -22,6 +23,8 @@ export function LoadingScreen() {
 
   useEffect(() => {
     isMobileRef.current = window.innerWidth < 768
+    // Skip 3MB video on mobile — solid dark bg is sufficient
+    if (!isMobileRef.current) setShowVideo(true)
     if (!isMobileRef.current) {
       const fh = Math.min(80, Math.max(36, window.innerWidth * 0.06))
       exitY.current     = -(window.innerHeight / 2 - 28)
@@ -78,19 +81,21 @@ export function LoadingScreen() {
           background: "#080a0e",
         }}
       >
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          style={{
-            position: "absolute", inset: 0,
-            width: "100%", height: "100%",
-            objectFit: "cover",
-          }}
-        >
-          <source src="/loading-bg.mp4" type="video/mp4" />
-        </video>
+        {showVideo && (
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            style={{
+              position: "absolute", inset: 0,
+              width: "100%", height: "100%",
+              objectFit: "cover",
+            }}
+          >
+            <source src="/loading-bg.mp4" type="video/mp4" />
+          </video>
+        )}
 
         {/* Dark overlay — really dark */}
         <div style={{

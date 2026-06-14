@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, useState, useEffect } from "react"
 import { motion, useScroll, useTransform, MotionValue } from "framer-motion"
 
 const POINTS = [
@@ -211,6 +211,18 @@ function PointCard({ point, index, progress }: PointProps) {
 
 export function Section05() {
   const sectionRef = useRef<HTMLElement>(null)
+  const [bgReady, setBgReady] = useState(false)
+
+  // Lazy-load community.jpg — only fetch when user is 500px away
+  useEffect(() => {
+    const section = sectionRef.current
+    if (!section) return
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setBgReady(true); obs.disconnect() }
+    }, { rootMargin: "500px" })
+    obs.observe(section)
+    return () => obs.disconnect()
+  }, [])
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -243,7 +255,7 @@ export function Section05() {
             position:           "absolute",
             inset:              0,
             scale:              bgScale,
-            backgroundImage:    "url('/community.jpg')",
+            backgroundImage:    bgReady ? "url('/community.jpg')" : "none",
             backgroundSize:     "cover",
             backgroundPositionX: "50%",
             backgroundPositionY: bgPosY,
