@@ -127,24 +127,23 @@ export default function B2BPage() {
   const sharedInput = "w-full px-5 py-4 rounded-xl text-sm placeholder:opacity-40"
 
   return (
-    <div style={{ background: "#bcc0ca", minHeight: "100vh" }}>
+    <div style={{ background: "#bcc0ca", minHeight: "100vh", overflowX: "hidden" }}>
       <Navbar />
 
-      {/* Ghost decoration */}
-      <div
-        aria-hidden
-        className="fixed bottom-0 right-0 pointer-events-none select-none overflow-hidden"
-        style={{ zIndex: 0 }}
-      >
-        <p
-          className="font-druk-wide uppercase leading-none"
-          style={{ fontSize: "clamp(8rem, 42vw, 56rem)", color: "rgba(53,56,63,0.036)", letterSpacing: "-0.04em" }}
-        >
-          B2B
-        </p>
-      </div>
-
       <div className="relative" style={{ zIndex: 1 }}>
+        {/* Ghost decoration — absolute so overflow:hidden clips it */}
+        <div
+          aria-hidden
+          className="absolute bottom-0 right-0 pointer-events-none select-none overflow-hidden"
+          style={{ zIndex: 0, maxWidth: "100%", lineHeight: 0 }}
+        >
+          <p
+            className="font-druk-wide uppercase leading-none"
+            style={{ fontSize: "clamp(8rem, 40vw, 56rem)", color: "rgba(53,56,63,0.036)", letterSpacing: "-0.04em" }}
+          >
+            B2B
+          </p>
+        </div>
         <div
           className="max-w-7xl mx-auto"
           style={{ padding: "clamp(72px,12vh,160px) clamp(16px,5vw,80px) clamp(48px,8vh,140px)" }}
@@ -160,7 +159,7 @@ export default function B2BPage() {
             <SectionLabel>B2B · Partnerschaft</SectionLabel>
             <h1
               className="font-druk-wide uppercase leading-none mt-5"
-              style={{ fontSize: "clamp(3.8rem, 10vw, 10.5rem)", letterSpacing: "-0.03em", color: TEXT }}
+              style={{ fontSize: "clamp(2.6rem, 9.5vw, 10.5rem)", letterSpacing: "-0.03em", color: TEXT }}
             >
               Werde<br />Partner.
             </h1>

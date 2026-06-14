@@ -106,6 +106,29 @@ function NavDropdown({ label, items }: { label: string; items: string[] }) {
   )
 }
 
+function NavLink({ href, children }: { href: string; children: string }) {
+  const [hov, setHov] = useState(false)
+  return (
+    <Link
+      href={href}
+      className="font-ekstra"
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        fontSize: "clamp(15px,1.3vw,19px)",
+        padding: "7px 14px",
+        textDecoration: "none",
+        whiteSpace: "nowrap",
+        display: "inline-block",
+        borderRadius: 9999,
+        transition: "color 0.2s, background 0.2s",
+        color: hov ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.55)",
+        background: hov ? "rgba(255,255,255,0.14)" : "transparent",
+      }}
+    >{children}</Link>
+  )
+}
+
 export function Navbar() {
   const [menuOpen, setMenuOpen]             = useState(false)
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null)
@@ -163,18 +186,7 @@ export function Navbar() {
           {NAV_ITEMS.map((name) => {
             const items = DROPDOWNS[name]
             if (!items) return (
-              <Link
-                key={name}
-                href={`/shop/${name.toLowerCase().replace(" ", "-")}`}
-                className="font-ekstra rounded-full transition-all duration-200 text-white/55 hover:text-white hover:bg-white/[0.13]"
-                style={{
-                  fontSize: "clamp(15px,1.3vw,19px)",
-                  padding: "7px 14px",
-                  textDecoration: "none",
-                  whiteSpace: "nowrap",
-                  display: "inline-block",
-                }}
-              >{name}</Link>
+              <NavLink key={name} href={`/shop/${name.toLowerCase().replace(" ", "-")}`}>{name}</NavLink>
             )
             return <NavDropdown key={name} label={name} items={items} />
           })}

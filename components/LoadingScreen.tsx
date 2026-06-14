@@ -13,11 +13,12 @@ export function LoadingScreen() {
   const [letterCount, setLetterCount] = useState(0)
   const [phase, setPhase]             = useState<Phase>("writing")
 
-  const assetsReady = useRef(false)
-  const writingDone = useRef(false)
-  const isMobileRef = useRef(false)
-  const exitY       = useRef(0)
-  const exitScale   = useRef(1)
+  const assetsReady    = useRef(false)
+  const writingDone    = useRef(false)
+  const exitInitiated  = useRef(false)
+  const isMobileRef    = useRef(false)
+  const exitY          = useRef(0)
+  const exitScale      = useRef(1)
 
   useEffect(() => {
     isMobileRef.current = window.innerWidth < 768
@@ -28,7 +29,10 @@ export function LoadingScreen() {
     }
 
     const tryExit = () => {
+      // Guard: once exit is initiated, never trigger it again (prevents hardTimeout re-flash)
+      if (exitInitiated.current) return
       if (writingDone.current && assetsReady.current) {
+        exitInitiated.current = true
         setTimeout(() => setPhase("exiting"), 350)
       }
     }

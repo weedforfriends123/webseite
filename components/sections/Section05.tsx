@@ -5,42 +5,54 @@ import { motion, useScroll, useTransform, MotionValue } from "framer-motion"
 
 const POINTS = [
   {
-    num:   "01",
-    label: "Für echte Freunde",
-    body:  "Kein Konzern. Keine Massenware. Eine Community — und Produkte, die wir selbst lieben.",
+    num:    "01",
+    label:  "Für echte Freunde",
+    body:   "Kein Konzern. Keine Massenware. Eine Community — und Produkte, die wir selbst lieben.",
+    accent: "rgba(130,100,220,0.22)",
+    stroke: "rgba(130,100,220,0.28)",
   },
   {
-    num:   "02",
-    label: "EU-zertifiziert",
-    body:  "Jedes Produkt mit öffentlichem Prüfzeugnis (COA). Keine Geheimnisse über Wirkstoffe oder Inhaltsstoffe.",
+    num:    "02",
+    label:  "EU-zertifiziert",
+    body:   "Jedes Produkt mit öffentlichem Prüfzeugnis (COA). Keine Geheimnisse über Wirkstoffe oder Inhaltsstoffe.",
+    accent: "rgba(70,190,100,0.18)",
+    stroke: "rgba(70,190,100,0.26)",
   },
   {
-    num:   "03",
-    label: "Kein Nikotin. Kein Tabak.",
-    body:  "Nur was reingehört. Echte Cannabinoide, echte Terpene — und sonst nichts.",
+    num:    "03",
+    label:  "Kein Nikotin. Kein Tabak.",
+    body:   "Nur was reingehört. Echte Cannabinoide, echte Terpene — und sonst nichts.",
+    accent: "rgba(210,205,185,0.14)",
+    stroke: "rgba(210,205,185,0.22)",
   },
   {
-    num:   "04",
-    label: "6 Sorten",
-    body:  "Von mild bis intensiv. Handselektiert mit echten Terpenen — für jeden Charakter.",
+    num:    "04",
+    label:  "6 Sorten",
+    body:   "Von mild bis intensiv. Handselektiert mit echten Terpenen — für jeden Charakter.",
+    accent: "rgba(200,158,55,0.20)",
+    stroke: "rgba(200,158,55,0.28)",
   },
   {
-    num:   "05",
-    label: "Diskret & schnell",
-    body:  "Lieferung in 2–4 Tagen. Unmarkierte Verpackung. Sicher und ohne Fragen.",
+    num:    "05",
+    label:  "Diskret & schnell",
+    body:   "Lieferung in 2–4 Tagen. Unmarkierte Verpackung. Sicher und ohne Fragen.",
+    accent: "rgba(50,185,185,0.16)",
+    stroke: "rgba(50,185,185,0.24)",
   },
   {
-    num:   "06",
-    label: "Qualität ohne Kompromisse",
-    body:  "Hergestellt nach höchsten Standards. Jeden Tag. Für dich.",
-    cta:   true,
+    num:    "06",
+    label:  "Qualität ohne Kompromisse",
+    body:   "Hergestellt nach höchsten Standards. Jeden Tag. Für dich.",
+    accent: "rgba(210,85,75,0.16)",
+    stroke: "rgba(210,85,75,0.24)",
+    cta:    true,
   },
 ]
 
-const N     = POINTS.length   // 6
-const STEPS = N + 1           // 7 (intro + 6 points)
+const N     = POINTS.length
+const STEPS = N + 1
 const S     = 1 / STEPS
-const T     = S * 0.28        // transition ramp
+const T     = S * 0.30
 
 interface PointProps {
   point:    typeof POINTS[0]
@@ -54,11 +66,11 @@ function PointCard({ point, index, progress }: PointProps) {
   const trough = S * (index + 2) - T
   const leave  = S * (index + 2)
 
-  const opacity = useTransform(progress, [enter, peak, trough, Math.min(leave, 1)], [0, 1, 1, 0])
-  // Alternate slide direction for visual variety
-  const fromX   = index % 2 === 0 ? -48 : 48
-  const x       = useTransform(progress, [enter, peak], [fromX, 0])
-  const labelOp = useTransform(progress, [enter, peak + T * 0.6], [0, 1])
+  const opacity  = useTransform(progress, [enter, peak, trough, Math.min(leave, 1)], [0, 1, 1, 0])
+  const x        = useTransform(progress, [enter, peak], [80, 0])
+  const scale    = useTransform(progress, [enter, peak], [0.96, 1.0])
+  const labelOp  = useTransform(progress, [enter, peak + T * 0.4], [0, 1])
+  const numOp    = useTransform(progress, [enter, peak], [0, 1])
 
   return (
     <motion.div
@@ -67,108 +79,124 @@ function PointCard({ point, index, progress }: PointProps) {
         position:       "absolute",
         inset:          0,
         display:        "flex",
-        alignItems:     "center",
+        alignItems:     "flex-end",
         justifyContent: "center",
+        paddingBottom:  "clamp(72px, 11vh, 150px)",
         pointerEvents:  "none",
         zIndex:         2,
       }}
     >
-      {/* Decorative background number */}
-      <div
-        aria-hidden
-        style={{
-          position:       "absolute",
-          inset:          0,
-          display:        "flex",
-          alignItems:     "center",
-          justifyContent: "center",
-          overflow:       "hidden",
-          pointerEvents:  "none",
-        }}
-      >
-        <span
+      {/* Per-card radial accent glow */}
+      <div aria-hidden style={{
+        position:   "absolute",
+        inset:      0,
+        background: `radial-gradient(ellipse 75% 65% at 50% 52%, ${point.accent} 0%, transparent 62%)`,
+        pointerEvents: "none",
+      }} />
+
+      {/* Giant background number */}
+      <div aria-hidden style={{
+        position:        "absolute",
+        inset:           0,
+        display:         "flex",
+        alignItems:      "center",
+        justifyContent:  "center",
+        overflow:        "hidden",
+        pointerEvents:   "none",
+        transform:       "translateY(6%)",
+      }}>
+        <motion.span
           className="font-druk-wide select-none"
           style={{
-            fontSize:         "clamp(42vw, 55vw, 70vw)",
+            opacity:          numOp,
+            fontSize:         "clamp(60vw, 67vw, 74vw)",
             color:            "transparent",
-            WebkitTextStroke: "1px rgba(232,228,220,0.055)",
+            WebkitTextStroke: `1.4px ${point.stroke}`,
             lineHeight:       1,
             letterSpacing:    "-0.04em",
             userSelect:       "none",
           }}
         >
           {point.num}
-        </span>
+        </motion.span>
       </div>
 
       {/* Content */}
       <motion.div
         style={{
           x,
-          textAlign:     "center",
-          padding:       "0 clamp(28px, 8vw, 140px)",
-          position:      "relative",
-          zIndex:        1,
-          maxWidth:      680,
+          scale,
+          textAlign: "center",
+          padding:   "0 clamp(24px, 5vw, 110px)",
+          position:  "relative",
+          zIndex:    1,
+          maxWidth:  740,
+          width:     "100%",
         }}
       >
-        {/* Counter + line */}
+        {/* Counter line */}
         <motion.div
           style={{ opacity: labelOp }}
-          className="flex items-center justify-center gap-4 mb-7"
+          className="flex items-center justify-center gap-5 mb-7"
         >
-          <div style={{ flex: 1, height: 1, background: "rgba(232,228,220,0.18)", maxWidth: 48 }} />
-          <span
-            className="font-ekstra uppercase"
-            style={{ fontSize: 10, letterSpacing: "0.48em", color: "rgba(232,228,220,0.40)" }}
-          >
+          <div style={{ flex: 1, height: 1, background: "rgba(232,228,220,0.14)", maxWidth: 60 }} />
+          <span className="font-ekstra uppercase" style={{
+            fontSize: 9, letterSpacing: "0.54em",
+            color: "rgba(232,228,220,0.38)",
+          }}>
             {point.num} / {String(N).padStart(2, "0")}
           </span>
-          <div style={{ flex: 1, height: 1, background: "rgba(232,228,220,0.18)", maxWidth: 48 }} />
+          <div style={{ flex: 1, height: 1, background: "rgba(232,228,220,0.14)", maxWidth: 60 }} />
         </motion.div>
 
-        {/* Headline — mix solid + outline */}
+        {/* Headline */}
         <h2
-          className="font-druk-wide uppercase leading-none"
+          className="font-druk-wide uppercase"
           style={{
-            fontSize:      "clamp(2.4rem, 5.8vw, 6.2rem)",
-            letterSpacing: "-0.025em",
-            color:         "#e8e4dc",
-            marginBottom:  "clamp(20px, 3vh, 32px)",
+            fontSize:      "clamp(2rem, 6.8vw, 8.5rem)",
+            letterSpacing: "-0.03em",
             lineHeight:    1.0,
+            color:         "#e8e4dc",
+            marginBottom:  "clamp(16px, 2.4vh, 32px)",
           }}
         >
           {point.label}
         </h2>
 
+        {/* Accent line */}
+        <div style={{
+          width:        "clamp(28px, 3.5vw, 52px)",
+          height:       2,
+          margin:       "0 auto clamp(14px, 2vh, 26px)",
+          borderRadius: 1,
+          background:   point.stroke.replace(/[\d.]+\)$/, "0.85)"),
+        }} />
+
         {/* Body */}
-        <p
-          className="font-ekstra"
-          style={{
-            fontSize:   "clamp(14px, 1.4vw, 18px)",
-            lineHeight: 1.75,
-            color:      "rgba(232,228,220,0.65)",
-            maxWidth:   440,
-            margin:     "0 auto",
-          }}
-        >
+        <p className="font-ekstra" style={{
+          fontSize:   "clamp(13px, 1.2vw, 17px)",
+          lineHeight: 1.88,
+          color:      "rgba(232,228,220,0.60)",
+          maxWidth:   460,
+          margin:     "0 auto",
+        }}>
           {point.body}
         </p>
 
-        {/* CTA on last card */}
+        {/* CTA — last card only */}
         {point.cta && (
           <motion.a
             href="/shop"
             style={{
               opacity:        labelOp,
-              marginTop:      "clamp(28px, 4vh, 44px)",
+              marginTop:      "clamp(28px, 4vh, 50px)",
               display:        "inline-flex",
               alignItems:     "center",
               gap:            12,
               background:     "#e8e4dc",
               color:          "#23262d",
               borderRadius:   9999,
-              padding:        "14px 28px 14px 16px",
+              padding:        "14px 30px 14px 16px",
               textDecoration: "none",
               pointerEvents:  "auto",
             }}
@@ -186,7 +214,7 @@ function PointCard({ point, index, progress }: PointProps) {
                 <path d="M2 12L12 2M12 2H4M12 2V10" stroke="#e8e4dc" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </span>
-            <span className="font-druk-wide uppercase" style={{ fontSize: "clamp(11px, 0.9vw, 13px)", letterSpacing: "0.04em" }}>
+            <span className="font-druk-wide uppercase" style={{ fontSize: "clamp(11px, 0.85vw, 13px)", letterSpacing: "0.04em" }}>
               Jetzt entdecken
             </span>
           </motion.a>
@@ -200,146 +228,132 @@ export function Section05() {
   const sectionRef = useRef<HTMLElement>(null)
 
   const { scrollYProgress } = useScroll({
-    target:  sectionRef,
-    offset:  ["start start", "end end"],
+    target: sectionRef,
+    offset: ["start start", "end end"],
   })
 
-  // Seamless blend from Section04's #bcc0ca background — fades out over first 0.6 steps
-  const entryBlend = useTransform(scrollYProgress, [0, S * 0.6], [1, 0])
+  // S04→S05 transition: full-step blend (was 0.6) + photo blur clears + photo zooms in
+  const entryBlend = useTransform(scrollYProgress, [0, S], [1, 0])
+  const bgBlur     = useTransform(scrollYProgress, [0, S * 0.85], ["blur(14px)", "blur(0px)"])
+  const bgScale    = useTransform(scrollYProgress, [0, S * 0.85], [1.07, 1.0])
+  const bgY        = useTransform(scrollYProgress, [0, 1], ["0%", "22%"])
 
-  // Intro panel
-  const introOpacity = useTransform(scrollYProgress, [S * 0.05, S * 0.3, S * 0.7, S], [0, 1, 1, 0])
-  const introY       = useTransform(scrollYProgress, [S * 0.7, S], [0, -28])
-
-  // Photo parallax
-  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"])
+  // Intro
+  const introOpacity = useTransform(scrollYProgress, [S * 0.06, S * 0.32, S * 0.70, S], [0, 1, 1, 0])
+  const introY       = useTransform(scrollYProgress, [S * 0.70, S], [0, -36])
+  const introScale   = useTransform(scrollYProgress, [S * 0.06, S * 0.32], [0.95, 1.0])
 
   // Progress bar
   const barWidth = useTransform(scrollYProgress, [0, 1], ["0%", "100%"])
 
   return (
-    <section
-      ref={sectionRef}
-      style={{ height: `${STEPS * 100}vh`, position: "relative" }}
-    >
-      {/* ── Sticky viewport ── */}
-      <div
-        style={{
-          position: "sticky",
-          top:       0,
-          height:    "100vh",
-          overflow:  "hidden",
-        }}
-      >
-        {/* Background photo with parallax */}
+    <section ref={sectionRef} style={{ height: `${STEPS * 100}vh`, position: "relative" }}>
+      <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden" }}>
+
+        {/* Background photo: parallax + blur-reveal + zoom-in */}
         <motion.div
           aria-hidden
           style={{
             position:           "absolute",
-            top:                "-20%",
-            bottom:             "-20%",
+            top:                "-22%",
+            bottom:             "-22%",
             left:               0,
             right:              0,
             y:                  bgY,
+            scale:              bgScale,
+            filter:             bgBlur,
             backgroundImage:    "url('/community.jpg')",
             backgroundSize:     "cover",
             backgroundPosition: "center 35%",
           }}
         />
 
-        {/* Mood overlay: dark + lavender radial (lighter than before so photo shows) */}
-        <div
-          aria-hidden
-          style={{
-            position: "absolute",
-            inset:    0,
-            zIndex:   1,
-            background: [
-              "radial-gradient(ellipse 80% 70% at 50% 42%, rgba(122,107,145,0.28) 0%, transparent 58%)",
-              "rgba(22,24,30,0.58)",
-            ].join(", "),
-          }}
-        />
+        {/* Cinematic overlay: dark base + purple center glow + top/bottom vignette */}
+        <div aria-hidden style={{
+          position: "absolute", inset: 0, zIndex: 1,
+          background: [
+            "radial-gradient(ellipse 85% 75% at 50% 46%, rgba(95,72,150,0.24) 0%, transparent 55%)",
+            "linear-gradient(to bottom, rgba(10,12,16,0.55) 0%, rgba(10,12,16,0.08) 35%, rgba(10,12,16,0.08) 60%, rgba(10,12,16,0.65) 100%)",
+            "rgba(12,14,18,0.65)",
+          ].join(", "),
+        }} />
 
-        {/* ── Intro panel ── */}
-        <motion.div
-          style={{
-            opacity:        introOpacity,
-            y:              introY,
-            position:       "absolute",
-            inset:          0,
-            display:        "flex",
-            alignItems:     "center",
-            justifyContent: "center",
-            flexDirection:  "column",
-            textAlign:      "center",
-            padding:        "0 clamp(28px, 8vw, 140px)",
-            pointerEvents:  "none",
-            zIndex:         2,
-          }}
-        >
-          <p
-            className="font-ekstra uppercase"
-            style={{ fontSize: 10, letterSpacing: "0.48em", color: "rgba(232,228,220,0.38)", marginBottom: 24 }}
-          >
+        {/* Intro panel */}
+        <motion.div style={{
+          opacity:        introOpacity,
+          y:              introY,
+          scale:          introScale,
+          position:       "absolute",
+          inset:          0,
+          display:        "flex",
+          alignItems:     "center",
+          justifyContent: "center",
+          flexDirection:  "column",
+          textAlign:      "center",
+          padding:        "0 clamp(24px, 6vw, 120px)",
+          pointerEvents:  "none",
+          zIndex:         2,
+        }}>
+          <p className="font-ekstra uppercase" style={{
+            fontSize: 9, letterSpacing: "0.56em",
+            color: "rgba(232,228,220,0.32)", marginBottom: 32,
+          }}>
             Das sind wir
           </p>
-          <h2
-            className="font-druk-wide uppercase leading-none"
-            style={{
-              fontSize:      "clamp(3rem, 7vw, 7.5rem)",
-              letterSpacing: "-0.028em",
-              color:         "#e8e4dc",
-              marginBottom:  "clamp(14px, 2vh, 24px)",
-            }}
-          >
+          <h2 className="font-druk-wide uppercase" style={{
+            fontSize:      "clamp(1.9rem, 7.8vw, 9rem)",
+            letterSpacing: "-0.03em",
+            lineHeight:    0.96,
+            color:         "#e8e4dc",
+            marginBottom:  "clamp(8px, 1.2vh, 16px)",
+          }}>
             WeedForFriends.
-            <br />
-            <span style={{ color: "transparent", WebkitTextStroke: "clamp(1.5px, 0.12vw, 2.5px) rgba(232,228,220,0.35)" }}>
-              Mehr als ein Produkt.
-            </span>
           </h2>
-          <p
-            className="font-ekstra"
-            style={{ color: "rgba(232,228,220,0.35)", fontSize: "clamp(11px, 1vw, 14px)", letterSpacing: "0.08em" }}
-          >
-            scroll ↓
-          </p>
+          <h2 className="font-druk-wide uppercase" style={{
+            fontSize:         "clamp(1.9rem, 7.8vw, 9rem)",
+            letterSpacing:    "-0.03em",
+            lineHeight:       0.96,
+            color:            "transparent",
+            WebkitTextStroke: "clamp(1.5px, 0.1vw, 2.5px) rgba(232,228,220,0.25)",
+            marginBottom:     "clamp(32px, 5vh, 56px)",
+          }}>
+            Mehr als ein Produkt.
+          </h2>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 1, height: 32, background: "rgba(232,228,220,0.18)" }} />
+            <p className="font-ekstra uppercase" style={{
+              fontSize: 9, letterSpacing: "0.52em",
+              color: "rgba(232,228,220,0.28)",
+            }}>scroll</p>
+            <div style={{ width: 1, height: 32, background: "rgba(232,228,220,0.18)" }} />
+          </div>
         </motion.div>
 
-        {/* ── Point cards ── */}
+        {/* Point cards */}
         {POINTS.map((point, i) => (
           <PointCard key={point.num} point={point} index={i} progress={scrollYProgress} />
         ))}
 
-        {/* ── Progress bar ── */}
-        <div
-          aria-hidden
-          style={{
-            position:   "absolute",
-            bottom:     0,
-            left:       0,
-            right:      0,
-            height:     2,
-            background: "rgba(232,228,220,0.08)",
-            zIndex:     10,
-          }}
-        >
-          <motion.div style={{ height: "100%", width: barWidth, background: "rgba(232,228,220,0.45)" }} />
+        {/* Progress bar */}
+        <div aria-hidden style={{
+          position:   "absolute",
+          bottom:     0, left: 0, right: 0,
+          height:     2,
+          background: "rgba(232,228,220,0.07)",
+          zIndex:     10,
+        }}>
+          <motion.div style={{ height: "100%", width: barWidth, background: "rgba(232,228,220,0.42)" }} />
         </div>
 
-        {/* ── Section04→05 blend: #bcc0ca fades out as you enter ── */}
-        <motion.div
-          aria-hidden
-          style={{
-            opacity:       entryBlend,
-            position:      "absolute",
-            inset:         0,
-            zIndex:        20,
-            background:    "#bcc0ca",
-            pointerEvents: "none",
-          }}
-        />
+        {/* S04→05 entry blend: fades over full first step */}
+        <motion.div aria-hidden style={{
+          opacity:       entryBlend,
+          position:      "absolute",
+          inset:         0,
+          zIndex:        20,
+          background:    "#bcc0ca",
+          pointerEvents: "none",
+        }} />
       </div>
     </section>
   )

@@ -57,20 +57,20 @@ function FeatureBlock({
   if (isMobile) {
     return (
       <motion.div style={{
-        position: "absolute", bottom: "clamp(80px,16vh,160px)",
+        position: "absolute", bottom: "clamp(56px,11vh,130px)",
         left: 0, right: 0, textAlign: "center",
-        opacity, y, zIndex: 5, pointerEvents: "none", padding: "0 32px",
+        opacity, y, zIndex: 5, pointerEvents: "none", padding: "0 28px",
       }}>
         <p className="font-druk" style={{
-          fontSize: "clamp(56px,16vw,96px)", color: TEXT,
+          fontSize: "clamp(52px,15vw,88px)", color: TEXT,
           lineHeight: 0.85, letterSpacing: "-0.04em", margin: "0 0 2px",
         }}>{feature.big}</p>
         <p className="font-druk-wide uppercase" style={{
-          fontSize: "clamp(14px,4vw,22px)", lineHeight: 1,
+          fontSize: "clamp(14px,4.2vw,24px)", lineHeight: 1,
           color: "transparent", WebkitTextStroke: `1.2px ${TEXT}`,
-          letterSpacing: "0.06em", margin: "0 0 8px",
+          letterSpacing: "0.06em", margin: "0 0 10px",
         }}>{feature.tag}</p>
-        <p style={{ color: MUTED, fontSize: "clamp(12px,3.2vw,15px)", lineHeight: 1.65, margin: 0, whiteSpace: "pre-line" }}>
+        <p style={{ color: MUTED, fontSize: "clamp(13px,3.6vw,16px)", lineHeight: 1.7, margin: 0, whiteSpace: "pre-line" }}>
           {feature.desc}
         </p>
       </motion.div>
@@ -293,13 +293,13 @@ function FrameScrubber({
       ref={wrapRef}
       style={{
         position: "absolute",
-        left: "50%", top: isMobile ? "40%" : "50%",
+        left: "50%", top: isMobile ? "36%" : "50%",
         translateX: "-50%", translateY: "-50%",
         y: floatY,
-        width:     isMobile ? "92vw" : "min(100vh, 72vw)",
-        height:    isMobile ? "92vw" : "min(100vh, 72vw)",
-        maxWidth:  isMobile ? 480 : 1040,
-        maxHeight: isMobile ? 480 : 1040,
+        width:     isMobile ? "84vw" : "min(100vh, 72vw)",
+        height:    isMobile ? "84vw" : "min(100vh, 72vw)",
+        maxWidth:  isMobile ? 420 : 1040,
+        maxHeight: isMobile ? 420 : 1040,
         zIndex: 10,
         pointerEvents: "none",
       }}
@@ -370,7 +370,7 @@ export function Section04_Features() {
         {/* ── OUTRO CTA — below the floating product ── */}
         <motion.div style={{
           position: "absolute",
-          bottom: isMobile ? "clamp(80px,16vh,160px)" : "clamp(48px,8vh,96px)",
+          bottom: isMobile ? "clamp(56px,11vh,130px)" : "clamp(48px,8vh,96px)",
           left: "50%",
           translateX: "-50%",
           textAlign: "center", opacity: outroOpacity, y: outroY,
