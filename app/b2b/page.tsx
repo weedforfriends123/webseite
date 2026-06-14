@@ -220,8 +220,9 @@ export default function B2BPage() {
             style={{ paddingTop: "clamp(48px,8vh,88px)" }}
           >
 
-            {/* LEFT — perks */}
+            {/* LEFT — perks (shown second on mobile) */}
             <motion.div
+              className="order-last lg:order-first"
               initial={{ opacity: 0, x: -18 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.22, duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
@@ -276,8 +277,9 @@ export default function B2BPage() {
               </div>
             </motion.div>
 
-            {/* RIGHT — form */}
+            {/* RIGHT — form (shown first on mobile) */}
             <motion.div
+              className="order-first lg:order-last"
               initial={{ opacity: 0, x: 18 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.28, duration: 0.75, ease: [0.16, 1, 0.3, 1] }}

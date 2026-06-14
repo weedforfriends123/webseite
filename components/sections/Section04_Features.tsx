@@ -28,7 +28,7 @@ const FEATURES = [
 
 const fStart = (i: number) => 0.10 + i * 0.13
 const fEnd   = (i: number) => fStart(i) + 0.13
-const RAMP   = 0.025
+const RAMP   = 0.04
 
 // ── FeatureBlock ─────────────────────────────────────────────────────────────
 
@@ -172,6 +172,10 @@ function FrameScrubber({
   // Track last wheel event to prevent onScroll overriding it
   const lastWheelMs = useRef(0)
 
+  // Mirror isMobile into a ref so drawAt (stable callback) can read it
+  const isMobileRef = useRef(isMobile)
+  useEffect(() => { isMobileRef.current = isMobile }, [isMobile])
+
   // ── Draw single frame — no globalAlpha blending (avoids white-flash on RGBA frames) ──
   const drawAt = useCallback((floatIdx: number) => {
     const canvas = canvasRef.current
@@ -185,7 +189,9 @@ function FrameScrubber({
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    const sc = Math.min(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight)
+    // On mobile zoom in 2.5× so the product fills the canvas instead of being tiny
+    const zoom = isMobileRef.current ? 2.5 : 1.0
+    const sc = Math.min(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight) * zoom
     const w  = img.naturalWidth  * sc
     const h  = img.naturalHeight * sc
 
@@ -277,13 +283,13 @@ function FrameScrubber({
       ref={wrapRef}
       style={{
         position: "absolute",
-        left: "50%", top: isMobile ? "36%" : "50%",
+        left: "50%", top: isMobile ? "40%" : "50%",
         translateX: "-50%", translateY: "-50%",
         y: floatY,
-        width:     isMobile ? "clamp(220px,70vw,340px)" : "min(100vh, 72vw)",
-        height:    isMobile ? "clamp(220px,70vw,340px)" : "min(100vh, 72vw)",
-        maxWidth:  isMobile ? 340 : 1040,
-        maxHeight: isMobile ? 340 : 1040,
+        width:     isMobile ? "92vw" : "min(100vh, 72vw)",
+        height:    isMobile ? "92vw" : "min(100vh, 72vw)",
+        maxWidth:  isMobile ? 480 : 1040,
+        maxHeight: isMobile ? 480 : 1040,
         zIndex: 10,
         pointerEvents: "none",
       }}
