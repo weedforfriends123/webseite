@@ -161,9 +161,9 @@ export function Section01_Hero() {
             </div>
 
             {/* ── MOBILE PREV / NEXT BUTTONS ─────────────────────────────── */}
-            <div className="block md:hidden" style={{
+            <div className="flex md:hidden" style={{
               position: "absolute", inset: 0, zIndex: 10,
-              display: "flex", alignItems: "center", justifyContent: "space-between",
+              alignItems: "center", justifyContent: "space-between",
               padding: "0 6px", pointerEvents: "none",
             }}>
               {/* Prev */}
