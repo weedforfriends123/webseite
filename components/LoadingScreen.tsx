@@ -4,8 +4,8 @@ import { useEffect, useState, useRef } from "react"
 import { motion } from "framer-motion"
 
 const WORD    = "WEEDFORFRIENDS"
-const LETTERS = WORD.split("")   // 14 letters
-const PACE_MS = 190              // ms between each letter  → ~2.7 s total
+const LETTERS = WORD.split("")
+const PACE_MS = 190
 
 type Phase = "writing" | "waiting" | "exiting" | "done"
 
@@ -33,15 +33,11 @@ export function LoadingScreen() {
       }
     }
 
-    // ── Asset loading — gate for exit, not for letter pacing ──
     const markReady = () => { assetsReady.current = true; tryExit() }
-
     if (document.readyState === "complete") markReady()
     else window.addEventListener("load", markReady)
-
     const hardTimeout = setTimeout(markReady, 5_000)
 
-    // ── Fixed-pace letter reveal — always plays in full, never skips ────────
     let n = 0
     const timer = setInterval(() => {
       n++
@@ -66,20 +62,39 @@ export function LoadingScreen() {
 
   return (
     <>
-      {/* Dark background */}
+      {/* Video background */}
       <motion.div
         animate={exiting ? { opacity: 0 } : { opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.2, ease: "easeIn" }}
+        transition={{ duration: 0.55, delay: 0.15, ease: "easeIn" }}
         onAnimationComplete={() => { if (exiting) setPhase("done") }}
         style={{
           position: "fixed", inset: 0,
           zIndex: 9999,
-          background: "#111212",
-          pointerEvents: "none",
+          overflow: "hidden",
         }}
-      />
+      >
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{
+            position: "absolute", inset: 0,
+            width: "100%", height: "100%",
+            objectFit: "cover",
+          }}
+        >
+          <source src="/loading-bg.mp4" type="video/mp4" />
+        </video>
 
-      {/* Text container */}
+        {/* Dark overlay — really dark */}
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "rgba(0,0,0,0.82)",
+        }} />
+      </motion.div>
+
+      {/* WEEDFORFRIENDS text */}
       <motion.div
         animate={exiting
           ? isMobileRef.current
@@ -101,19 +116,14 @@ export function LoadingScreen() {
             fontSize: isMobileRef.current ? "6.5vw" : "clamp(38px,6.2vw,82px)",
             color: "#e8e4dc",
             letterSpacing: isMobileRef.current ? "0.03em" : "0.06em",
-            margin: 0,
-            lineHeight: 1,
-            whiteSpace: "nowrap",
+            margin: 0, lineHeight: 1, whiteSpace: "nowrap",
           }}
         >
           {LETTERS.map((letter, i) => (
             <motion.span
               key={i}
               initial={{ opacity: 0, y: 8 }}
-              animate={letterCount > i
-                ? { opacity: 1, y: 0 }
-                : { opacity: 0, y: 8 }
-              }
+              animate={letterCount > i ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
               transition={{ duration: 0.20, ease: [0.16, 1, 0.3, 1] }}
               style={{ display: "inline-block" }}
             >
