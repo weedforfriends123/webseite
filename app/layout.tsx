@@ -4,7 +4,6 @@ import "./globals.css"
 import { CartProvider } from "@/lib/cart"
 import { CartDrawer } from "@/components/CartDrawer"
 import { WFFHeader } from "@/components/WFFHeader"
-import { MouseTrail } from "@/components/MouseTrail"
 import { PageTransition } from "@/components/PageTransition"
 import { SmoothScroll } from "@/components/SmoothScroll"
 import { LoadingScreen } from "@/components/LoadingScreen"
@@ -56,7 +55,6 @@ export default function RootLayout({
             <WFFHeader />
             {children}
             <CartDrawer />
-            <MouseTrail />
           </PageTransition>
         </CartProvider>
       </body>

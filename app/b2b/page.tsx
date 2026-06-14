@@ -147,7 +147,7 @@ export default function B2BPage() {
       <div className="relative" style={{ zIndex: 1 }}>
         <div
           className="max-w-7xl mx-auto"
-          style={{ padding: "clamp(88px,14vh,160px) clamp(16px,5vw,80px) clamp(64px,10vh,140px)" }}
+          style={{ padding: "clamp(72px,12vh,160px) clamp(16px,5vw,80px) clamp(48px,8vh,140px)" }}
         >
 
           {/* ─── SECTION 1 — Headline ─── */}
@@ -284,6 +284,8 @@ export default function B2BPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.28, duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
             >
+              {/* Mobile card — visually groups the form on small screens, removed on lg */}
+              <div className="rounded-2xl p-5 sm:p-7 lg:p-0 lg:rounded-none bg-white/[0.14] border border-black/[0.09] lg:bg-transparent lg:border-0">
               <AnimatePresence mode="wait">
                 {sent ? (
                   <motion.div
@@ -473,6 +475,7 @@ export default function B2BPage() {
                   </motion.div>
                 )}
               </AnimatePresence>
+              </div>
             </motion.div>
 
           </div>

@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
-import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/Navbar"
 import { createClient } from "@/lib/supabase/client"
@@ -112,24 +111,6 @@ export default function LoginPage() {
           </p>
         </div>
         <div className="w-full" style={{ maxWidth: 496 }}>
-
-          {/* ─── Logo ─── */}
-          <motion.div
-            initial={{ opacity: 0, y: -12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="flex justify-center mb-12"
-          >
-            <Link href="/">
-              <Image
-                src="/logo.webp"
-                alt="Weed For Friends"
-                width={52}
-                height={52}
-                style={{ height: 52, width: "auto", filter: "brightness(0)" }}
-              />
-            </Link>
-          </motion.div>
 
           {/* ─── Tab toggle ─── */}
           <motion.div
