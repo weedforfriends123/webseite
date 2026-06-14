@@ -230,7 +230,7 @@ export function Section01_Hero() {
                     <img
                       src={strain.img}
                       alt={`${strain.line1} ${strain.line2}`}
-                      style={{ height: "68vh", maxHeight: 820, width: "auto", objectFit: "contain",
+                      style={{ height: "clamp(380px,62vh,820px)", width: "auto", objectFit: "contain",
                         userSelect: "none", pointerEvents: "none", display: "block" }}
                       draggable={false}
                     />

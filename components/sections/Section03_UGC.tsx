@@ -248,22 +248,22 @@ export function Section03_UGC() {
         style={{
           gridTemplateColumns: "1fr 1fr",
           alignItems: "center",
-          padding: `0 ${PAD_X} clamp(80px,12vh,160px) clamp(140px,20vw,360px)`,
+          padding: `0 ${PAD_X} clamp(80px,12vh,160px) clamp(24px,5vw,180px)`,
         }}
       >
         {/* Left: Polaroid stack */}
-        <div style={{ position: "relative", minHeight: "clamp(380px,58vw,680px)" }}>
+        <div style={{ position: "relative", minHeight: "clamp(380px,50vw,680px)" }}>
           <div style={{ position: "absolute", left: "2%",  bottom: "2%"  }}>
-            <PolaroidVideo src="/ugc1-desktop.mp4" rotate={-12} zIndex={1} delay={0.10} width="clamp(200px,24vw,340px)" />
+            <PolaroidVideo src="/ugc1-desktop.mp4" rotate={-12} zIndex={1} delay={0.10} width="clamp(160px,18vw,300px)" />
           </div>
           <div style={{ position: "absolute", left: "18%", bottom: "10%" }}>
-            <PolaroidVideo src="/ugc3-desktop.mp4" rotate={-3}  zIndex={2} delay={0.22} width="clamp(210px,26vw,360px)" />
+            <PolaroidVideo src="/ugc3-desktop.mp4" rotate={-3}  zIndex={2} delay={0.22} width="clamp(160px,18vw,300px)" />
           </div>
-          <div style={{ position: "absolute", left: "42%", bottom: "5%"  }}>
-            <PolaroidVideo src="/ugc4-desktop.mp4" rotate={6}   zIndex={3} delay={0.34} width="clamp(200px,24vw,340px)" />
+          <div style={{ position: "absolute", left: "32%", bottom: "5%"  }}>
+            <PolaroidVideo src="/ugc4-desktop.mp4" rotate={6}   zIndex={3} delay={0.34} width="clamp(160px,18vw,300px)" />
           </div>
-          <div style={{ position: "absolute", left: "60%", bottom: "0%"  }}>
-            <PolaroidVideo src="/ugc2-desktop.mp4" rotate={11}  zIndex={4} delay={0.46} width="clamp(200px,24vw,340px)" />
+          <div style={{ position: "absolute", left: "44%", bottom: "0%"  }}>
+            <PolaroidVideo src="/ugc2-desktop.mp4" rotate={11}  zIndex={4} delay={0.46} width="clamp(160px,18vw,300px)" />
           </div>
         </div>
 
