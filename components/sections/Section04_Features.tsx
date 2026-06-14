@@ -57,7 +57,7 @@ function FeatureBlock({
   if (isMobile) {
     return (
       <motion.div style={{
-        position: "absolute", bottom: "clamp(56px,11vh,130px)",
+        position: "absolute", bottom: "clamp(44px,9dvh,110px)",
         left: 0, right: 0, textAlign: "center",
         opacity, y, zIndex: 5, pointerEvents: "none", padding: "0 28px",
       }}>
@@ -189,8 +189,8 @@ function FrameScrubber({
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    // On mobile zoom in 2.5× so the product fills the canvas instead of being tiny
-    const zoom = isMobileRef.current ? 2.5 : 1.0
+    // Mobile zoom 1.5× — enough to fill the canvas while keeping full product visible
+    const zoom = isMobileRef.current ? 1.5 : 1.0
     const sc = Math.min(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight) * zoom
     const w  = img.naturalWidth  * sc
     const h  = img.naturalHeight * sc
@@ -227,18 +227,39 @@ function FrameScrubber({
     return () => cancelAnimationFrame(animRaf.current)
   }, [drawAt])
 
-  // ── Preload all frames ────────────────────────────────────────────────────
+  // ── Lazy-load frames — starts only when section enters viewport ──────────
   useEffect(() => {
+    // Create image objects without src first (no network requests yet)
     imgsRef.current = Array.from({ length: FRAME_COUNT }, (_, i) => {
       const img = new Image()
       img.onload = () => {
         loadedRef.current.add(i)
         if (i === 0) drawAt(0)
       }
-      img.src = `/frames/frame_${String(i).padStart(3, "0")}.webp?v=10`
       return img
     })
-  }, [drawAt])
+
+    const section = sectionRef.current
+    if (!section) return
+
+    const loadRange = (start: number, end: number) => {
+      for (let i = start; i < end; i++) {
+        if (!imgsRef.current[i].src)
+          imgsRef.current[i].src = `/frames/frame_${String(i).padStart(3, "0")}.webp?v=10`
+      }
+    }
+
+    // Trigger 600px before section enters viewport so frames are ready when user arrives
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+      observer.disconnect()
+      loadRange(0, 15)                                 // first 15 frames immediately
+      setTimeout(() => loadRange(15, FRAME_COUNT), 300) // rest after brief delay
+    }, { rootMargin: "600px" })
+
+    observer.observe(section)
+    return () => observer.disconnect()
+  }, [drawAt, sectionRef])
 
   // ── Canvas resize — high-DPR aware ───────────────────────────────────────
   useEffect(() => {
@@ -293,13 +314,13 @@ function FrameScrubber({
       ref={wrapRef}
       style={{
         position: "absolute",
-        left: "50%", top: isMobile ? "36%" : "50%",
+        left: "50%", top: isMobile ? "34%" : "50%",
         translateX: "-50%", translateY: "-50%",
         y: floatY,
-        width:     isMobile ? "84vw" : "min(100vh, 72vw)",
-        height:    isMobile ? "84vw" : "min(100vh, 72vw)",
-        maxWidth:  isMobile ? 420 : 1040,
-        maxHeight: isMobile ? 420 : 1040,
+        width:     isMobile ? "78vw" : "min(100vh, 72vw)",
+        height:    isMobile ? "78vw" : "min(100vh, 72vw)",
+        maxWidth:  isMobile ? 380 : 1040,
+        maxHeight: isMobile ? 380 : 1040,
         zIndex: 10,
         pointerEvents: "none",
       }}
@@ -351,7 +372,7 @@ export function Section04_Features() {
       ref={sectionRef}
       style={{ background: BG, minHeight: "700vh", position: "relative" }}
     >
-      <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden", background: BG }}>
+      <div style={{ position: "sticky", top: 0, height: "100dvh", overflow: "hidden", background: BG }}>
 
         {/* Radial glow */}
         <div aria-hidden style={{
@@ -370,7 +391,7 @@ export function Section04_Features() {
         {/* ── OUTRO CTA — below the floating product ── */}
         <motion.div style={{
           position: "absolute",
-          bottom: isMobile ? "clamp(56px,11vh,130px)" : "clamp(48px,8vh,96px)",
+          bottom: isMobile ? "clamp(44px,9dvh,110px)" : "clamp(48px,8vh,96px)",
           left: "50%",
           translateX: "-50%",
           textAlign: "center", opacity: outroOpacity, y: outroY,

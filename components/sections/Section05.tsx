@@ -20,15 +20,15 @@ const POINTS = [
   },
   {
     num:    "03",
-    label:  "Kein Nikotin. Kein Tabak.",
-    body:   "Nur was reingehört. Echte Cannabinoide, echte Terpene — und sonst nichts.",
+    label:  "Rein & ehrlich.",
+    body:   "Nur was reingehört: echte Cannabinoide, natürliche Terpene — keine künstlichen Zusatzstoffe. Bei jedem Produkt. Immer.",
     accent: "rgba(210,205,185,0.14)",
     stroke: "rgba(210,205,185,0.22)",
   },
   {
     num:    "04",
-    label:  "6 Sorten",
-    body:   "Von mild bis intensiv. Handselektiert mit echten Terpenen — für jeden Charakter.",
+    label:  "Für jeden Moment.",
+    body:   "Vapes, Pods, Edibles und Blüten — jedes Produkt für einen anderen Anlass, jeden Geschmack. Handselektiert, laborgeprüft.",
     accent: "rgba(200,158,55,0.20)",
     stroke: "rgba(200,158,55,0.28)",
   },
@@ -66,11 +66,11 @@ function PointCard({ point, index, progress }: PointProps) {
   const trough = S * (index + 2) - T
   const leave  = S * (index + 2)
 
-  const opacity  = useTransform(progress, [enter, peak, trough, Math.min(leave, 1)], [0, 1, 1, 0])
-  const x        = useTransform(progress, [enter, peak], [80, 0])
-  const scale    = useTransform(progress, [enter, peak], [0.96, 1.0])
-  const labelOp  = useTransform(progress, [enter, peak + T * 0.4], [0, 1])
-  const numOp    = useTransform(progress, [enter, peak], [0, 1])
+  const opacity = useTransform(progress, [enter, peak, trough, Math.min(leave, 1)], [0, 1, 1, 0])
+  const x       = useTransform(progress, [enter, peak], [80, 0])
+  const scale   = useTransform(progress, [enter, peak], [0.96, 1.0])
+  const labelOp = useTransform(progress, [enter, peak + T * 0.4], [0, 1])
+  const numOp   = useTransform(progress, [enter, peak], [0, 1])
 
   return (
     <motion.div
@@ -81,7 +81,7 @@ function PointCard({ point, index, progress }: PointProps) {
         display:        "flex",
         alignItems:     "flex-end",
         justifyContent: "center",
-        paddingBottom:  "clamp(72px, 11vh, 150px)",
+        paddingBottom:  "clamp(56px, 10dvh, 140px)",
         pointerEvents:  "none",
         zIndex:         2,
       }}
@@ -96,14 +96,14 @@ function PointCard({ point, index, progress }: PointProps) {
 
       {/* Giant background number */}
       <div aria-hidden style={{
-        position:        "absolute",
-        inset:           0,
-        display:         "flex",
-        alignItems:      "center",
-        justifyContent:  "center",
-        overflow:        "hidden",
-        pointerEvents:   "none",
-        transform:       "translateY(6%)",
+        position:       "absolute",
+        inset:          0,
+        display:        "flex",
+        alignItems:     "center",
+        justifyContent: "center",
+        overflow:       "hidden",
+        pointerEvents:  "none",
+        transform:      "translateY(6%)",
       }}>
         <motion.span
           className="font-druk-wide select-none"
@@ -134,21 +134,6 @@ function PointCard({ point, index, progress }: PointProps) {
           width:     "100%",
         }}
       >
-        {/* Counter line */}
-        <motion.div
-          style={{ opacity: labelOp }}
-          className="flex items-center justify-center gap-5 mb-7"
-        >
-          <div style={{ flex: 1, height: 1, background: "rgba(232,228,220,0.14)", maxWidth: 60 }} />
-          <span className="font-ekstra uppercase" style={{
-            fontSize: 9, letterSpacing: "0.54em",
-            color: "rgba(232,228,220,0.38)",
-          }}>
-            {point.num} / {String(N).padStart(2, "0")}
-          </span>
-          <div style={{ flex: 1, height: 1, background: "rgba(232,228,220,0.14)", maxWidth: 60 }} />
-        </motion.div>
-
         {/* Headline */}
         <h2
           className="font-druk-wide uppercase"
@@ -157,7 +142,7 @@ function PointCard({ point, index, progress }: PointProps) {
             letterSpacing: "-0.03em",
             lineHeight:    1.0,
             color:         "#e8e4dc",
-            marginBottom:  "clamp(16px, 2.4vh, 32px)",
+            marginBottom:  "clamp(14px, 2.2vh, 30px)",
           }}
         >
           {point.label}
@@ -167,7 +152,7 @@ function PointCard({ point, index, progress }: PointProps) {
         <div style={{
           width:        "clamp(28px, 3.5vw, 52px)",
           height:       2,
-          margin:       "0 auto clamp(14px, 2vh, 26px)",
+          margin:       "0 auto clamp(12px, 1.8vh, 24px)",
           borderRadius: 1,
           background:   point.stroke.replace(/[\d.]+\)$/, "0.85)"),
         }} />
@@ -189,7 +174,7 @@ function PointCard({ point, index, progress }: PointProps) {
             href="/shop"
             style={{
               opacity:        labelOp,
-              marginTop:      "clamp(28px, 4vh, 50px)",
+              marginTop:      "clamp(24px, 3.5vh, 48px)",
               display:        "inline-flex",
               alignItems:     "center",
               gap:            12,
@@ -232,11 +217,12 @@ export function Section05() {
     offset: ["start start", "end end"],
   })
 
-  // S04→S05 transition: full-step blend (was 0.6) + photo blur clears + photo zooms in
-  const entryBlend = useTransform(scrollYProgress, [0, S], [1, 0])
-  const bgBlur     = useTransform(scrollYProgress, [0, S * 0.85], ["blur(14px)", "blur(0px)"])
-  const bgScale    = useTransform(scrollYProgress, [0, S * 0.85], [1.07, 1.0])
-  const bgY        = useTransform(scrollYProgress, [0, 1], ["0%", "22%"])
+  // S04→S05 entry: full-step blend — photo reveals as you scroll in
+  const entryBlend  = useTransform(scrollYProgress, [0, S], [1, 0])
+  const bgScale     = useTransform(scrollYProgress, [0, S * 0.85], [1.06, 1.0])
+
+  // Parallax via backgroundPosition — no element translation, no gray areas possible
+  const bgPosY = useTransform(scrollYProgress, [0, 1], ["35%", "50%"])
 
   // Intro
   const introOpacity = useTransform(scrollYProgress, [S * 0.06, S * 0.32, S * 0.70, S], [0, 1, 1, 0])
@@ -248,27 +234,23 @@ export function Section05() {
 
   return (
     <section ref={sectionRef} style={{ height: `${STEPS * 100}vh`, position: "relative" }}>
-      <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden" }}>
+      <div style={{ position: "sticky", top: 0, height: "100dvh", overflow: "hidden" }}>
 
-        {/* Background photo: parallax + blur-reveal + zoom-in */}
+        {/* Background photo — inset:0 so no gray area, backgroundPosition for parallax */}
         <motion.div
           aria-hidden
           style={{
             position:           "absolute",
-            top:                "-22%",
-            bottom:             "-22%",
-            left:               0,
-            right:              0,
-            y:                  bgY,
+            inset:              0,
             scale:              bgScale,
-            filter:             bgBlur,
             backgroundImage:    "url('/community.jpg')",
             backgroundSize:     "cover",
-            backgroundPosition: "center 35%",
+            backgroundPositionX: "50%",
+            backgroundPositionY: bgPosY,
           }}
         />
 
-        {/* Cinematic overlay: dark base + purple center glow + top/bottom vignette */}
+        {/* Cinematic overlay */}
         <div aria-hidden style={{
           position: "absolute", inset: 0, zIndex: 1,
           background: [
@@ -315,7 +297,7 @@ export function Section05() {
             lineHeight:       0.96,
             color:            "transparent",
             WebkitTextStroke: "clamp(1.5px, 0.1vw, 2.5px) rgba(232,228,220,0.25)",
-            marginBottom:     "clamp(32px, 5vh, 56px)",
+            marginBottom:     "clamp(32px, 5dvh, 56px)",
           }}>
             Mehr als ein Produkt.
           </h2>
@@ -345,7 +327,7 @@ export function Section05() {
           <motion.div style={{ height: "100%", width: barWidth, background: "rgba(232,228,220,0.42)" }} />
         </div>
 
-        {/* S04→05 entry blend: fades over full first step */}
+        {/* S04→05 entry blend */}
         <motion.div aria-hidden style={{
           opacity:       entryBlend,
           position:      "absolute",

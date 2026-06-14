@@ -75,6 +75,7 @@ export function LoadingScreen() {
           position: "fixed", inset: 0,
           zIndex: 9999,
           overflow: "hidden",
+          background: "#080a0e",
         }}
       >
         <video
