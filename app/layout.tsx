@@ -44,6 +44,11 @@ export default function RootLayout({
       lang="de"
       className={`${syne.variable} ${spaceGrotesk.variable} ${spaceMono.variable}`}
     >
+      <head>
+        {/* Preload fonts used in loading screen to prevent FOUT on animation */}
+        <link rel="preload" as="font" href="/fonts/drinksom/DrukWide-Heavy.woff2" crossOrigin="anonymous" type="font/woff2" />
+        <link rel="preload" as="font" href="/fonts/Ekstra-Regular.otf" crossOrigin="anonymous" type="font/otf" />
+      </head>
       <body>
         <PreLoader />
         <LoadingScreen />

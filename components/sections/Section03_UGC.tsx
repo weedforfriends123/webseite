@@ -23,9 +23,28 @@ const fadeUpSlow = {
 function PolaroidVideo({ src, rotate, zIndex, delay, width }: {
   src: string; rotate: number; zIndex: number; delay: number; width: string
 }) {
-  const noMotion = useReducedMotion()
+  const noMotion  = useReducedMotion()
+  const videoRef  = useRef<HTMLVideoElement>(null)
+  const wrapRef   = useRef<HTMLDivElement>(null)
+
+  // Lazy-load video src only when near viewport — prevents 37MB autoloading on page open
+  useEffect(() => {
+    const video = videoRef.current
+    const wrap  = wrapRef.current
+    if (!video || !wrap) return
+    const obs = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return
+      video.src = src
+      video.load()
+      obs.disconnect()
+    }, { rootMargin: "400px" })
+    obs.observe(wrap)
+    return () => obs.disconnect()
+  }, [src])
+
   return (
     <motion.div
+      ref={wrapRef}
       initial={noMotion ? false : { opacity: 0, y: 80, rotate: rotate - 8, scale: 0.92 }}
       whileInView={{ opacity: 1, y: 0, rotate, scale: 1 }}
       viewport={{ once: true, margin: "-60px" }}
@@ -41,7 +60,7 @@ function PolaroidVideo({ src, rotate, zIndex, delay, width }: {
         cursor: "default",
       }}
     >
-      <video src={src} autoPlay muted loop playsInline
+      <video ref={videoRef} autoPlay muted loop playsInline preload="none"
         style={{ display: "block", width: "100%", aspectRatio: "9/16", objectFit: "cover", borderRadius: 2 }} />
     </motion.div>
   )

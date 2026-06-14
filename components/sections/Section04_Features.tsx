@@ -242,10 +242,11 @@ function FrameScrubber({
     const section = sectionRef.current
     if (!section) return
 
+    const dir = isMobile ? "frames-mobile" : "frames"
     const loadRange = (start: number, end: number, step: number) => {
       for (let i = start; i < end; i += step) {
         if (!imgsRef.current[i].src)
-          imgsRef.current[i].src = `/frames/frame_${String(i).padStart(3, "0")}.webp?v=10`
+          imgsRef.current[i].src = `/${dir}/frame_${String(i).padStart(3, "0")}.webp?v=11`
       }
     }
 
