@@ -163,13 +163,17 @@ export function Navbar() {
           {NAV_ITEMS.map((name) => {
             const items = DROPDOWNS[name]
             if (!items) return (
-              <Link key={name} href={`/shop/${name.toLowerCase().replace(" ", "-")}`} className="font-ekstra" style={{
-                color: "rgba(255,255,255,0.55)", fontSize: "clamp(15px,1.3vw,19px)", padding: "7px 14px",
-                borderRadius: 9999, textDecoration: "none", whiteSpace: "nowrap",
-                transition: "color .2s, background .2s",
-              }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.95)"; (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.07)" }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.55)"; (e.currentTarget as HTMLElement).style.background = "transparent" }}
+              <Link
+                key={name}
+                href={`/shop/${name.toLowerCase().replace(" ", "-")}`}
+                className="font-ekstra rounded-full transition-all duration-200 text-white/55 hover:text-white hover:bg-white/[0.13]"
+                style={{
+                  fontSize: "clamp(15px,1.3vw,19px)",
+                  padding: "7px 14px",
+                  textDecoration: "none",
+                  whiteSpace: "nowrap",
+                  display: "inline-block",
+                }}
               >{name}</Link>
             )
             return <NavDropdown key={name} label={name} items={items} />

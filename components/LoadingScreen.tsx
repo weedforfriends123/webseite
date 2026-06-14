@@ -20,9 +20,6 @@ export function LoadingScreen() {
   const exitScale   = useRef(1)
 
   useEffect(() => {
-    // Remove the static CSS pre-loader now that we're mounted
-    document.getElementById("__preldr")?.remove()
-
     isMobileRef.current = window.innerWidth < 768
     if (!isMobileRef.current) {
       const fh = Math.min(80, Math.max(36, window.innerWidth * 0.06))
