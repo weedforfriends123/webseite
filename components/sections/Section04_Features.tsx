@@ -308,6 +308,7 @@ function FrameScrubber({
         style={{
           width: "100%", height: "100%",
           display: "block", position: "relative", zIndex: 1,
+          background: BG,
         }}
       />
     </motion.div>
