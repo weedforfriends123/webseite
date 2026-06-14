@@ -189,10 +189,8 @@ function FrameScrubber({
     const w  = img.naturalWidth  * sc
     const h  = img.naturalHeight * sc
 
-    // Only enable smoothing when upscaling — downscaling with smoothing off is sharper
-    const upscaling = sc > 1
-    ctx.imageSmoothingEnabled = upscaling
-    if (upscaling) ctx.imageSmoothingQuality = "high"
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = "high"
 
     ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h)
   }, [])
@@ -221,7 +219,7 @@ function FrameScrubber({
         loadedRef.current.add(i)
         if (i === 0) drawAt(0)
       }
-      img.src = `/frames/frame_${String(i).padStart(3, "0")}.png?v=7`
+      img.src = `/frames/frame_${String(i).padStart(3, "0")}.png?v=8`
       return img
     })
   }, [drawAt])
