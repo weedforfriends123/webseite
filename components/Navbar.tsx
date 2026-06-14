@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion"
 const BG   = "#bcc0ca"
 const TEXT = "#35383f"
 
-const NAV_ITEMS = ["Vapes", "Pods", "Blüten", "Pre Rolls", "Hasch", "Edibles"] as const
+const NAV_ITEMS = ["Waves", "Vapes", "Pods", "Blüten", "Pre Rolls", "Hasch", "Edibles"] as const
 const DROPDOWNS: Record<string, string[]> = {
   "Blüten":  ["Superior", "CBD"],
   "Hasch":   ["Superior", "CBD"],
@@ -184,6 +184,9 @@ export function Navbar() {
         <nav className="hidden md:flex" style={{ alignItems: "center", flex: 1 }}>
           {NAV_ITEMS.map((name) => {
             const items = DROPDOWNS[name]
+            if (name === "Waves") return (
+              <NavLink key={name} href="/waves">{name}</NavLink>
+            )
             if (!items) return (
               <NavLink key={name} href={`/shop/${name.toLowerCase().replace(" ", "-")}`}>{name}</NavLink>
             )
@@ -291,6 +294,18 @@ export function Navbar() {
                 const items = DROPDOWNS[name]
                 const isExpanded = mobileExpanded === name
                 const isLast = i === NAV_ITEMS.length - 1
+
+                if (name === "Waves") return (
+                  <Link key={name} href="/waves"
+                    onClick={() => setMenuOpen(false)}
+                    className="font-ekstra"
+                    style={{
+                      display: "block", padding: "18px 24px",
+                      color: "rgba(255,255,255,0.82)", fontSize: 18, textDecoration: "none",
+                      borderBottom: "1px solid rgba(255,255,255,0.06)",
+                    }}
+                  >{name}</Link>
+                )
 
                 if (!items) return (
                   <Link key={name} href={`/shop/${name.toLowerCase().replace(" ", "-")}`}
