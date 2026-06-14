@@ -20,31 +20,28 @@ const fadeUpSlow = {
   show:   { opacity: 1, y: 0, transition: { duration: 0.9, ease: [0.16, 1, 0.3, 1] } },
 }
 
+function LazyVideo({ src, style }: { src: string; style?: React.CSSProperties }) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+    const obs = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return
+      video.src = src; video.load(); obs.disconnect()
+    }, { rootMargin: "400px" })
+    obs.observe(video)
+    return () => obs.disconnect()
+  }, [src])
+  return <video ref={videoRef} autoPlay muted loop playsInline preload="none" style={style} />
+}
+
 function PolaroidVideo({ src, rotate, zIndex, delay, width }: {
   src: string; rotate: number; zIndex: number; delay: number; width: string
 }) {
-  const noMotion  = useReducedMotion()
-  const videoRef  = useRef<HTMLVideoElement>(null)
-  const wrapRef   = useRef<HTMLDivElement>(null)
-
-  // Lazy-load video src only when near viewport — prevents 37MB autoloading on page open
-  useEffect(() => {
-    const video = videoRef.current
-    const wrap  = wrapRef.current
-    if (!video || !wrap) return
-    const obs = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting) return
-      video.src = src
-      video.load()
-      obs.disconnect()
-    }, { rootMargin: "400px" })
-    obs.observe(wrap)
-    return () => obs.disconnect()
-  }, [src])
+  const noMotion = useReducedMotion()
 
   return (
     <motion.div
-      ref={wrapRef}
       initial={noMotion ? false : { opacity: 0, y: 80, rotate: rotate - 8, scale: 0.92 }}
       whileInView={{ opacity: 1, y: 0, rotate, scale: 1 }}
       viewport={{ once: true, margin: "-60px" }}
@@ -60,8 +57,7 @@ function PolaroidVideo({ src, rotate, zIndex, delay, width }: {
         cursor: "default",
       }}
     >
-      <video ref={videoRef} autoPlay muted loop playsInline preload="none"
-        style={{ display: "block", width: "100%", aspectRatio: "9/16", objectFit: "cover", borderRadius: 2 }} />
+      <LazyVideo src={src} style={{ display: "block", width: "100%", aspectRatio: "9/16", objectFit: "cover", borderRadius: 2 }} />
     </motion.div>
   )
 }
@@ -187,10 +183,10 @@ export function Section03_UGC() {
             }}
           >
             {[
-              { src: "/ugc1.mp4", rotate: -8,  delay: 0    },
-              { src: "/ugc3.mp4", rotate: -2,  delay: 0.1  },
-              { src: "/ugc4.mp4", rotate: 5,   delay: 0.2  },
-              { src: "/ugc2.mp4", rotate: 10,  delay: 0.3  },
+              { src: "/ugc1-mobile.mp4", rotate: -8,  delay: 0    },
+              { src: "/ugc3-mobile.mp4", rotate: -2,  delay: 0.1  },
+              { src: "/ugc4-mobile.mp4", rotate: 5,   delay: 0.2  },
+              { src: "/ugc2-mobile.mp4", rotate: 10,  delay: 0.3  },
             ].map(({ src, rotate, delay }) => (
               <motion.div
                 key={src}
@@ -209,8 +205,7 @@ export function Section03_UGC() {
                   originY: "50%",
                 }}
               >
-                <video src={src} autoPlay muted loop playsInline
-                  style={{ display: "block", width: "100%", aspectRatio: "9/16", objectFit: "cover", borderRadius: 2 }} />
+                <LazyVideo src={src} style={{ display: "block", width: "100%", aspectRatio: "9/16", objectFit: "cover", borderRadius: 2 }} />
               </motion.div>
             ))}
           </motion.div>
@@ -259,16 +254,16 @@ export function Section03_UGC() {
         {/* Left: Polaroid stack */}
         <div style={{ position: "relative", minHeight: "clamp(380px,58vw,680px)" }}>
           <div style={{ position: "absolute", left: "2%",  bottom: "2%"  }}>
-            <PolaroidVideo src="/ugc1.mp4" rotate={-12} zIndex={1} delay={0.10} width="clamp(200px,24vw,340px)" />
+            <PolaroidVideo src="/ugc1-desktop.mp4" rotate={-12} zIndex={1} delay={0.10} width="clamp(200px,24vw,340px)" />
           </div>
           <div style={{ position: "absolute", left: "18%", bottom: "10%" }}>
-            <PolaroidVideo src="/ugc3.mp4" rotate={-3}  zIndex={2} delay={0.22} width="clamp(210px,26vw,360px)" />
+            <PolaroidVideo src="/ugc3-desktop.mp4" rotate={-3}  zIndex={2} delay={0.22} width="clamp(210px,26vw,360px)" />
           </div>
           <div style={{ position: "absolute", left: "42%", bottom: "5%"  }}>
-            <PolaroidVideo src="/ugc4.mp4" rotate={6}   zIndex={3} delay={0.34} width="clamp(200px,24vw,340px)" />
+            <PolaroidVideo src="/ugc4-desktop.mp4" rotate={6}   zIndex={3} delay={0.34} width="clamp(200px,24vw,340px)" />
           </div>
           <div style={{ position: "absolute", left: "60%", bottom: "0%"  }}>
-            <PolaroidVideo src="/ugc2.mp4" rotate={11}  zIndex={4} delay={0.46} width="clamp(200px,24vw,340px)" />
+            <PolaroidVideo src="/ugc2-desktop.mp4" rotate={11}  zIndex={4} delay={0.46} width="clamp(200px,24vw,340px)" />
           </div>
         </div>
 

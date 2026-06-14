@@ -233,6 +233,9 @@ export function Section05() {
   const entryBlend  = useTransform(scrollYProgress, [0, S], [1, 0])
   const bgScale     = useTransform(scrollYProgress, [0, S * 0.85], [1.06, 1.0])
 
+  // S05→S06 exit: mirror of entry — BG color fades in over last step
+  const exitBlend   = useTransform(scrollYProgress, [1 - S, 1], [0, 1])
+
   // Parallax via GPU-composited y-transform — element extends 20% top/bottom so no gray areas
   const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "-12%"])
 
@@ -259,7 +262,7 @@ export function Section05() {
             right:            0,
             scale:            bgScale,
             y:                bgY,
-            backgroundImage:  bgReady ? "url('/community.jpg')" : "none",
+            backgroundImage:  bgReady ? "url('/community.webp')" : "none",
             backgroundSize:   "cover",
             backgroundPosition: "50% 50%",
             willChange:       "transform",
@@ -346,6 +349,16 @@ export function Section05() {
         {/* S04→05 entry blend */}
         <motion.div aria-hidden style={{
           opacity:       entryBlend,
+          position:      "absolute",
+          inset:         0,
+          zIndex:        20,
+          background:    "#bcc0ca",
+          pointerEvents: "none",
+        }} />
+
+        {/* S05→06 exit blend — mirrors the entry */}
+        <motion.div aria-hidden style={{
+          opacity:       exitBlend,
           position:      "absolute",
           inset:         0,
           zIndex:        20,
