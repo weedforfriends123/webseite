@@ -207,9 +207,19 @@ function FrameScrubber({
       const diff = targetRef.current - smoothRef.current
       if (Math.abs(diff) > 0.1 || Math.abs(velRef.current) > 0.1) {
         const acc = diff * 0.22 - velRef.current * 1.0
-        velRef.current    = Math.max(-10, Math.min(10, velRef.current + acc))
-        smoothRef.current += velRef.current
-        drawAt(Math.max(0, Math.min(FRAME_COUNT - 1, smoothRef.current)))
+        velRef.current = Math.max(-10, Math.min(10, velRef.current + acc))
+        const next = smoothRef.current + velRef.current
+        // Hard boundary: absorb velocity when hitting frame limits (prevents overshoot jump)
+        if (next < 0) {
+          smoothRef.current = 0
+          velRef.current    = 0
+        } else if (next > FRAME_COUNT - 1) {
+          smoothRef.current = FRAME_COUNT - 1
+          velRef.current    = 0
+        } else {
+          smoothRef.current = next
+        }
+        drawAt(smoothRef.current)
       }
       animRaf.current = requestAnimationFrame(tick)
     }

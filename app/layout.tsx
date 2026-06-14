@@ -45,6 +45,10 @@ export default function RootLayout({
       className={`${syne.variable} ${spaceGrotesk.variable} ${spaceMono.variable}`}
     >
       <body>
+        {/* Instant CSS blocker — visible before any JS executes, removed by LoadingScreen on mount */}
+        {/* eslint-disable-next-line react/no-danger */}
+        <style dangerouslySetInnerHTML={{ __html: `#__preldr{position:fixed;inset:0;background:#000;z-index:10001}` }} />
+        <div id="__preldr" />
         <LoadingScreen />
         <SmoothScroll />
         <CartProvider>

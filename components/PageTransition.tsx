@@ -25,12 +25,14 @@ const REVEAL_DUR = 0.44
 export function PageTransition({ children }: { children: React.ReactNode }) {
   const [covering, setCovering] = useState(false)
   const [revealing, setRevealing] = useState(false)
-  const nextHref = useRef("")
-  const router   = useRouter()
-  const path     = usePathname()
+  const nextHref    = useRef("")
+  const router      = useRouter()
+  const path        = usePathname()
+  const isFirstPath = useRef(true)
 
-  // Every route change → play reveal (wipe drops away from top)
+  // Route change → play reveal (skip on initial mount — LoadingScreen handles that)
   useEffect(() => {
+    if (isFirstPath.current) { isFirstPath.current = false; return }
     setRevealing(true)
   }, [path])
 
