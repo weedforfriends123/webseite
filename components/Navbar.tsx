@@ -158,7 +158,6 @@ export function Navbar() {
           margin: "0 auto",
           pointerEvents: "all",
           height: "clamp(56px,7vh,88px)",
-          overflow: "hidden",
         }}
       >
         {/* Logo */}
