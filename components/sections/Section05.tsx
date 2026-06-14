@@ -138,7 +138,7 @@ function PointCard({ point, index, progress }: PointProps) {
         <h2
           className="font-druk-wide uppercase"
           style={{
-            fontSize:      "clamp(2rem, 6.8vw, 8.5rem)",
+            fontSize:      "clamp(1.4rem, 6.8vw, 8.5rem)",
             letterSpacing: "-0.03em",
             lineHeight:    1.0,
             color:         "#e8e4dc",
@@ -233,8 +233,8 @@ export function Section05() {
   const entryBlend  = useTransform(scrollYProgress, [0, S], [1, 0])
   const bgScale     = useTransform(scrollYProgress, [0, S * 0.85], [1.06, 1.0])
 
-  // Parallax via backgroundPosition — no element translation, no gray areas possible
-  const bgPosY = useTransform(scrollYProgress, [0, 1], ["35%", "50%"])
+  // Parallax via GPU-composited y-transform — element extends 20% top/bottom so no gray areas
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "-12%"])
 
   // Intro
   const introOpacity = useTransform(scrollYProgress, [S * 0.06, S * 0.32, S * 0.70, S], [0, 1, 1, 0])
@@ -248,17 +248,21 @@ export function Section05() {
     <section ref={sectionRef} style={{ height: `${STEPS * 100}vh`, position: "relative" }}>
       <div style={{ position: "sticky", top: 0, height: "100dvh", overflow: "hidden" }}>
 
-        {/* Background photo — inset:0 so no gray area, backgroundPosition for parallax */}
+        {/* Background photo — oversized (top/bottom -20%) + y-transform for GPU parallax, no gray areas */}
         <motion.div
           aria-hidden
           style={{
-            position:           "absolute",
-            inset:              0,
-            scale:              bgScale,
-            backgroundImage:    bgReady ? "url('/community.jpg')" : "none",
-            backgroundSize:     "cover",
-            backgroundPositionX: "50%",
-            backgroundPositionY: bgPosY,
+            position:         "absolute",
+            top:              "-20%",
+            bottom:           "-20%",
+            left:             0,
+            right:            0,
+            scale:            bgScale,
+            y:                bgY,
+            backgroundImage:  bgReady ? "url('/community.jpg')" : "none",
+            backgroundSize:   "cover",
+            backgroundPosition: "50% 50%",
+            willChange:       "transform",
           }}
         />
 
@@ -295,7 +299,7 @@ export function Section05() {
             Das sind wir
           </p>
           <h2 className="font-druk-wide uppercase" style={{
-            fontSize:      "clamp(1.9rem, 7.8vw, 9rem)",
+            fontSize:      "clamp(1.1rem, 7.8vw, 9rem)",
             letterSpacing: "-0.03em",
             lineHeight:    0.96,
             color:         "#e8e4dc",
@@ -304,7 +308,7 @@ export function Section05() {
             WeedForFriends.
           </h2>
           <h2 className="font-druk-wide uppercase" style={{
-            fontSize:         "clamp(1.9rem, 7.8vw, 9rem)",
+            fontSize:         "clamp(1.1rem, 7.8vw, 9rem)",
             letterSpacing:    "-0.03em",
             lineHeight:       0.96,
             color:            "transparent",

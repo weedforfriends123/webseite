@@ -44,22 +44,18 @@ function FeatureBlock({
   const e      = fEnd(index)
   const isLeft = feature.side === "left"
 
+  // Section05-style: enter from right with scale, simple fade out
   const opacity = useTransform(scrollYProgress, [s, s + RAMP, e - RAMP, e], [0, 1, 1, 0])
-  const x = useTransform(
-    scrollYProgress, [s, s + RAMP, e - RAMP, e],
-    isMobile ? [0,0,0,0] : [isLeft ? -100 : 100, 0, 0, isLeft ? -60 : 60],
-  )
-  const y = useTransform(
-    scrollYProgress, [s, s + RAMP, e - RAMP, e],
-    isMobile ? [40,0,0,40] : [0,0,0,0],
-  )
+  const x       = useTransform(scrollYProgress, [s, s + RAMP], [isMobile ? 40 : 80, 0])
+  const scale   = useTransform(scrollYProgress, [s, s + RAMP], [0.96, 1.0])
 
   if (isMobile) {
     return (
       <motion.div style={{
         position: "absolute", bottom: "clamp(44px,9dvh,110px)",
         left: 0, right: 0, textAlign: "center",
-        opacity, y, zIndex: 5, pointerEvents: "none", padding: "0 28px",
+        opacity, x, scale,
+        zIndex: 5, pointerEvents: "none", padding: "0 28px",
       }}>
         <p className="font-druk" style={{
           fontSize: "clamp(52px,15vw,88px)", color: TEXT,
@@ -82,7 +78,8 @@ function FeatureBlock({
     <motion.div style={{
       position: "absolute", top: "50%", translateY: "-50%",
       [isLeft ? "left" : "right"]: edge,
-      opacity, x, zIndex: 5, pointerEvents: "none",
+      opacity, x, scale,
+      zIndex: 5, pointerEvents: "none",
       maxWidth: "clamp(240px,27vw,420px)",
       display: "flex", flexDirection: "column",
       alignItems: isLeft ? "flex-start" : "flex-end",

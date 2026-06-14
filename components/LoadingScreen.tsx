@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 
 const WORD    = "WEEDFORFRIENDS"
 const LETTERS = WORD.split("")
-const PACE_MS = 190
+const PACE_MS = 120
 
 type Phase = "writing" | "waiting" | "exiting" | "done"
 
@@ -43,7 +43,7 @@ export function LoadingScreen() {
     const markReady = () => { assetsReady.current = true; tryExit() }
     if (document.readyState === "complete") markReady()
     else window.addEventListener("load", markReady)
-    const hardTimeout = setTimeout(markReady, 5_000)
+    const hardTimeout = setTimeout(markReady, 3_000)
 
     let n = 0
     const timer = setInterval(() => {
