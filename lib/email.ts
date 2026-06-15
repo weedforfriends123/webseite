@@ -37,45 +37,33 @@ function emailBase(previewText: string, body: string) {
 
           <!-- ── HEADER ── -->
           <tr>
-            <td style="background:#35383f;padding:28px 40px 0;border-radius:20px 20px 0 0;">
-              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td align="center" style="padding-bottom:24px;">
-                    <!-- Logo wordmark as inline SVG fallback text for Outlook -->
-                    <!--[if mso]><p style="font-family:Arial;font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:4px;color:#e8e4dc;text-align:center;margin:0;">WEEDFORFRIENDS</p><![endif]-->
-                    <!--[if !mso]><!-->
-                    <img src="${SITE}/branding/logo-wordmark-figma.svg"
-                      width="180" height="49" alt="WEEDFORFRIENDS"
-                      style="display:block;margin:0 auto;width:180px;height:auto;max-width:180px;" />
-                    <!--<![endif]-->
-                  </td>
-                </tr>
-              </table>
+            <td style="background:#35383f;padding:32px 40px 24px;border-radius:20px 20px 0 0;text-align:center;">
+              <!--[if mso]><p style="font-family:Arial;font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:4px;color:#e8e4dc;text-align:center;margin:0;">WEEDFORFRIENDS</p><![endif]-->
+              <!--[if !mso]><!-->
+              <img src="${SITE}/branding/logo-email.png"
+                width="180" height="49" alt="WEEDFORFRIENDS"
+                style="display:block;margin:0 auto;width:180px;height:auto;max-width:180px;" />
+              <!--<![endif]-->
             </td>
           </tr>
 
           <!-- Yellow accent line -->
           <tr>
-            <td style="background:#35383f;padding:0 40px;">
+            <td style="background:#35383f;padding:0 40px 28px;">
               <div style="height:2px;background:#eddc8c;border-radius:2px;"></div>
             </td>
           </tr>
 
-          <!-- Spacer under header -->
-          <tr>
-            <td style="background:#35383f;height:28px;border-radius:0;"></td>
-          </tr>
-
           <!-- ── BODY ── -->
           <tr>
-            <td style="background:#bcc0ca;padding:32px 24px 40px;">
+            <td style="background:#bcc0ca;padding:36px 28px 44px;">
               ${body}
             </td>
           </tr>
 
           <!-- ── FOOTER ── -->
           <tr>
-            <td style="background:#bcc0ca;padding:0 24px 40px;">
+            <td style="background:#bcc0ca;padding:0 28px 44px;">
               <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="border-top:1px solid rgba(53,56,63,0.15);padding-top:24px;">
@@ -103,10 +91,14 @@ function emailBase(previewText: string, body: string) {
 </html>`
 }
 
-function card(content: string, noPad = false) {
-  return `<div style="background:#e2e5ea;border-radius:16px;border:1px solid #eaecef;${noPad ? "" : "padding:24px 28px;"}overflow:hidden;">
-    ${content}
-  </div>`
+function card(content: string) {
+  return `<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td style="background:#d8dce3;border-radius:16px;padding:22px 24px;">
+        ${content}
+      </td>
+    </tr>
+  </table>`
 }
 
 function ctaBtn(label: string, url: string) {
@@ -121,55 +113,49 @@ function ctaBtn(label: string, url: string) {
   </table>`
 }
 
-function label(text: string) {
-  return `<p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(53,56,63,0.45);">${text}</p>`
-}
-
 type OrderItem = { title: string; variant_title?: string; price: string; quantity: number }
 
 function lineItemsTable(items: OrderItem[], shippingPrice: string, grandTotal: string) {
   const rows = items.map(i => {
     const lineTotal = (parseFloat(i.price) * i.quantity).toFixed(2).replace(".", ",")
     return `<tr>
-      <td style="padding:12px 28px;border-bottom:1px solid rgba(53,56,63,0.07);">
+      <td style="padding:10px 0;border-bottom:1px solid rgba(53,56,63,0.10);">
         <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:14px;font-weight:600;color:#35383f;">${i.title}</p>
         ${i.variant_title ? `<p style="margin:2px 0 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(53,56,63,0.45);">${i.variant_title}</p>` : ""}
       </td>
-      <td style="padding:12px 28px;border-bottom:1px solid rgba(53,56,63,0.07);text-align:right;white-space:nowrap;">
-        <span style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:13px;color:rgba(53,56,63,0.45);">×${i.quantity}&nbsp;&nbsp;</span>
-        <span style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:14px;font-weight:700;color:#35383f;">${lineTotal}&nbsp;€</span>
+      <td style="padding:10px 0;border-bottom:1px solid rgba(53,56,63,0.10);text-align:right;white-space:nowrap;vertical-align:top;">
+        <span style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:13px;color:rgba(53,56,63,0.45);">×${i.quantity}&nbsp;</span>
+        <span style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:14px;font-weight:700;color:#35383f;">${lineTotal} €</span>
       </td>
     </tr>`
   }).join("")
 
   const ship = parseFloat(shippingPrice) === 0
     ? `<span style="color:#a0ba87;font-weight:700;">Gratis</span>`
-    : `${parseFloat(shippingPrice).toFixed(2).replace(".", ",")} €`
+    : `<span style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:13px;color:#35383f;">${parseFloat(shippingPrice).toFixed(2).replace(".", ",")} €</span>`
 
   return card(`
     <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
       ${rows}
       <tr>
-        <td style="padding:12px 28px;border-bottom:1px solid rgba(53,56,63,0.07);">
+        <td style="padding:10px 0;border-bottom:1px solid rgba(53,56,63,0.10);">
           <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:13px;color:rgba(53,56,63,0.55);">Versand</p>
         </td>
-        <td style="padding:12px 28px;border-bottom:1px solid rgba(53,56,63,0.07);text-align:right;">
-          <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:13px;">${ship}</p>
-        </td>
+        <td style="padding:10px 0;border-bottom:1px solid rgba(53,56,63,0.10);text-align:right;">${ship}</td>
       </tr>
       <tr>
-        <td style="padding:16px 28px;">
-          <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(53,56,63,0.50);">Gesamt</p>
+        <td style="padding:14px 0 0;">
+          <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(53,56,63,0.50);">Gesamt</p>
         </td>
-        <td style="padding:16px 28px;text-align:right;">
-          <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:22px;font-weight:900;letter-spacing:-0.02em;color:#35383f;">${parseFloat(grandTotal).toFixed(2).replace(".", ",")} €</p>
+        <td style="padding:14px 0 0;text-align:right;">
+          <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:20px;font-weight:900;letter-spacing:-0.02em;color:#35383f;">${parseFloat(grandTotal).toFixed(2).replace(".", ",")} €</p>
         </td>
       </tr>
     </table>
-  `, true)
+  `)
 }
 
-// ── Existing emails ───────────────────────────────────────────────────────────
+// ── Age Verification ──────────────────────────────────────────────────────────
 
 export async function sendAgeVerificationReminder(email: string, firstName?: string) {
   const name = firstName ? `, ${firstName}` : ""
@@ -199,7 +185,7 @@ export async function sendAgeVerificationConfirmation(email: string, firstName?:
     subject: "Altersverifizierung abgeschlossen – WEEDFORFRIENDS",
     html: emailBase(
       "Dein Alter wurde bestätigt – du kannst jetzt bestellen.",
-      `<div style="text-align:center;margin-bottom:20px;">
+      `<div style="text-align:center;margin-bottom:24px;">
         <div style="display:inline-block;width:56px;height:56px;border-radius:50%;background:#35383f;line-height:56px;text-align:center;">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e8e4dc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-top:-2px;"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
@@ -239,44 +225,37 @@ export async function sendOrderConfirmation(params: {
       `Danke ${firstName}, wir haben deine Bestellung erhalten.`,
       `
       <div style="text-align:center;margin-bottom:24px;">
-        <div style="display:inline-block;width:64px;height:64px;border-radius:50%;background:#eddc8c;line-height:64px;text-align:center;">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#35383f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-top:-2px;">
+        <div style="display:inline-block;width:56px;height:56px;border-radius:50%;background:#eddc8c;line-height:56px;text-align:center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#35383f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-top:-2px;">
             <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
           </svg>
         </div>
       </div>
 
-      <h1 style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:28px;font-weight:900;text-transform:uppercase;letter-spacing:-0.03em;color:#35383f;margin:0 0 8px;line-height:1.05;text-align:center;">
+      <h1 style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:26px;font-weight:900;text-transform:uppercase;letter-spacing:-0.02em;color:#35383f;margin:0 0 12px;line-height:1.1;text-align:center;">
         Bestellung<br/>eingegangen.
       </h1>
-      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;color:rgba(53,56,63,0.65);line-height:1.75;margin:14px 0 28px;text-align:center;">
-        Hey ${firstName}, deine Bestellung ist bei uns eingegangen. Sobald deine Zahlung bestätigt wurde, bearbeiten wir sie sofort.
+      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;color:rgba(53,56,63,0.65);line-height:1.75;margin:16px 0 28px;text-align:center;">
+        Hey ${firstName}, deine Bestellung ist bei uns eingegangen. Sobald deine Zahlung bestätigt ist, bearbeiten wir sie sofort.
       </p>
 
-      <!-- Order reference — dark card -->
-      <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-        <tr>
-          <td style="background:#35383f;border-radius:14px;padding:20px 28px;text-align:center;">
-            <p style="margin:0 0 6px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(232,228,220,0.45);">Bestellreferenz</p>
-            <p style="margin:0;font-family:'Courier New',Courier,monospace;font-size:20px;font-weight:700;letter-spacing:0.12em;color:#eddc8c;">#${orderRef}</p>
-          </td>
-        </tr>
-      </table>
+      ${card(`
+        <p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Bestellreferenz</p>
+        <p style="margin:0;font-family:'Courier New',Courier,monospace;font-size:18px;font-weight:700;letter-spacing:0.10em;color:#35383f;">#${orderRef}</p>
+      `)}
 
-      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(53,56,63,0.45);margin:0 0 8px;">Deine Artikel</p>
+      <p style="margin:24px 0 10px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Deine Artikel</p>
       ${lineItemsTable(lineItems, shippingPrice, grandTotal)}
 
-      <div style="margin-top:20px;">
-        ${card(`
-          <p style="margin:0 0 6px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Lieferadresse</p>
-          <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:14px;color:#35383f;line-height:1.85;margin:6px 0 0;">
-            ${addr.first_name} ${addr.last_name}<br/>
-            ${addr.address1}${addr.address2 ? "<br/>" + addr.address2 : ""}<br/>
-            ${addr.zip} ${addr.city}<br/>
-            ${addr.country}
-          </p>
-        `)}
-      </div>
+      <p style="margin:20px 0 10px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Lieferadresse</p>
+      ${card(`
+        <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:14px;color:#35383f;line-height:1.85;">
+          ${addr.first_name} ${addr.last_name}<br/>
+          ${addr.address1}${addr.address2 ? "<br/>" + addr.address2 : ""}<br/>
+          ${addr.zip} ${addr.city}<br/>
+          ${addr.country}
+        </p>
+      `)}
 
       ${ctaBtn("Zum Shop", `${SITE}/`)}
 
@@ -308,43 +287,39 @@ export async function sendPaymentConfirmation(params: {
       `Zahlung eingegangen – Bestellung #${shopifyOrderNumber} wird bearbeitet.`,
       `
       <div style="text-align:center;margin-bottom:24px;">
-        <div style="display:inline-block;width:64px;height:64px;border-radius:50%;background:#a0ba87;line-height:64px;text-align:center;">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-top:-2px;"><polyline points="20 6 9 17 4 12"/></svg>
+        <div style="display:inline-block;width:56px;height:56px;border-radius:50%;background:#a0ba87;line-height:56px;text-align:center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-top:-2px;"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
       </div>
 
-      <h1 style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:28px;font-weight:900;text-transform:uppercase;letter-spacing:-0.03em;color:#35383f;margin:0 0 8px;line-height:1.05;text-align:center;">
+      <h1 style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:26px;font-weight:900;text-transform:uppercase;letter-spacing:-0.02em;color:#35383f;margin:0 0 12px;line-height:1.1;text-align:center;">
         Zahlung<br/>bestätigt.
       </h1>
-      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;color:rgba(53,56,63,0.65);line-height:1.75;margin:14px 0 28px;text-align:center;">
+      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;color:rgba(53,56,63,0.65);line-height:1.75;margin:16px 0 28px;text-align:center;">
         Hey ${firstName}, deine Zahlung ist eingegangen. Wir bearbeiten deine Bestellung und schicken sie so schnell wie möglich raus.
       </p>
 
       ${card(`
+        <p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Bestellnummer</p>
+        <p style="margin:0 0 16px;font-family:'Courier New',Courier,monospace;font-size:18px;font-weight:700;letter-spacing:0.10em;color:#35383f;">#${shopifyOrderNumber}</p>
         <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
           <tr>
-            <td style="padding:0 0 12px;">
-              ${label("Shopify Bestellnummer")}
-              <p style="font-family:'Courier New',Courier,monospace;font-size:18px;font-weight:700;letter-spacing:0.06em;color:#35383f;margin:4px 0 0;">#${shopifyOrderNumber}</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding-top:16px;border-top:1px solid rgba(53,56,63,0.10);">
-              ${label("Lieferzeit")}
-              <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:14px;color:#35383f;margin:4px 0 0;font-weight:600;">2–4 Werktage &mdash; diskret verpackt</p>
+            <td style="border-top:1px solid rgba(53,56,63,0.12);padding-top:14px;">
+              <p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Lieferzeit</p>
+              <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:14px;font-weight:600;color:#35383f;">2–4 Werktage &mdash; diskret verpackt</p>
             </td>
           </tr>
         </table>
       `)}
 
-      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(53,56,63,0.45);margin:24px 0 8px;">Deine Artikel</p>
+      <p style="margin:24px 0 10px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Deine Artikel</p>
       ${lineItemsTable(lineItems, shippingPrice, grandTotal)}
 
       ${card(`
         <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
           <tr>
             <td width="44" style="vertical-align:middle;padding-right:14px;">
-              <div style="width:36px;height:36px;border-radius:50%;background:#d4e0cc;text-align:center;line-height:36px;font-size:18px;">📦</div>
+              <div style="width:36px;height:36px;border-radius:50%;background:#c8d9be;text-align:center;line-height:36px;font-size:18px;">📦</div>
             </td>
             <td style="vertical-align:middle;">
               <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:13px;color:rgba(53,56,63,0.65);line-height:1.65;">
