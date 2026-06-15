@@ -153,25 +153,108 @@ function HeroBuy() {
       <div style={{
         position: "relative", zIndex: 1,
         display: "grid",
-        gridTemplateColumns: "clamp(160px,16vw,240px) 1fr clamp(160px,16vw,240px)",
+        gridTemplateColumns: "clamp(180px,18vw,260px) 1fr clamp(180px,18vw,260px)",
         minHeight: "100dvh",
       }} className="vapes-3col">
 
-        {/* ══ LEFT ══ */}
+        {/* ══ LEFT — editorial flavor list ══ */}
         <div style={{
           display: "flex", flexDirection: "column", justifyContent: "center",
-          padding: "clamp(80px,10vh,110px) clamp(12px,2vw,28px) clamp(40px,6vh,60px) clamp(16px,2.5vw,40px)",
-          gap: "clamp(18px,2.8vh,30px)",
+          padding: "clamp(90px,11vh,120px) clamp(12px,2vw,32px) clamp(48px,7vh,72px) clamp(20px,3vw,48px)",
+        }}>
+          <p className="font-ekstra uppercase" style={{ fontSize: 8, letterSpacing: "0.44em", color: MUTED, marginBottom: "clamp(18px,3vh,28px)" }}>Sorte</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {VAPES.map((v, i) => {
+              const active = sel === i
+              const label = v.lineA ? `${v.lineA} ${v.lineB}` : v.lineB
+              return (
+                <button key={v.key} onClick={() => { setSel(i); setPack(0) }} style={{
+                  background: "none", border: "none", cursor: "pointer",
+                  textAlign: "left", padding: "clamp(5px,0.9vh,9px) 0",
+                  display: "flex", alignItems: "center", gap: 10,
+                  borderBottom: "1px solid rgba(53,56,63,0.07)",
+                }}>
+                  <motion.div
+                    animate={{ width: active ? 20 : 6, background: active ? TEXT : "rgba(53,56,63,0.18)" }}
+                    transition={{ duration: 0.25, ease: [0.16,1,0.3,1] }}
+                    style={{ height: 1.5, borderRadius: 99, flexShrink: 0 }}
+                  />
+                  <motion.span
+                    animate={{ opacity: active ? 1 : 0.22 }}
+                    transition={{ duration: 0.22 }}
+                    className="font-druk-wide uppercase"
+                    style={{
+                      fontSize: "clamp(0.62rem,0.9vw,1.05rem)",
+                      letterSpacing: active ? "-0.01em" : "0.01em",
+                      color: TEXT, lineHeight: 1.1,
+                    }}>
+                    {label}
+                  </motion.span>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Specs */}
+          <div style={{
+            marginTop: "clamp(28px,4vh,44px)",
+            paddingTop: "clamp(18px,2.5vh,28px)",
+            borderTop: "1px solid rgba(53,56,63,0.10)",
+            display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "clamp(8px,1.2vw,16px)",
+          }}>
+            {[
+              { label: "ML",    val: "1"    },
+              { label: "HC",    val: "96%"  },
+              { label: "Puffs", val: "600+" },
+            ].map(({ label, val }) => (
+              <div key={label} style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                <span className="font-druk" style={{ fontSize: "clamp(1rem,1.4vw,1.6rem)", color: TEXT, lineHeight: 1 }}>{val}</span>
+                <span className="font-ekstra uppercase" style={{ fontSize: 7, letterSpacing: "0.3em", color: MUTED }}>{label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ══ CENTER — image, constrained size ══ */}
+        <div style={{
+          position: "relative", display: "flex",
+          alignItems: "center", justifyContent: "center",
+        }}>
+          <AnimatePresence mode="wait">
+            <motion.div key={`img-${sel}`}
+              initial={{ opacity: 0, scale: 0.9, y: 28 }}
+              animate={{ opacity: 1, scale: 1,   y: 0  }}
+              exit={{ opacity: 0, scale: 0.95, y: -18 }}
+              transition={{ duration: 0.55, ease: [0.16,1,0.3,1] }}
+              style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}
+            >
+              <Image src={vape.img} alt={vape.name} width={500} height={500} priority
+                style={{
+                  height: "clamp(220px,38vh,440px)", width: "auto",
+                  objectFit: "contain", display: "block",
+                  filter: "drop-shadow(0 40px 80px rgba(53,56,63,0.22)) drop-shadow(0 10px 24px rgba(53,56,63,0.12))",
+                }}
+              />
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* ══ RIGHT — buy panel ══ */}
+        <div style={{
+          display: "flex", flexDirection: "column", justifyContent: "center",
+          padding: "clamp(90px,11vh,120px) clamp(20px,3vw,48px) clamp(48px,7vh,72px) clamp(12px,2vw,32px)",
+          gap: 0,
         }}>
 
-          {/* Name */}
+          {/* Animated name */}
           <AnimatePresence mode="wait">
-            <motion.div key={`name-${sel}`}
-              initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.38, ease: [0.16,1,0.3,1] }}>
+            <motion.div key={`rname-${sel}`}
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.35, ease: [0.16,1,0.3,1] }}
+              style={{ marginBottom: "clamp(16px,2.4vh,26px)" }}>
               <h1 className="font-druk-wide uppercase" style={{
-                fontSize: "clamp(1.2rem,2vw,2.6rem)",
+                fontSize: "clamp(1.3rem,2.1vw,2.8rem)",
                 lineHeight: 0.9, letterSpacing: "-0.03em",
                 color: TEXT, margin: 0,
               }}>
@@ -181,144 +264,75 @@ function HeroBuy() {
             </motion.div>
           </AnimatePresence>
 
-          {/* Specs */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            {[
-              { label: "Volumen",  val: "1 ML"   },
-              { label: "Wirkstoff", val: "HC 96%" },
-              { label: "Puffs",    val: "600+"   },
-            ].map(({ label, val }) => (
-              <div key={label}>
-                <p className="font-ekstra uppercase" style={{ fontSize: 8, letterSpacing: "0.38em", color: MUTED, margin: "0 0 2px" }}>{label}</p>
-                <p className="font-druk" style={{ fontSize: "clamp(0.9rem,1.3vw,1.5rem)", color: TEXT, margin: 0, lineHeight: 1 }}>{val}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Flavor dots */}
-          <div>
-            <p className="font-ekstra uppercase" style={{ fontSize: 8, letterSpacing: "0.38em", color: MUTED, marginBottom: 10 }}>Sorte</p>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              {VAPES.map((v, i) => (
-                <button key={v.key} onClick={() => { setSel(i); setPack(0) }}
-                  title={v.lineA ? `${v.lineA} ${v.lineB}` : v.lineB}
-                  style={{
-                    width: 22, height: 22, borderRadius: "50%",
-                    background: v.accent, border: "none", cursor: "pointer",
-                    outline: sel === i ? `2px solid ${TEXT}` : "2px solid transparent",
-                    outlineOffset: 2,
-                    transition: "outline 0.18s, transform 0.18s",
-                    transform: sel === i ? "scale(1.18)" : "scale(1)",
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* ══ CENTER — image ══ */}
-        <div style={{
-          position: "relative", display: "flex",
-          alignItems: "center", justifyContent: "center",
-          padding: "clamp(60px,8vh,90px) 0",
-        }}>
-          <AnimatePresence mode="wait">
-            <motion.div key={`img-${sel}`}
-              initial={{ opacity: 0, scale: 0.88, y: 40 }}
-              animate={{ opacity: 1, scale: 1,    y: 0  }}
-              exit={{ opacity: 0, scale: 0.94, y: -24 }}
-              transition={{ duration: 0.6, ease: [0.16,1,0.3,1] }}
-              style={{ position: "relative", zIndex: 1, width: "100%" }}
-            >
-              <Image src={vape.img} alt={vape.name} width={800} height={800} priority
-                style={{
-                  width: "100%", height: "auto", objectFit: "contain", display: "block",
-                  filter: "drop-shadow(0 80px 140px rgba(53,56,63,0.25)) drop-shadow(0 20px 40px rgba(53,56,63,0.15))",
-                }}
-              />
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        {/* ══ RIGHT ══ */}
-        <div style={{
-          display: "flex", flexDirection: "column", justifyContent: "center",
-          padding: "clamp(80px,10vh,110px) clamp(16px,2.5vw,40px) clamp(40px,6vh,60px) clamp(12px,2vw,28px)",
-          gap: "clamp(16px,2.4vh,28px)",
-        }}>
-
           {/* Description */}
           <AnimatePresence mode="wait">
             <motion.p key={`desc-${sel}`}
-              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.38, ease: [0.16,1,0.3,1] }}
-              style={{ fontSize: "clamp(12px,0.95vw,15px)", color: MUTED, lineHeight: 1.8, margin: 0 }}>
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              style={{ fontSize: "clamp(11px,0.85vw,13px)", color: MUTED, lineHeight: 1.85, margin: "0 0 clamp(20px,3vh,32px)" }}>
               {vape.desc}
             </motion.p>
           </AnimatePresence>
 
-          {/* Pack — compact chips */}
-          <div>
-            <p className="font-ekstra uppercase" style={{ fontSize: 8, letterSpacing: "0.38em", color: MUTED, marginBottom: 10 }}>Menge</p>
-            <div style={{ display: "flex", gap: 7 }}>
-              {PACKS.map((pk, i) => (
-                <button key={pk.label} onClick={() => setPack(i)} style={{
-                  display: "flex", flexDirection: "column", alignItems: "center",
-                  padding: "9px 14px",
-                  border: `1.5px solid ${pack === i ? TEXT : "rgba(53,56,63,0.18)"}`,
-                  background: pack === i ? TEXT : "transparent",
-                  borderRadius: 8, cursor: "pointer", transition: "all 0.16s", gap: 3,
-                }}>
-                  <span className="font-druk-wide uppercase" style={{ fontSize: "clamp(12px,1vw,15px)", color: pack === i ? LIGHT : TEXT, lineHeight: 1 }}>
-                    {pk.label}
-                  </span>
-                  {pk.savings && (
-                    <span style={{ fontSize: 9, color: "#6fa05e", fontWeight: 700 }} className="font-druk">{pk.savings}</span>
-                  )}
-                </button>
-              ))}
-            </div>
+          <div style={{ height: 1, background: "rgba(53,56,63,0.10)", marginBottom: "clamp(20px,3vh,32px)" }} />
+
+          {/* Pack chips */}
+          <p className="font-ekstra uppercase" style={{ fontSize: 8, letterSpacing: "0.44em", color: MUTED, marginBottom: 10 }}>Menge</p>
+          <div style={{ display: "flex", gap: 7, marginBottom: "clamp(20px,3vh,32px)" }}>
+            {PACKS.map((pk, i) => (
+              <button key={pk.label} onClick={() => setPack(i)} style={{
+                display: "flex", flexDirection: "column", alignItems: "center",
+                padding: "8px 13px",
+                border: `1.5px solid ${pack === i ? TEXT : "rgba(53,56,63,0.16)"}`,
+                background: pack === i ? TEXT : "transparent",
+                borderRadius: 7, cursor: "pointer", transition: "all 0.15s", gap: 2,
+              }}>
+                <span className="font-druk-wide uppercase" style={{ fontSize: "clamp(11px,0.9vw,14px)", color: pack === i ? LIGHT : TEXT, lineHeight: 1 }}>
+                  {pk.label}
+                </span>
+                {pk.savings && (
+                  <span style={{ fontSize: 8, color: "#6fa05e" }} className="font-druk">{pk.savings}</span>
+                )}
+              </button>
+            ))}
           </div>
 
-          {/* Price + CTA */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-              <AnimatePresence mode="wait">
-                <motion.span key={`p-${pack}`}
-                  initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.16 }}
-                  className="font-druk"
-                  style={{ fontSize: "clamp(1.6rem,2.4vw,2.8rem)", color: TEXT, lineHeight: 1 }}>
-                  €{PACKS[pack].price.toFixed(2)}
-                </motion.span>
-              </AnimatePresence>
-              <span className="font-ekstra" style={{ fontSize: 11, color: MUTED }}>
-                €{PACKS[pack].perUnit.toFixed(2)} / Stk
-              </span>
-            </div>
-
-            <button onClick={addToCart} style={{
-              width: "100%", padding: "15px 20px",
-              background: added ? "#a0ba87" : TEXT,
-              color: LIGHT, borderRadius: 9999,
-              border: "none", cursor: "pointer",
-              fontSize: "clamp(10px,0.85vw,12px)", letterSpacing: "0.2em",
-              transition: "background 0.3s",
-            }} className="font-druk-wide uppercase">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.span key={added ? "a" : "b"}
-                  initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: 0.14 }} style={{ display: "block" }}>
-                  {added ? "✓ Im Warenkorb" : "In den Warenkorb"}
-                </motion.span>
-              </AnimatePresence>
-            </button>
+          {/* Price */}
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: "clamp(12px,1.8vh,18px)" }}>
+            <AnimatePresence mode="wait">
+              <motion.span key={`p-${pack}`}
+                initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.14 }}
+                className="font-druk"
+                style={{ fontSize: "clamp(1.8rem,2.8vw,3.4rem)", color: TEXT, lineHeight: 1 }}>
+                €{PACKS[pack].price.toFixed(2)}
+              </motion.span>
+            </AnimatePresence>
+            <span className="font-ekstra" style={{ fontSize: 10, color: MUTED }}>
+              €{PACKS[pack].perUnit.toFixed(2)} / Stk
+            </span>
           </div>
 
-          {/* Trust */}
-          <p className="font-ekstra" style={{ fontSize: 10, color: "rgba(53,56,63,0.32)", lineHeight: 1.8, margin: 0 }}>
-            Lab Tested · EU Zertifiziert · 0% Nikotin · 0% Tabak
+          {/* CTA */}
+          <button onClick={addToCart} style={{
+            width: "100%", padding: "14px 20px",
+            background: added ? "#a0ba87" : TEXT,
+            color: LIGHT, borderRadius: 9999,
+            border: "none", cursor: "pointer",
+            fontSize: "clamp(10px,0.82vw,12px)", letterSpacing: "0.2em",
+            transition: "background 0.28s",
+          }} className="font-druk-wide uppercase">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span key={added ? "a" : "b"}
+                initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.13 }} style={{ display: "block" }}>
+                {added ? "✓ Im Warenkorb" : "In den Warenkorb"}
+              </motion.span>
+            </AnimatePresence>
+          </button>
+
+          <p className="font-ekstra" style={{ fontSize: 9, color: "rgba(53,56,63,0.28)", lineHeight: 2, marginTop: "clamp(12px,1.6vh,18px)" }}>
+            Lab Tested · EU Zertifiziert · 0% Nikotin
           </p>
         </div>
       </div>
@@ -328,7 +342,7 @@ function HeroBuy() {
           .vapes-3col {
             grid-template-columns: 1fr !important;
           }
-          .vapes-3col > *:nth-child(2) { order: -1; min-height: 55vw; }
+          .vapes-3col > *:nth-child(2) { order: -1; min-height: 50vw; }
         }
       `}</style>
     </section>
