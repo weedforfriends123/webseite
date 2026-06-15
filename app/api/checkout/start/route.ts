@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { randomUUID } from "crypto"
 import { createClient } from "@supabase/supabase-js"
-import { sendOrderConfirmation } from "@/lib/email"
+import { createShopifyOrder } from "@/lib/shopify.server"
+import { sendOrderConfirmation, sendPaymentConfirmation } from "@/lib/email"
 
 type LineItem = {
   title: string
@@ -27,6 +28,7 @@ type CheckoutPayload = {
   line_items: LineItem[]
   shipping_address: ShippingAddress
   shipping_price: string
+  discount_cents?: number
 }
 
 export async function POST(req: NextRequest) {
@@ -41,28 +43,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Pflichtfelder fehlen" }, { status: 400 })
     }
 
-    const grandTotalCheck = (
-      body.line_items.reduce((s, i) => s + parseFloat(i.price) * i.quantity, 0) +
-      parseFloat(body.shipping_price ?? "0")
-    )
-    if (grandTotalCheck < 0.50) {
-      return NextResponse.json({ error: "Mindestbestellwert ist €0.50 (Stripe-Minimum)" }, { status: 400 })
-    }
-
-    const hookUrl = process.env.ZAPIER_PAYMENT_HOOK_URL
-    if (!hookUrl) throw new Error("ZAPIER_PAYMENT_HOOK_URL nicht konfiguriert")
-
-    const origin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? ""
+    const origin      = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? ""
     const orderNumber = randomUUID()
 
-    const grandTotal = (
-      body.line_items.reduce((s, i) => s + parseFloat(i.price) * i.quantity, 0) +
-      parseFloat(body.shipping_price ?? "0")
-    ).toFixed(2)
+    const subtotal = body.line_items.reduce((s, i) => s + parseFloat(i.price) * i.quantity, 0)
+      + parseFloat(body.shipping_price ?? "0")
 
-    const amountCents = Math.round(parseFloat(grandTotal) * 100)
+    const discountCents = body.discount_cents ?? 0
+    const amountCents   = Math.max(0, Math.round(subtotal * 100) - discountCents)
+    const grandTotal    = (amountCents / 100).toFixed(2)
 
-    // Bestelldaten in Supabase speichern — werden beim Stripe-Webhook abgerufen
     const { error: dbErr } = await supabase.from("pending_orders").insert({
       id:               orderNumber,
       status:           "pending",
@@ -79,7 +69,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Datenbankfehler" }, { status: 500 })
     }
 
-    // Bestellbestätigung per E-Mail (fire & forget)
+    // Bestellbestätigung (fire & forget)
     sendOrderConfirmation({
       email:           body.email,
       firstName:       body.shipping_address.first_name,
@@ -88,9 +78,62 @@ export async function POST(req: NextRequest) {
       shippingAddress: body.shipping_address,
       shippingPrice:   body.shipping_price ?? "0.00",
       grandTotal,
-    }).catch(e => console.error("[checkout/start] email error:", e))
+    }).catch(e => console.error("[checkout/start] order-email error:", e))
 
-    // Zapier: Stripe Checkout Session erstellen
+    // ── Gratis-Order: Stripe überspringen ────────────────────────────────────
+    if (amountCents === 0) {
+      const addr = body.shipping_address
+      try {
+        const shopifyOrder = await createShopifyOrder({
+          email:            body.email,
+          phone:            body.phone,
+          note:             "Gratis-Bestellung (100% Rabatt)",
+          financial_status: "paid",
+          line_items:       body.line_items,
+          shipping_address: {
+            first_name: addr.first_name,
+            last_name:  addr.last_name,
+            address1:   addr.address1,
+            address2:   addr.address2,
+            city:       addr.city,
+            zip:        addr.zip,
+            country:    addr.country,
+            phone:      addr.phone,
+          },
+          shipping_price: body.shipping_price,
+          amount_cents:   0,
+        })
+
+        await supabase.from("pending_orders")
+          .update({ status: "paid", shopify_order_id: shopifyOrder.id })
+          .eq("id", orderNumber)
+
+        sendPaymentConfirmation({
+          email:              body.email,
+          firstName:          addr.first_name,
+          shopifyOrderNumber: shopifyOrder.order_number,
+          lineItems:          body.line_items,
+          shippingPrice:      body.shipping_price ?? "0.00",
+          grandTotal:         "0.00",
+        }).catch(e => console.error("[checkout/start] payment-email error:", e))
+
+        console.log(`[checkout/start] Gratis-Order #${shopifyOrder.order_number} für ${body.email}`)
+        return NextResponse.json({ ok: true, free: true, order_token: orderNumber })
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Shopify-Fehler"
+        console.error("[checkout/start] free order shopify error:", msg)
+        return NextResponse.json({ error: msg }, { status: 500 })
+      }
+    }
+
+    // ── Paid-Order: Zapier → Stripe ──────────────────────────────────────────
+    if (amountCents < 50) {
+      return NextResponse.json({ error: "Mindestbetrag für Stripe ist €0.50" }, { status: 400 })
+    }
+
+    const hookUrl = process.env.ZAPIER_PAYMENT_HOOK_URL
+    if (!hookUrl) throw new Error("ZAPIER_PAYMENT_HOOK_URL nicht konfiguriert")
+
     await fetch(hookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

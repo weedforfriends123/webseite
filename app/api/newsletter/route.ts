@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { appendFileSync, mkdirSync } from "fs"
 import { join } from "path"
 import { syncShopifyCustomer } from "@/lib/shopify.server"
+import { sendNewsletterConfirmation } from "@/lib/email"
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -22,6 +23,11 @@ export async function POST(req: NextRequest) {
     // ── Shopify customer sync (fire-and-forget — never blocks the response) ──
     syncShopifyCustomer({ email, accepts_marketing: true }).catch(e =>
       console.error("[newsletter] shopify sync error:", e),
+    )
+
+    // ── Confirmation email ────────────────────────────────────────────────────
+    sendNewsletterConfirmation({ email }).catch(e =>
+      console.error("[newsletter] confirmation email error:", e),
     )
 
     // ── Brevo integration (set BREVO_API_KEY in .env.local) ──────────────────

@@ -41,8 +41,8 @@ function emailBase(previewText: string, body: string) {
               <!--[if mso]><p style="font-family:Arial;font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:4px;color:#e8e4dc;text-align:center;margin:0;">WEEDFORFRIENDS</p><![endif]-->
               <!--[if !mso]><!-->
               <img src="${SITE}/branding/logo-email.png"
-                width="180" height="49" alt="WEEDFORFRIENDS"
-                style="display:block;margin:0 auto;width:180px;height:auto;max-width:180px;" />
+                width="360" height="100" alt="WEEDFORFRIENDS"
+                style="display:block;margin:0 auto;width:240px;height:auto;max-width:240px;" />
               <!--<![endif]-->
             </td>
           </tr>
@@ -535,6 +535,245 @@ export async function sendCancellationConfirmation(params: {
 
       <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:12px;color:rgba(53,56,63,0.40);text-align:center;margin-top:20px;line-height:1.6;">
         Fragen zur Stornierung? <a href="mailto:info@weedforfriends.com" style="color:rgba(53,56,63,0.55);text-decoration:none;">info@weedforfriends.com</a>
+      </p>
+      `
+    ),
+  })
+}
+
+// ── Newsletter Confirmation ───────────────────────────────────────────────────
+
+export async function sendNewsletterConfirmation(params: { email: string; firstName?: string }) {
+  const { email, firstName } = params
+  const name = firstName ? ` ${firstName}` : ""
+
+  return getResend().emails.send({
+    from: FROM,
+    to: [email],
+    subject: "Newsletter-Anmeldung bestätigt — WEEDFORFRIENDS",
+    html: emailBase(
+      `Du bist dabei${name} — willkommen im WFF-Newsletter.`,
+      `
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="display:inline-block;width:56px;height:56px;border-radius:50%;background:#eddc8c;line-height:56px;text-align:center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#35383f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-top:-2px;">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+      </div>
+
+      <h1 style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:26px;font-weight:900;text-transform:uppercase;letter-spacing:-0.02em;color:#35383f;margin:0 0 12px;line-height:1.1;text-align:center;">
+        Du bist<br/>dabei.
+      </h1>
+      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;color:rgba(53,56,63,0.65);line-height:1.75;margin:16px 0 28px;text-align:center;">
+        Hey${name}, deine Newsletter-Anmeldung ist bestätigt. Du bekommst als Erstes Neuheiten, exklusive Angebote und Einblicke direkt aus der WFF-Welt.
+      </p>
+
+      ${card(`
+        <p style="margin:0 0 6px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Was dich erwartet</p>
+        <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+          <tr><td style="padding:6px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:13px;color:#35383f;line-height:1.6;">🌿&nbsp; Neue Produkte &amp; Sorten als Erste</td></tr>
+          <tr><td style="padding:6px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:13px;color:#35383f;line-height:1.6;">🎁&nbsp; Exklusive Rabatte &amp; Aktionen</td></tr>
+          <tr><td style="padding:6px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:13px;color:#35383f;line-height:1.6;">📦&nbsp; Hinter-den-Kulissen-Einblicke</td></tr>
+        </table>
+      `)}
+
+      ${ctaBtn("Zum Shop", `${SITE}/`)}
+
+      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;color:rgba(53,56,63,0.30);text-align:center;margin-top:20px;line-height:1.6;">
+        Du kannst dich jederzeit abmelden. Kein Spam, versprochen.
+      </p>
+      `
+    ),
+  })
+}
+
+// ── B2B Confirmation (to customer) ───────────────────────────────────────────
+
+export async function sendB2BConfirmation(params: {
+  email: string
+  contact: string
+  company: string
+}) {
+  const { email, contact, company } = params
+
+  return getResend().emails.send({
+    from: FROM,
+    to: [email],
+    subject: `B2B-Anfrage erhalten — WEEDFORFRIENDS`,
+    html: emailBase(
+      `Danke ${contact}, deine B2B-Anfrage ist bei uns eingegangen.`,
+      `
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="display:inline-block;width:56px;height:56px;border-radius:50%;background:#eddc8c;line-height:56px;text-align:center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#35383f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-top:-2px;">
+            <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+        </div>
+      </div>
+
+      <h1 style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:26px;font-weight:900;text-transform:uppercase;letter-spacing:-0.02em;color:#35383f;margin:0 0 12px;line-height:1.1;text-align:center;">
+        Anfrage<br/>eingegangen.
+      </h1>
+      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;color:rgba(53,56,63,0.65);line-height:1.75;margin:16px 0 28px;text-align:center;">
+        Hey ${contact}, deine B2B-Anfrage für <strong style="color:#35383f;">${company}</strong> ist bei uns eingegangen. Unser Team meldet sich innerhalb von 24 Stunden bei dir.
+      </p>
+
+      ${card(`
+        <p style="margin:0 0 6px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Was als Nächstes passiert</p>
+        <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+          <tr><td style="padding:7px 0;border-bottom:1px solid rgba(53,56,63,0.08);">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0"><tr>
+              <td width="28" style="vertical-align:top;padding-top:1px;"><span style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;color:#eddc8c;background:#35383f;padding:2px 6px;border-radius:4px;">01</span></td>
+              <td style="padding-left:10px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:13px;color:#35383f;line-height:1.6;">Unser B2B-Team prüft deine Anfrage</td>
+            </tr></table>
+          </td></tr>
+          <tr><td style="padding:7px 0;border-bottom:1px solid rgba(53,56,63,0.08);">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0"><tr>
+              <td width="28" style="vertical-align:top;padding-top:1px;"><span style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;color:#eddc8c;background:#35383f;padding:2px 6px;border-radius:4px;">02</span></td>
+              <td style="padding-left:10px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:13px;color:#35383f;line-height:1.6;">Wir melden uns innerhalb von 24 Stunden</td>
+            </tr></table>
+          </td></tr>
+          <tr><td style="padding:7px 0;">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0"><tr>
+              <td width="28" style="vertical-align:top;padding-top:1px;"><span style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;color:#eddc8c;background:#35383f;padding:2px 6px;border-radius:4px;">03</span></td>
+              <td style="padding-left:10px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:13px;color:#35383f;line-height:1.6;">Individuelles Angebot &amp; Konditionen</td>
+            </tr></table>
+          </td></tr>
+        </table>
+      `)}
+
+      ${ctaBtn("Mehr über WFF B2B", `${SITE}/b2b`)}
+
+      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:12px;color:rgba(53,56,63,0.40);text-align:center;margin-top:20px;line-height:1.6;">
+        Direktkontakt: <a href="mailto:info@weedforfriends.com" style="color:rgba(53,56,63,0.55);text-decoration:none;">info@weedforfriends.com</a>
+      </p>
+      `
+    ),
+  })
+}
+
+// ── B2B Internal Notification ─────────────────────────────────────────────────
+
+type B2BInternalParams = {
+  company: string; contact: string; email: string; phone?: string
+  business_type?: string; volume?: string; message?: string; vat?: string
+}
+
+export async function sendB2BInternalNotification(params: B2BInternalParams) {
+  const { company, contact, email, phone, business_type, volume, message, vat } = params
+  const rows: [string, string][] = [
+    ["Unternehmen", company],
+    ["Ansprechpartner", contact],
+    ["E-Mail", email],
+    ...(phone        ? [["Telefon",          phone]        as [string,string]] : []),
+    ...(vat          ? [["UID / USt-IdNr.",  vat]          as [string,string]] : []),
+    ...(business_type? [["Unternehmenstyp",  business_type]as [string,string]] : []),
+    ...(volume       ? [["Monatsmenge",      volume]       as [string,string]] : []),
+  ]
+
+  return getResend().emails.send({
+    from: FROM,
+    to: ["info@weedforfriends.com"],
+    replyTo: email,
+    subject: `Neue B2B-Anfrage: ${company}`,
+    html: emailBase(
+      `Neue B2B-Anfrage von ${company}`,
+      `
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="display:inline-block;width:56px;height:56px;border-radius:50%;background:#35383f;line-height:56px;text-align:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#eddc8c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-top:-2px;">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
+          </svg>
+        </div>
+      </div>
+
+      <h1 style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:26px;font-weight:900;text-transform:uppercase;letter-spacing:-0.02em;color:#35383f;margin:0 0 12px;line-height:1.1;text-align:center;">
+        Neue B2B-Anfrage.
+      </h1>
+      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;color:rgba(53,56,63,0.65);line-height:1.75;margin:16px 0 28px;text-align:center;">
+        <strong style="color:#35383f;">${company}</strong> hat eine B2B-Partnerschaftsanfrage gestellt.
+      </p>
+
+      ${card(`
+        <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+          ${rows.map(([k, v]) => `<tr>
+            <td style="padding:9px 0;border-bottom:1px solid rgba(53,56,63,0.08);width:42%;vertical-align:top;">
+              <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">${k}</p>
+            </td>
+            <td style="padding:9px 0;border-bottom:1px solid rgba(53,56,63,0.08);vertical-align:top;">
+              <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:13px;color:#35383f;">${v}</p>
+            </td>
+          </tr>`).join("")}
+        </table>
+      `)}
+
+      ${message ? `
+      <p style="margin:20px 0 10px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Nachricht</p>
+      ${card(`<p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:14px;color:#35383f;line-height:1.75;">${message}</p>`)}
+      ` : ""}
+
+      ${ctaBtn(`${contact} antworten →`, `mailto:${email}`)}
+      `
+    ),
+  })
+}
+
+// ── Refund Confirmation ───────────────────────────────────────────────────────
+
+export async function sendRefundConfirmation(params: {
+  email: string
+  firstName: string
+  orderRef: string
+  refundAmount: string
+}) {
+  const { email, firstName, orderRef, refundAmount } = params
+
+  return getResend().emails.send({
+    from: FROM,
+    to: [email],
+    subject: `Rückerstattung veranlasst #${orderRef} — WEEDFORFRIENDS`,
+    html: emailBase(
+      `Deine Rückerstattung von ${refundAmount} € ist auf dem Weg.`,
+      `
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="display:inline-block;width:56px;height:56px;border-radius:50%;background:#a0ba87;line-height:56px;text-align:center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-top:-2px;">
+            <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+          </svg>
+        </div>
+      </div>
+
+      <h1 style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:26px;font-weight:900;text-transform:uppercase;letter-spacing:-0.02em;color:#35383f;margin:0 0 12px;line-height:1.1;text-align:center;">
+        Rückerstattung<br/>veranlasst.
+      </h1>
+      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;color:rgba(53,56,63,0.65);line-height:1.75;margin:16px 0 28px;text-align:center;">
+        Hey ${firstName}, deine Rückerstattung wurde veranlasst und ist auf dem Weg zu dir.
+      </p>
+
+      ${card(`
+        <p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Bestellreferenz</p>
+        <p style="margin:0 0 16px;font-family:'Courier New',Courier,monospace;font-size:18px;font-weight:700;letter-spacing:0.10em;color:#35383f;">#${orderRef}</p>
+        <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="border-top:1px solid rgba(53,56,63,0.12);padding-top:14px;">
+              <p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Rückerstattungsbetrag</p>
+              <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:22px;font-weight:900;letter-spacing:-0.02em;color:#a0ba87;">${refundAmount} €</p>
+            </td>
+          </tr>
+        </table>
+      `)}
+
+      ${card(`
+        <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:13px;color:rgba(53,56,63,0.65);line-height:1.65;">
+          Die Rückerstattung erscheint innerhalb von <strong style="color:#35383f;">5–10 Werktagen</strong> auf deinem ursprünglichen Zahlungsmittel. Die genaue Laufzeit hängt von deiner Bank ab.
+        </p>
+      `)}
+
+      ${ctaBtn("Zurück zum Shop", `${SITE}/`)}
+
+      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:12px;color:rgba(53,56,63,0.40);text-align:center;margin-top:20px;line-height:1.6;">
+        Fragen? <a href="mailto:info@weedforfriends.com" style="color:rgba(53,56,63,0.55);text-decoration:none;">info@weedforfriends.com</a>
       </p>
       `
     ),
