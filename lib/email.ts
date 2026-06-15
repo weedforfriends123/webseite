@@ -339,3 +339,204 @@ export async function sendPaymentConfirmation(params: {
     ),
   })
 }
+
+// ── Welcome ───────────────────────────────────────────────────────────────────
+
+export async function sendWelcome(params: { email: string; firstName?: string }) {
+  const { email, firstName } = params
+  const name = firstName ? ` ${firstName}` : ""
+
+  return getResend().emails.send({
+    from: FROM,
+    to: [email],
+    subject: "Willkommen bei WEEDFORFRIENDS",
+    html: emailBase(
+      `Hey${name}, schön dass du dabei bist.`,
+      `
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="display:inline-block;width:56px;height:56px;border-radius:50%;background:#35383f;line-height:56px;text-align:center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#eddc8c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-top:-2px;">
+            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+          </svg>
+        </div>
+      </div>
+
+      <h1 style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:26px;font-weight:900;text-transform:uppercase;letter-spacing:-0.02em;color:#35383f;margin:0 0 12px;line-height:1.1;text-align:center;">
+        Willkommen<br/>bei WFF.
+      </h1>
+      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;color:rgba(53,56,63,0.65);line-height:1.75;margin:16px 0 28px;text-align:center;">
+        Hey${name}, schön dass du dabei bist. Entdecke unser Sortiment an Premium-CBD-Produkten — diskret, sicher und schnell geliefert.
+      </p>
+
+      ${card(`
+        <p style="margin:0 0 6px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Nächster Schritt</p>
+        <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:14px;color:#35383f;line-height:1.75;">
+          Verifiziere kurz dein Alter — einmalig, dauert nur wenige Sekunden. Danach kannst du sofort bestellen.
+        </p>
+      `)}
+
+      ${ctaBtn("Alter verifizieren & shoppen", `${SITE}/account`)}
+
+      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:12px;color:rgba(53,56,63,0.40);text-align:center;margin-top:20px;line-height:1.6;">
+        Fragen? <a href="mailto:info@weedforfriends.com" style="color:rgba(53,56,63,0.55);text-decoration:none;">info@weedforfriends.com</a>
+      </p>
+      `
+    ),
+  })
+}
+
+// ── Shipping Confirmation ─────────────────────────────────────────────────────
+
+export async function sendShippingConfirmation(params: {
+  email: string
+  firstName: string
+  orderRef: string
+  trackingNumber?: string
+  trackingUrl?: string
+  carrier?: string
+  lineItems: OrderItem[]
+  shippingAddress: { first_name: string; last_name: string; address1: string; address2?: string; city: string; zip: string; country: string }
+}) {
+  const { email, firstName, orderRef, trackingNumber, trackingUrl, carrier, lineItems, shippingAddress } = params
+  const addr = shippingAddress
+  const hasTracking = !!(trackingNumber || trackingUrl)
+
+  return getResend().emails.send({
+    from: FROM,
+    to: [email],
+    subject: `Dein Paket ist unterwegs #${orderRef} — WEEDFORFRIENDS`,
+    html: emailBase(
+      `Dein Paket ist auf dem Weg zu dir, ${firstName}!`,
+      `
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="display:inline-block;width:56px;height:56px;border-radius:50%;background:#a0ba87;line-height:56px;text-align:center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-top:-2px;">
+            <rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+          </svg>
+        </div>
+      </div>
+
+      <h1 style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:26px;font-weight:900;text-transform:uppercase;letter-spacing:-0.02em;color:#35383f;margin:0 0 12px;line-height:1.1;text-align:center;">
+        Auf dem<br/>Weg zu dir.
+      </h1>
+      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;color:rgba(53,56,63,0.65);line-height:1.75;margin:16px 0 28px;text-align:center;">
+        Hey ${firstName}, dein Paket wurde übergeben und ist jetzt unterwegs. Erwarte deine Lieferung in 1–2 Werktagen.
+      </p>
+
+      ${card(`
+        <p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Bestellreferenz</p>
+        <p style="margin:0 0 ${hasTracking ? "16px" : "0"};font-family:'Courier New',Courier,monospace;font-size:18px;font-weight:700;letter-spacing:0.10em;color:#35383f;">#${orderRef}</p>
+        ${hasTracking ? `
+        <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="border-top:1px solid rgba(53,56,63,0.12);padding-top:14px;">
+              ${carrier ? `<p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Versanddienstleister</p>
+              <p style="margin:0 0 12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:14px;font-weight:600;color:#35383f;">${carrier}</p>` : ""}
+              ${trackingNumber ? `<p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Tracking-Nummer</p>
+              <p style="margin:0;font-family:'Courier New',Courier,monospace;font-size:14px;font-weight:700;letter-spacing:0.08em;color:#35383f;">${trackingNumber}</p>` : ""}
+            </td>
+          </tr>
+        </table>` : ""}
+      `)}
+
+      ${hasTracking && trackingUrl ? ctaBtn("Sendung verfolgen →", trackingUrl) : ""}
+
+      <p style="margin:24px 0 10px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Lieferadresse</p>
+      ${card(`
+        <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:14px;color:#35383f;line-height:1.85;">
+          ${addr.first_name} ${addr.last_name}<br/>
+          ${addr.address1}${addr.address2 ? "<br/>" + addr.address2 : ""}<br/>
+          ${addr.zip} ${addr.city}<br/>
+          ${addr.country}
+        </p>
+      `)}
+
+      <p style="margin:20px 0 10px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Deine Artikel</p>
+      ${card(`
+        <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+          ${lineItems.map(i => `<tr>
+            <td style="padding:8px 0;border-bottom:1px solid rgba(53,56,63,0.08);">
+              <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:13px;font-weight:600;color:#35383f;">${i.title}</p>
+              ${i.variant_title ? `<p style="margin:1px 0 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(53,56,63,0.40);">${i.variant_title}</p>` : ""}
+            </td>
+            <td style="padding:8px 0;border-bottom:1px solid rgba(53,56,63,0.08);text-align:right;white-space:nowrap;vertical-align:top;">
+              <span style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:12px;color:rgba(53,56,63,0.45);">×${i.quantity}</span>
+            </td>
+          </tr>`).join("")}
+        </table>
+      `)}
+
+      ${!hasTracking || !trackingUrl ? ctaBtn("Zum Shop", `${SITE}/`) : ""}
+
+      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:12px;color:rgba(53,56,63,0.40);text-align:center;margin-top:20px;line-height:1.6;">
+        Fragen zur Sendung? <a href="mailto:info@weedforfriends.com" style="color:rgba(53,56,63,0.55);text-decoration:none;">info@weedforfriends.com</a>
+      </p>
+      `
+    ),
+  })
+}
+
+// ── Cancellation Confirmation ─────────────────────────────────────────────────
+
+export async function sendCancellationConfirmation(params: {
+  email: string
+  firstName: string
+  orderRef: string
+  reason?: string
+  refundAmount?: string
+}) {
+  const { email, firstName, orderRef, reason, refundAmount } = params
+
+  return getResend().emails.send({
+    from: FROM,
+    to: [email],
+    subject: `Bestellung storniert #${orderRef} — WEEDFORFRIENDS`,
+    html: emailBase(
+      `Deine Bestellung #${orderRef} wurde storniert.`,
+      `
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="display:inline-block;width:56px;height:56px;border-radius:50%;background:rgba(53,56,63,0.10);line-height:56px;text-align:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#35383f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-top:-2px;">
+            <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+        </div>
+      </div>
+
+      <h1 style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:26px;font-weight:900;text-transform:uppercase;letter-spacing:-0.02em;color:#35383f;margin:0 0 12px;line-height:1.1;text-align:center;">
+        Bestellung<br/>storniert.
+      </h1>
+      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;color:rgba(53,56,63,0.65);line-height:1.75;margin:16px 0 28px;text-align:center;">
+        Hey ${firstName}, deine Bestellung wurde erfolgreich storniert.${refundAmount ? " Die Rückerstattung ist auf dem Weg." : ""}
+      </p>
+
+      ${card(`
+        <p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Stornierte Bestellung</p>
+        <p style="margin:0 0 ${reason || refundAmount ? "16px" : "0"};font-family:'Courier New',Courier,monospace;font-size:18px;font-weight:700;letter-spacing:0.10em;color:#35383f;">#${orderRef}</p>
+        ${reason || refundAmount ? `
+        <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="border-top:1px solid rgba(53,56,63,0.12);padding-top:14px;">
+              ${reason ? `<p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Grund</p>
+              <p style="margin:0 0 ${refundAmount ? "14px" : "0"};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:14px;color:#35383f;">${reason}</p>` : ""}
+              ${refundAmount ? `<p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Rückerstattung</p>
+              <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:16px;font-weight:700;color:#a0ba87;">${refundAmount} €</p>` : ""}
+            </td>
+          </tr>
+        </table>` : ""}
+      `)}
+
+      ${refundAmount ? card(`
+        <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:13px;color:rgba(53,56,63,0.65);line-height:1.65;">
+          Die Rückerstattung von <strong style="color:#35383f;">${refundAmount} €</strong> wird innerhalb von <strong style="color:#35383f;">5–10 Werktagen</strong> auf deinem ursprünglichen Zahlungsmittel gutgeschrieben.
+        </p>
+      `) : ""}
+
+      ${ctaBtn("Zurück zum Shop", `${SITE}/`)}
+
+      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:12px;color:rgba(53,56,63,0.40);text-align:center;margin-top:20px;line-height:1.6;">
+        Fragen zur Stornierung? <a href="mailto:info@weedforfriends.com" style="color:rgba(53,56,63,0.55);text-decoration:none;">info@weedforfriends.com</a>
+      </p>
+      `
+    ),
+  })
+}
