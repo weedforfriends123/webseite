@@ -153,15 +153,15 @@ function HeroBuy() {
       <div style={{
         position: "relative", zIndex: 1,
         display: "grid",
-        gridTemplateColumns: "clamp(220px,22vw,320px) 1fr clamp(220px,22vw,320px)",
+        gridTemplateColumns: "clamp(160px,16vw,240px) 1fr clamp(160px,16vw,240px)",
         minHeight: "100dvh",
       }} className="vapes-3col">
 
         {/* ══ LEFT ══ */}
         <div style={{
           display: "flex", flexDirection: "column", justifyContent: "center",
-          padding: "clamp(100px,13vh,140px) clamp(16px,2.5vw,40px) clamp(60px,8vh,80px) clamp(24px,4vw,64px)",
-          gap: "clamp(28px,4vh,44px)",
+          padding: "clamp(80px,10vh,110px) clamp(12px,2vw,28px) clamp(40px,6vh,60px) clamp(16px,2.5vw,40px)",
+          gap: "clamp(18px,2.8vh,30px)",
         }}>
 
           {/* Name */}
@@ -171,7 +171,7 @@ function HeroBuy() {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.38, ease: [0.16,1,0.3,1] }}>
               <h1 className="font-druk-wide uppercase" style={{
-                fontSize: "clamp(1.8rem,3.2vw,4rem)",
+                fontSize: "clamp(1.2rem,2vw,2.6rem)",
                 lineHeight: 0.9, letterSpacing: "-0.03em",
                 color: TEXT, margin: 0,
               }}>
@@ -190,7 +190,7 @@ function HeroBuy() {
             ].map(({ label, val }) => (
               <div key={label}>
                 <p className="font-ekstra uppercase" style={{ fontSize: 8, letterSpacing: "0.38em", color: MUTED, margin: "0 0 2px" }}>{label}</p>
-                <p className="font-druk" style={{ fontSize: "clamp(1.1rem,1.8vw,2rem)", color: TEXT, margin: 0, lineHeight: 1 }}>{val}</p>
+                <p className="font-druk" style={{ fontSize: "clamp(0.9rem,1.3vw,1.5rem)", color: TEXT, margin: 0, lineHeight: 1 }}>{val}</p>
               </div>
             ))}
           </div>
@@ -220,7 +220,7 @@ function HeroBuy() {
         <div style={{
           position: "relative", display: "flex",
           alignItems: "center", justifyContent: "center",
-          padding: "clamp(90px,11vh,120px) 0",
+          padding: "clamp(60px,8vh,90px) 0",
         }}>
           <AnimatePresence mode="wait">
             <motion.div key={`img-${sel}`}
@@ -243,8 +243,8 @@ function HeroBuy() {
         {/* ══ RIGHT ══ */}
         <div style={{
           display: "flex", flexDirection: "column", justifyContent: "center",
-          padding: "clamp(100px,13vh,140px) clamp(24px,4vw,64px) clamp(60px,8vh,80px) clamp(16px,2.5vw,40px)",
-          gap: "clamp(24px,3.5vh,40px)",
+          padding: "clamp(80px,10vh,110px) clamp(16px,2.5vw,40px) clamp(40px,6vh,60px) clamp(12px,2vw,28px)",
+          gap: "clamp(16px,2.4vh,28px)",
         }}>
 
           {/* Description */}
@@ -289,7 +289,7 @@ function HeroBuy() {
                   initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.16 }}
                   className="font-druk"
-                  style={{ fontSize: "clamp(2rem,3.2vw,3.8rem)", color: TEXT, lineHeight: 1 }}>
+                  style={{ fontSize: "clamp(1.6rem,2.4vw,2.8rem)", color: TEXT, lineHeight: 1 }}>
                   €{PACKS[pack].price.toFixed(2)}
                 </motion.span>
               </AnimatePresence>
