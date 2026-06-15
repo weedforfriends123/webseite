@@ -336,12 +336,13 @@ export default function CartPage() {
                 </div>
 
                 {/* CTA */}
-                <button
-                  className="w-full py-4 font-ekstra uppercase rounded-full transition-all duration-200"
-                  style={{ background: TEXT, color: "#e8e4dc", letterSpacing: "0.20em", fontSize: 13 }}
+                <Link
+                  href="/checkout"
+                  className="block w-full py-4 font-ekstra uppercase rounded-full transition-all duration-200 text-center"
+                  style={{ background: TEXT, color: "#e8e4dc", letterSpacing: "0.20em", fontSize: 13, textDecoration: "none" }}
                 >
                   Zur Kasse
-                </button>
+                </Link>
 
                 {/* Trust */}
                 <div className="flex justify-center gap-4 mt-5">

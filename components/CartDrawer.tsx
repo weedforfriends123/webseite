@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion"
 import { ShoppingBag } from "lucide-react"
+import Link from "next/link"
 import { useCart } from "@/lib/cart"
 
 export function CartDrawer() {
@@ -111,12 +112,14 @@ export function CartDrawer() {
                     €{total.toFixed(2)}
                   </span>
                 </div>
-                <button
-                  className="w-full py-4 font-mono text-[10px] tracking-[0.35em] uppercase"
-                  style={{ background: "#35383f", color: "#1a1916" }}
+                <Link
+                  href="/checkout"
+                  onClick={() => dispatch({ type: "CLOSE_CART" })}
+                  className="block w-full py-4 font-mono text-[10px] tracking-[0.35em] uppercase text-center"
+                  style={{ background: "#35383f", color: "#1a1916", textDecoration: "none" }}
                 >
                   Zur Kasse →
-                </button>
+                </Link>
                 <button
                   onClick={() => dispatch({ type: "CLOSE_CART" })}
                   className="w-full mt-4 font-mono text-[9px] tracking-[0.3em] uppercase"

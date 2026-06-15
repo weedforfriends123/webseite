@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { appendFileSync, mkdirSync } from "fs"
 import { join } from "path"
+import { syncShopifyCustomer } from "@/lib/shopify.server"
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -17,6 +18,11 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       )
     }
+
+    // ── Shopify customer sync (fire-and-forget — never blocks the response) ──
+    syncShopifyCustomer({ email, accepts_marketing: true }).catch(e =>
+      console.error("[newsletter] shopify sync error:", e),
+    )
 
     // ── Brevo integration (set BREVO_API_KEY in .env.local) ──────────────────
     if (process.env.BREVO_API_KEY) {
