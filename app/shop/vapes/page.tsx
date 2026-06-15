@@ -127,10 +127,8 @@ function HeroBuy() {
         className="vapes-grid"
       >
 
-        {/* ── Left: product image + flavor picker ── */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "clamp(20px,2.5vh,32px)" }}>
-          {/* Image */}
-          <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        {/* ── Left: product image ── */}
+        <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={`glow-${sel}`}
@@ -169,50 +167,43 @@ function HeroBuy() {
             </AnimatePresence>
           </div>
 
-          {/* Flavor picker strip */}
-          <div style={{ display: "flex", borderTop: "1px solid rgba(53,56,63,0.12)" }}>
-            {VAPES.map((v, i) => (
-              <button
-                key={v.key}
-                onClick={() => { setSel(i); setPack(0) }}
-                style={{
-                  flex: 1,
-                  display: "flex", flexDirection: "column", alignItems: "center",
-                  gap: 8, padding: "16px 6px 14px",
-                  background: sel === i ? "rgba(53,56,63,0.05)" : "transparent",
-                  border: "none", cursor: "pointer",
-                  borderTop: `2.5px solid ${sel === i ? v.accent : "transparent"}`,
-                  marginTop: -1,
-                  transition: "all 0.2s",
-                }}
-              >
-                <div style={{
-                  width: sel === i ? 14 : 10,
-                  height: sel === i ? 14 : 10,
-                  borderRadius: "50%",
-                  background: v.accent,
-                  boxShadow: sel === i ? `0 0 10px ${v.accent}99` : "none",
-                  opacity: sel === i ? 1 : 0.4,
-                  transition: "all 0.25s ease",
-                  flexShrink: 0,
-                }} />
-                <span className="font-druk-wide uppercase" style={{
-                  fontSize: "clamp(6.5px,0.52vw,8.5px)",
-                  letterSpacing: "0.04em",
-                  color: sel === i ? TEXT : "rgba(53,56,63,0.38)",
-                  transition: "color 0.2s",
-                  lineHeight: 1.35,
-                  textAlign: "center",
-                }}>
-                  {v.lineA ? <>{v.lineA}<br />{v.lineB}</> : v.lineB}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* ── Right: info + buy ── */}
         <div style={{ display: "flex", flexDirection: "column", gap: "clamp(16px,2vh,24px)" }}>
+
+          {/* Flavor selector — clean text links */}
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "2px 0", rowGap: 4 }}>
+            {VAPES.map((v, i) => (
+              <span key={v.key} style={{ display: "inline-flex", alignItems: "center" }}>
+                <button
+                  onClick={() => { setSel(i); setPack(0) }}
+                  style={{
+                    background: "none", border: "none", cursor: "pointer", padding: "2px 0",
+                    display: "inline-flex", alignItems: "center", gap: 5,
+                  }}
+                >
+                  {sel === i && (
+                    <span style={{
+                      width: 6, height: 6, borderRadius: "50%",
+                      background: vape.accent, flexShrink: 0,
+                      display: "inline-block",
+                    }} />
+                  )}
+                  <span className="font-ekstra uppercase" style={{
+                    fontSize: "clamp(10px,0.8vw,12px)",
+                    letterSpacing: "0.18em",
+                    color: sel === i ? TEXT : "rgba(53,56,63,0.32)",
+                    transition: "color 0.18s",
+                    fontWeight: sel === i ? 600 : 400,
+                  }}>
+                    {v.lineA ? `${v.lineA} ${v.lineB}` : v.lineB}
+                  </span>
+                </button>
+                {i < VAPES.length - 1 && (
+                  <span style={{ color: "rgba(53,56,63,0.18)", fontSize: 12, padding: "0 8px", userSelect: "none" }}>·</span>
+                )}
+              </span>
+            ))}
+          </div>
 
           {/* Animated block: name + desc (changes per flavor) */}
           <AnimatePresence mode="wait">
