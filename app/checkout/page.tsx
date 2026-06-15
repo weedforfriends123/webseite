@@ -151,26 +151,6 @@ export default function CheckoutPage() {
     shipping_price: shipping.toFixed(2),
   })
 
-  async function handleBankTransfer() {
-    setLoadingMsg("Bestellung wird angelegt …")
-    const res = await fetch("/api/checkout/bank-transfer", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(orderPayload()),
-    })
-    const data = await res.json()
-    if (!res.ok) throw new Error(data.error ?? "Fehler")
-    const params = new URLSearchParams({
-      ref:    data.reference,
-      amount: data.amount,
-      iban:   data.bank.iban,
-      bic:    data.bank.bic,
-      owner:  data.bank.owner,
-      bank:   data.bank.name,
-    })
-    window.location.href = `/checkout/pending?${params.toString()}`
-  }
-
   async function handleCardPayment() {
     setLoadingMsg("Bestellung wird übermittelt …")
     const res = await fetch("/api/checkout/start", {
@@ -205,11 +185,7 @@ export default function CheckoutPage() {
     setServerError("")
 
     try {
-      if (paymentMethod === "bank_transfer") {
-        await handleBankTransfer()
-      } else {
-        await handleCardPayment()
-      }
+      await handleCardPayment()
     } catch (err) {
       setServerError(err instanceof Error ? err.message : "Unbekannter Fehler")
       setLoading(false)
@@ -357,7 +333,7 @@ export default function CheckoutPage() {
                 cursor: items.length === 0 ? "not-allowed" : "pointer",
               }}
             >
-              {loading ? loadingMsg : paymentMethod === "bank_transfer" ? "Jetzt bestellen" : "Jetzt bezahlen"}
+              {loading ? loadingMsg : "Jetzt bezahlen"}
             </button>
           </form>
 
