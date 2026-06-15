@@ -1,6 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 500">
-  <rect width="780" height="500" rx="40" fill="#191C1F"/>
-  <!-- Revolut logo mark (simplified R shape) -->
-  <path d="M120 140 h90 c50 0 80 30 80 72 0 30-16 54-42 64 l55 84 h-68 l-48-76 h-27 v76 h-40 z m40 36 v72 h48 c22 0 38-14 38-36 0-22-16-36-38-36 z" fill="white"/>
-  <text x="430" y="305" font-family="Arial, sans-serif" font-size="130" font-weight="700" fill="white">Pay</text>
+  <rect width="780" height="500" rx="48" fill="white"/>
+  <rect x="1.5" y="1.5" width="777" height="497" rx="47" fill="none" stroke="rgba(0,0,0,0.10)" stroke-width="3"/>
+  <!-- Revolut R mark -->
+  <!-- Left vertical stem -->
+  <rect x="88" y="118" width="52" height="272" rx="4" fill="#1c1c1e"/>
+  <!-- Upper bowl (P-shape top) outer -->
+  <path d="M88,118 L88,280 L210,280 Q302,280 302,199 Q302,118 210,118 Z" fill="#1c1c1e"/>
+  <!-- Upper bowl inner cutout -->
+  <path d="M140,158 L204,158 Q258,158 258,199 Q258,240 204,240 L140,240 Z" fill="white"/>
+  <!-- Notch rectangle at inner junction -->
+  <rect x="140" y="240" width="52" height="40" fill="white"/>
+  <!-- Diagonal leg of R -->
+  <polygon points="192,280 244,280 336,390 284,390" fill="#1c1c1e"/>
+  <!-- Pay text -->
+  <text x="370" y="378" font-family="Arial, Helvetica, sans-serif" font-size="200" font-weight="700" fill="#1c1c1e">Pay</text>
 </svg>

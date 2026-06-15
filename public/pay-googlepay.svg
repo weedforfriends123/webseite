@@ -1,8 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 500">
-  <rect width="780" height="500" rx="40" fill="white"/>
-  <rect x="2" y="2" width="776" height="496" rx="38" fill="none" stroke="#E0E0E0" stroke-width="3"/>
-  <!-- G letter in Google colors -->
-  <text x="170" y="320" font-family="Arial, sans-serif" font-size="230" font-weight="700" fill="#4285F4">G</text>
-  <!-- Overlay right half of G in gradient colors - simplified as multicolor -->
-  <text x="388" y="320" font-family="Arial, sans-serif" font-size="230" font-weight="400" fill="#3C4043">Pay</text>
+  <rect width="780" height="500" rx="48" fill="white"/>
+  <rect x="1.5" y="1.5" width="777" height="497" rx="47" fill="none" stroke="rgba(0,0,0,0.07)" stroke-width="3"/>
+  <!-- Google G mark -->
+  <g transform="translate(68, 108)">
+    <!-- G outer arc (blue, top and left) -->
+    <path d="M142,134 A134,134 0 1,0 276,134 L276,134 L210,134 A68,68 0 1,1 142,66 L142,134 Z" fill="#4285F4"/>
+    <!-- G red bottom -->
+    <path d="M14,182 A134,134 0 0,0 102,258 L148,210 A68,68 0 0,1 68,182 Z" fill="#EA4335"/>
+    <!-- G yellow bottom-right -->
+    <path d="M102,258 A134,134 0 0,0 228,252 L180,206 A68,68 0 0,1 148,210 Z" fill="#FBBC04"/>
+    <!-- G green right -->
+    <path d="M228,252 A134,134 0 0,0 276,134 L210,134 A68,68 0 0,1 180,206 Z" fill="#34A853"/>
+    <!-- White bar for G horizontal -->
+    <rect x="142" y="104" width="134" height="60" fill="white"/>
+    <!-- G inner cutout -->
+    <circle cx="142" cy="134" r="68" fill="white"/>
+    <!-- Restore G arc parts removed by cutout -->
+    <path d="M142,66 A68,68 0 0,1 210,134 L276,134 A134,134 0 0,0 142,0 Z" fill="#4285F4"/>
+  </g>
+  <!-- Pay text -->
+  <text x="400" y="348" font-family="'Product Sans', Arial, sans-serif" font-size="190" font-weight="500" fill="#3C4043">Pay</text>
 </svg>

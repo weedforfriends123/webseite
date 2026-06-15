@@ -1,4 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 500">
-  <rect width="780" height="500" rx="40" fill="#1A1A2E"/>
-  <text x="390" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="190" font-weight="700" fill="white">Billie</text>
+  <rect width="780" height="500" rx="48" fill="white"/>
+  <rect x="1.5" y="1.5" width="777" height="497" rx="47" fill="none" stroke="rgba(0,0,0,0.07)" stroke-width="3"/>
+
+  <!-- B logomark: left vertical bar -->
+  <path d="M88,118 Q88,106 100,106 L142,106 Q154,106 154,118 L154,394 Q154,406 142,406 L100,406 Q88,406 88,394 Z" fill="#1a1a1a"/>
+
+  <!-- Upper arch (outer D) -->
+  <path d="M121,106 L234,106 Q318,106 318,188 Q318,266 234,270 L121,270 Z" fill="#1a1a1a"/>
+  <!-- Upper arch inner white cutout -->
+  <path d="M154,138 L228,138 Q282,138 282,188 Q282,236 228,240 L154,240 Z" fill="white"/>
+
+  <!-- Lower D outer -->
+  <path d="M121,270 L232,270 Q318,270 318,338 Q318,406 232,406 L121,406 Z" fill="#1a1a1a"/>
+  <!-- Lower D inner white cutout -->
+  <path d="M154,300 L225,300 Q282,300 282,338 Q282,376 225,376 L154,376 Z" fill="white"/>
+
+  <!-- Diagonal slash through lower section (white cut, bottom-left to top-right) -->
+  <polygon points="140,404 162,406 318,270 295,268" fill="white"/>
+
+  <!-- "illie" -->
+  <text x="338" y="394" font-family="Arial Black, Helvetica Neue, sans-serif" font-size="208" font-weight="900" fill="#1a1a1a">illie</text>
 </svg>

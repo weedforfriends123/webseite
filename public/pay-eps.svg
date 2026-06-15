@@ -1,4 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 500">
-  <rect width="780" height="500" rx="40" fill="#C8102E"/>
-  <text x="390" y="310" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="220" font-weight="900" fill="white">eps</text>
+  <rect width="780" height="500" rx="48" fill="white"/>
+  <rect x="1.5" y="1.5" width="777" height="497" rx="47" fill="none" stroke="rgba(0,0,0,0.07)" stroke-width="3"/>
+  <!-- eps red background pill -->
+  <rect x="60" y="148" width="280" height="204" rx="28" fill="#C8102E"/>
+  <!-- eps text white -->
+  <text x="200" y="296" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="118" font-weight="900" fill="white">eps</text>
+  <!-- Überweisung label -->
+  <text x="390" y="230" font-family="Arial, sans-serif" font-size="76" font-weight="700" fill="#1a1a1a">Über-</text>
+  <text x="390" y="320" font-family="Arial, sans-serif" font-size="76" font-weight="700" fill="#1a1a1a">weisung</text>
 </svg>
