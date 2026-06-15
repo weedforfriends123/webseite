@@ -11,7 +11,6 @@ const ACCENT  = "#eddc8c"
 const DIVIDER = "rgba(232,228,220,0.07)"
 
 const SHOP_LINKS = [
-  { label: "Waves",     href: "/waves"          },
   { label: "Vapes",     href: "/shop/vapes"     },
   { label: "Pods",      href: "/shop/pods"      },
   { label: "Blüten",    href: "/shop/blüten"    },
