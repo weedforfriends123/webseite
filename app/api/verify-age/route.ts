@@ -3,9 +3,8 @@ import { createClient } from "@/lib/supabase/server"
 import { GoogleGenAI } from "@google/genai"
 import { sendAgeVerificationConfirmation } from "@/lib/email"
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
-
 async function checkImage(base64: string, prompt: string): Promise<boolean> {
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash",

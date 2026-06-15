@@ -89,14 +89,11 @@ export default function ImpressumPage() {
         </div>
 
         <div style={{ marginTop: 48 }}>
-          <Link href="/" className="font-ekstra" style={{
+          <Link href="/" className="font-ekstra legal-back-link" style={{
             fontSize: 13, color: MUTED, textDecoration: "none",
             display: "inline-flex", alignItems: "center", gap: 8,
             transition: "color 0.18s",
-          }}
-            onMouseEnter={e => (e.currentTarget.style.color = TEXT)}
-            onMouseLeave={e => (e.currentTarget.style.color = MUTED)}
-          >
+          }}>
             ← Zurück zur Startseite
           </Link>
         </div>

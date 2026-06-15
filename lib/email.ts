@@ -1,7 +1,7 @@
 import { Resend } from "resend"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-const FROM   = "WEEDFORFRIENDS <noreply@weedforfriends.com>"
+const getResend = () => new Resend(process.env.RESEND_API_KEY)
+const FROM      = "WEEDFORFRIENDS <noreply@weedforfriends.com>"
 const SITE   = process.env.NEXT_PUBLIC_SITE_URL ?? "https://weedforfriends-production.up.railway.app"
 
 const BASE_STYLE = `
@@ -40,7 +40,7 @@ function btn(label: string, url: string) {
 
 export async function sendAgeVerificationReminder(email: string, firstName?: string) {
   const name = firstName ? `, ${firstName}` : ""
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to: [email],
     subject: "Verifiziere dein Alter – WEEDFORFRIENDS",
@@ -70,7 +70,7 @@ export async function sendAgeVerificationReminder(email: string, firstName?: str
 
 export async function sendAgeVerificationConfirmation(email: string, firstName?: string) {
   const name = firstName ? `, ${firstName}` : ""
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to: [email],
     subject: "Altersverifizierung abgeschlossen – WEEDFORFRIENDS",
