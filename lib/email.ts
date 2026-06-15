@@ -42,7 +42,7 @@ function emailBase(previewText: string, body: string) {
               <!--[if !mso]><!-->
               <img src="${SITE}/branding/logo-email.png"
                 width="120" height="120" alt="WEEDFORFRIENDS"
-                style="display:block;margin:0 auto;width:48px;height:48px;" />
+                style="display:block;margin:0 auto;width:58px;height:58px;" />
               <!--<![endif]-->
             </td>
           </tr>
