@@ -772,3 +772,61 @@ export async function sendRefundConfirmation(params: {
     ),
   })
 }
+
+// ── 12. Payment Failed ────────────────────────────────────────────────────────
+export async function sendPaymentFailed({
+  email,
+  firstName,
+  orderRef,
+}: {
+  email: string
+  firstName?: string
+  orderRef: string
+}) {
+  const resend = getResend()
+  return resend.emails.send({
+    from: FROM,
+    to: [email],
+    subject: `Zahlung fehlgeschlagen #${orderRef} — WEEDFORFRIENDS`,
+    html: emailBase(
+      "Die Zahlung konnte leider nicht abgeschlossen werden.",
+      `
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="display:inline-block;width:56px;height:56px;border-radius:50%;background:rgba(232,92,92,0.12);line-height:56px;text-align:center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e85c5c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-top:-2px;">
+            <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+        </div>
+      </div>
+
+      <h1 style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:26px;font-weight:900;text-transform:uppercase;letter-spacing:-0.02em;color:#35383f;margin:0 0 12px;line-height:1.1;text-align:center;">
+        Zahlung<br/>fehlgeschlagen.
+      </h1>
+
+      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;color:rgba(53,56,63,0.65);line-height:1.75;margin:16px 0 28px;text-align:center;">
+        Hey${firstName ? ` ${firstName}` : ""}, leider konnte deine Zahlung nicht abgeschlossen werden. Kein Problem — du kannst es jederzeit erneut versuchen.
+      </p>
+
+      ${card(`
+        <p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Bestellreferenz</p>
+        <p style="margin:0 0 16px;font-family:'Courier New',Courier,monospace;font-size:18px;font-weight:700;letter-spacing:0.10em;color:#35383f;">#${orderRef}</p>
+        <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="border-top:1px solid rgba(53,56,63,0.12);padding-top:14px;">
+              <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:13px;color:rgba(53,56,63,0.65);line-height:1.65;">
+                Du findest deine Bestellung in deinem <strong style="color:#35383f;">Kundenkonto unter Bestellungen</strong> und kannst die Zahlung dort erneut durchführen.
+              </p>
+            </td>
+          </tr>
+        </table>
+      `)}
+
+      ${ctaBtn("Zum Kundenkonto", `${SITE}/account`)}
+
+      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:12px;color:rgba(53,56,63,0.40);text-align:center;margin-top:20px;line-height:1.6;">
+        Fragen? <a href="mailto:info@weedforfriends.com" style="color:rgba(53,56,63,0.55);text-decoration:none;">info@weedforfriends.com</a>
+      </p>
+      `,
+    ),
+  })
+}

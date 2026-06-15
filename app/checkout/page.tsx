@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { useCart } from "@/lib/cart"
 import { useUser } from "@/lib/hooks/useUser"
 import { createClient } from "@/lib/supabase/client"
+import Link from "next/link"
 
 type Field = { name: string; label: string; type?: string; required?: boolean; half?: boolean; placeholder?: string }
 
@@ -43,21 +44,35 @@ type DiscountResult = {
   label: string
 }
 
+const gateCard: React.CSSProperties = {
+  background: "#bcc0ca", minHeight: "100vh",
+  display: "flex", alignItems: "center", justifyContent: "center",
+}
+const gateInner: React.CSSProperties = {
+  background: "rgba(255,255,255,0.50)", borderRadius: 24,
+  border: "1px solid rgba(255,255,255,0.75)",
+  padding: "clamp(40px,6vh,72px) clamp(32px,6vw,64px)",
+  maxWidth: 440, width: "100%", textAlign: "center", margin: "0 24px",
+}
+
 export default function CheckoutPage() {
   const { state, total } = useCart()
-  const { user, profile } = useUser()
+  const { user, profile, loading: userLoading } = useUser()
   const supabase = createClient()
 
-  const [form, setForm]             = useState<Record<string, string>>({ country: "Österreich" })
-  const [errors, setErrors]         = useState<Record<string, boolean>>({})
-  const [loading, setLoading]       = useState(false)
-  const [loadingMsg, setLoadingMsg] = useState("Zahlung wird vorbereitet …")
+  const isAgeVerified = user?.user_metadata?.age_verified === true
+
+  // All hooks must be called unconditionally — gates are rendered below
+  const [form, setForm]               = useState<Record<string, string>>({ country: "Österreich" })
+  const [errors, setErrors]           = useState<Record<string, boolean>>({})
+  const [loading, setLoading]         = useState(false)
+  const [loadingMsg, setLoadingMsg]   = useState("Zahlung wird vorbereitet …")
   const [serverError, setServerError] = useState("")
 
-  const [discountCode, setDiscountCode]       = useState("")
-  const [discountResult, setDiscountResult]   = useState<DiscountResult | null>(null)
+  const [discountCode, setDiscountCode]     = useState("")
+  const [discountResult, setDiscountResult] = useState<DiscountResult | null>(null)
   const [discountLoading, setDiscountLoading] = useState(false)
-  const [discountError, setDiscountError]     = useState("")
+  const [discountError, setDiscountError]   = useState("")
 
   useEffect(() => {
     if (!user) return
@@ -74,6 +89,83 @@ export default function CheckoutPage() {
         setForm(prev => ({ ...prev, ...prefill }))
       })
   }, [user, profile])
+
+  // ── Auth gate ────────────────────────────────────────────────────────────────
+  if (userLoading) {
+    return (
+      <div style={gateCard}>
+        <div style={{ width: 40, height: 40, borderRadius: "50%",
+          border: "3px solid rgba(53,56,63,0.12)", borderTop: "3px solid #35383f",
+          animation: "spin 1s linear infinite" }} />
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div style={gateCard}>
+        <div style={gateInner}>
+          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#35383f",
+            display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+              <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+          </div>
+          <h1 className="font-druk-wide uppercase leading-none mb-3"
+            style={{ fontSize: "clamp(1.6rem,4vw,2.4rem)", letterSpacing: "-0.03em", color: "#35383f" }}>
+            Anmelden<br />erforderlich
+          </h1>
+          <p className="font-ekstra mb-8" style={{ fontSize: "0.92rem", color: "rgba(53,56,63,0.60)", lineHeight: 1.7 }}>
+            Zum Bestellen benötigst du ein Kundenkonto mit verifiziertem Alter.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <Link href="/login?redirect=/checkout"
+              className="font-ekstra uppercase rounded-full"
+              style={{ background: "#35383f", color: "#e8e4dc", padding: "14px 40px",
+                fontSize: 13, letterSpacing: "0.20em", textDecoration: "none", display: "block" }}>
+              Anmelden
+            </Link>
+            <Link href="/login?mode=register"
+              className="font-ekstra uppercase rounded-full"
+              style={{ background: "transparent", color: "#35383f", padding: "14px 40px",
+                fontSize: 13, letterSpacing: "0.20em", textDecoration: "none", display: "block",
+                border: "1.5px solid rgba(53,56,63,0.22)" }}>
+              Konto erstellen
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isAgeVerified) {
+    return (
+      <div style={gateCard}>
+        <div style={gateInner}>
+          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#eddc8c",
+            display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#35383f" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <h1 className="font-druk-wide uppercase leading-none mb-3"
+            style={{ fontSize: "clamp(1.6rem,4vw,2.4rem)", letterSpacing: "-0.03em", color: "#35383f" }}>
+            Alter nicht<br />verifiziert
+          </h1>
+          <p className="font-ekstra mb-8" style={{ fontSize: "0.92rem", color: "rgba(53,56,63,0.60)", lineHeight: 1.7 }}>
+            Um bestellen zu können, muss dein Alter einmalig verifiziert werden. Das dauert nur wenige Sekunden.
+          </p>
+          <Link href="/account"
+            className="font-ekstra uppercase rounded-full"
+            style={{ background: "#35383f", color: "#e8e4dc", padding: "14px 40px",
+              fontSize: 13, letterSpacing: "0.20em", textDecoration: "none", display: "block" }}>
+            Alter jetzt verifizieren →
+          </Link>
+        </div>
+      </div>
+    )
+  }
+  // ── End gate ─────────────────────────────────────────────────────────────────
 
   const items    = state.items
   const shipping = total >= 50 ? 0 : 4.99

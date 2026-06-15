@@ -20,9 +20,10 @@ function SuccessContent() {
   const [orderRef, setOrderRef] = useState("")
 
   useEffect(() => {
+    // Clear cart immediately when landing here (payment is done)
+    dispatch({ type: "HYDRATE", items: [] })
+
     if (!token) {
-      // No token — just show success (e.g. direct navigation)
-      dispatch({ type: "HYDRATE", items: [] })
       setStatus("paid")
       return
     }

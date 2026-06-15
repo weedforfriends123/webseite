@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
         shipping_address: body.shipping_address,
         shipping_price:   body.shipping_price,
         success_url:      `${origin}/checkout/success?token=${orderNumber}`,
-        cancel_url:       `${origin}/checkout/cancel`,
+        cancel_url:       `${origin}/checkout/cancel?token=${orderNumber}`,
         callback_url:     `${origin}/api/checkout/callback`,
       }),
     })

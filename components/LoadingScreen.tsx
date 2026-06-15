@@ -11,7 +11,13 @@ type Phase = "writing" | "waiting" | "exiting" | "done"
 
 export function LoadingScreen() {
   const [letterCount, setLetterCount] = useState(0)
-  const [phase, setPhase]             = useState<Phase>("writing")
+  const [phase, setPhase]             = useState<Phase>(() => {
+    // Skip intro animation on checkout pages (user arrives from Stripe redirect)
+    if (typeof window !== "undefined" && window.location.pathname.startsWith("/checkout/")) {
+      return "done"
+    }
+    return "writing"
+  })
   const [showVideo, setShowVideo]     = useState(false)
 
   const assetsReady    = useRef(false)
