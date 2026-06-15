@@ -233,34 +233,6 @@ function HeroBuy() {
                 lineHeight: 1.7, margin: 0,
               }}>{vape.desc}</p>
 
-              {/* Tags + strength in one row */}
-              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "clamp(5px,0.5vw,8px)" }}>
-                {vape.flavor.split(" · ").map(t => (
-                  <span key={t} style={{
-                    padding: "3px 10px", borderRadius: 999,
-                    border: "1px solid rgba(53,56,63,0.18)",
-                    fontSize: 11, color: TEXT,
-                  }} className="font-ekstra">{t}</span>
-                ))}
-                <span style={{
-                  padding: "3px 10px", borderRadius: 999,
-                  background: `${vape.accent}44`,
-                  border: `1px solid ${vape.accent}88`,
-                  fontSize: 11, color: TEXT,
-                }} className="font-ekstra">{vape.effect}</span>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: 2 }}>
-                  <span className="font-ekstra uppercase" style={{ fontSize: 9, letterSpacing: "0.42em", color: MUTED }}>Stärke</span>
-                  <div style={{ display: "flex", gap: 3 }}>
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <div key={i} style={{
-                        width: 16, height: 3, borderRadius: 2,
-                        background: i < vape.strength ? TEXT : "rgba(53,56,63,0.14)",
-                        transition: "background 0.3s",
-                      }} />
-                    ))}
-                  </div>
-                </div>
-              </div>
             </motion.div>
           </AnimatePresence>
 
