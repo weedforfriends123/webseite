@@ -80,7 +80,6 @@ const PAYMENT_LOGOS: { src: string; alt: string }[] = [
   { src: "/pay-googlepay.svg",  alt: "Google Pay"  },
   { src: "/pay-amazonpay.svg",  alt: "Amazon Pay"  },
   { src: "/pay-revolut.svg",    alt: "Revolut Pay" },
-  { src: "/pay-ideal.svg",      alt: "iDEAL"       },
   { src: "/pay-wero.svg",       alt: "Wero"        },
   { src: "/pay-eps.svg",        alt: "eps"         },
   { src: "/pay-mobilepay.svg",  alt: "MobilePay"   },
