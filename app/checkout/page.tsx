@@ -26,7 +26,36 @@ const FIELDS: Field[] = [
   { name: "address2",   label: "Adresszusatz", placeholder: "Tür, Stiege ..." },
   { name: "zip",        label: "PLZ",          required: true,  half: true  },
   { name: "city",       label: "Ort",          required: true,  half: true  },
-  { name: "country",    label: "Land",         required: true               },
+]
+
+const COUNTRIES = [
+  "Österreich",
+  "Deutschland",
+  "Belgien",
+  "Bulgarien",
+  "Dänemark",
+  "Estland",
+  "Finnland",
+  "Frankreich",
+  "Griechenland",
+  "Irland",
+  "Italien",
+  "Kroatien",
+  "Lettland",
+  "Litauen",
+  "Luxemburg",
+  "Malta",
+  "Niederlande",
+  "Polen",
+  "Portugal",
+  "Rumänien",
+  "Schweden",
+  "Slowakei",
+  "Slowenien",
+  "Spanien",
+  "Tschechien",
+  "Ungarn",
+  "Zypern",
 ]
 
 const inputStyle = (hasError: boolean): React.CSSProperties => ({
@@ -178,6 +207,31 @@ export default function CheckoutPage() {
                   )}
                 </div>
               ))}
+
+              {/* Land Dropdown */}
+              <div style={{ gridColumn: "span 2" }}>
+                <label className="font-ekstra uppercase block mb-1.5" style={{ fontSize: 9, letterSpacing: "0.22em", color: MUTED }}>
+                  Land *
+                </label>
+                <select
+                  name="country"
+                  value={form.country ?? "Österreich"}
+                  onChange={e => setForm(p => ({ ...p, country: e.target.value }))}
+                  style={{
+                    ...inputStyle(false),
+                    appearance: "none",
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2335383f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right 16px center",
+                    paddingRight: 40,
+                    cursor: "pointer",
+                  }}
+                >
+                  {COUNTRIES.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {serverError && (
