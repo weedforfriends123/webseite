@@ -36,16 +36,28 @@ const PAYMENT_LOGOS = [
   { src: "/pay-sepa-debit.svg", alt: "SEPA-Lastschrift" },
 ]
 
+type DiscountResult = {
+  valid: boolean
+  discount: number
+  finalTotal: number
+  label: string
+}
+
 export default function CheckoutPage() {
   const { state, total } = useCart()
   const { user, profile } = useUser()
   const supabase = createClient()
 
-  const [form, setForm] = useState<Record<string, string>>({ country: "Österreich" })
-  const [errors, setErrors] = useState<Record<string, boolean>>({})
-  const [loading, setLoading] = useState(false)
+  const [form, setForm]             = useState<Record<string, string>>({ country: "Österreich" })
+  const [errors, setErrors]         = useState<Record<string, boolean>>({})
+  const [loading, setLoading]       = useState(false)
   const [loadingMsg, setLoadingMsg] = useState("Zahlung wird vorbereitet …")
   const [serverError, setServerError] = useState("")
+
+  const [discountCode, setDiscountCode]       = useState("")
+  const [discountResult, setDiscountResult]   = useState<DiscountResult | null>(null)
+  const [discountLoading, setDiscountLoading] = useState(false)
+  const [discountError, setDiscountError]     = useState("")
 
   useEffect(() => {
     if (!user) return
@@ -65,7 +77,8 @@ export default function CheckoutPage() {
 
   const items    = state.items
   const shipping = total >= 50 ? 0 : 4.99
-  const grand    = total + shipping
+  const subtotal = total + shipping
+  const grand    = discountResult?.finalTotal ?? subtotal
 
   function validate() {
     const next: Record<string, boolean> = {}
@@ -74,12 +87,39 @@ export default function CheckoutPage() {
     return Object.keys(next).length === 0
   }
 
+  async function applyDiscount() {
+    if (!discountCode.trim()) return
+    setDiscountLoading(true)
+    setDiscountError("")
+    try {
+      const res = await fetch("/api/checkout/validate-discount", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: discountCode, subtotal }),
+      })
+      const d = await res.json()
+      if (!d.valid) {
+        setDiscountError(d.error ?? "Ungültiger Rabattcode")
+        setDiscountResult(null)
+      } else {
+        setDiscountResult(d)
+      }
+    } catch {
+      setDiscountError("Fehler beim Prüfen des Codes")
+    } finally {
+      setDiscountLoading(false)
+    }
+  }
+
+  const discountCents = discountResult ? Math.round(discountResult.discount * 100) : 0
+
   const orderPayload = () => ({
     email: form.email, phone: form.phone,
     line_items: items.map(item => ({ title: item.name, variant_title: item.pack, price: item.price.toFixed(2), quantity: item.qty })),
     shipping_address: { first_name: form.first_name, last_name: form.last_name, address1: form.address1,
       address2: form.address2, city: form.city, zip: form.zip, country: form.country, phone: form.phone },
     shipping_price: shipping.toFixed(2),
+    ...(discountCents > 0 ? { discount_cents: discountCents } : {}),
   })
 
   async function handleSubmit(e: FormEvent) {
@@ -92,6 +132,13 @@ export default function CheckoutPage() {
       const res = await fetch("/api/checkout/start", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderPayload()) })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? "Fehler")
+
+      // Gratis-Bestellung: kein Stripe, direkt zur Erfolgsseite
+      if (data.free) {
+        window.location.href = `/checkout/success?token=${data.order_token}`
+        return
+      }
+
       const { order_token } = data
       setLoadingMsg("Zahlung wird vorbereitet …")
       let url: string | null = null
@@ -178,6 +225,47 @@ export default function CheckoutPage() {
               </div>
             </div>
 
+            {/* ── Rabattcode ── */}
+            <div className="mt-8">
+              <p className="font-ekstra uppercase mb-3"
+                style={{ fontSize: 11, letterSpacing: "0.28em", color: "rgba(53,56,63,0.45)" }}>
+                Rabattcode
+              </p>
+              <div style={{ display: "flex", gap: 10 }}>
+                <input
+                  type="text"
+                  placeholder="Code eingeben …"
+                  value={discountCode}
+                  onChange={e => {
+                    setDiscountCode(e.target.value.toUpperCase())
+                    setDiscountResult(null)
+                    setDiscountError("")
+                  }}
+                  onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); applyDiscount() } }}
+                  style={{ ...inp(!!discountError), flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={applyDiscount}
+                  disabled={discountLoading || !discountCode.trim()}
+                  className="font-ekstra uppercase rounded-full"
+                  style={{ padding: "0 22px", background: "#35383f", color: "#e8e4dc",
+                    fontSize: 13, letterSpacing: "0.18em", border: "none",
+                    cursor: discountLoading || !discountCode.trim() ? "not-allowed" : "pointer",
+                    whiteSpace: "nowrap", opacity: discountLoading || !discountCode.trim() ? 0.45 : 1 }}>
+                  {discountLoading ? "…" : "Anwenden"}
+                </button>
+              </div>
+              {discountError && (
+                <p className="font-ekstra mt-2" style={{ fontSize: 10, color: "#e85c5c" }}>{discountError}</p>
+              )}
+              {discountResult?.valid && (
+                <p className="font-ekstra mt-2" style={{ fontSize: 10, color: "#a0ba87" }}>
+                  ✓ {discountResult.label} angewendet
+                </p>
+              )}
+            </div>
+
             {/* Payment logos */}
             <div className="mt-8">
               <p className="font-ekstra uppercase mb-3"
@@ -207,7 +295,7 @@ export default function CheckoutPage() {
                 color: "#e8e4dc", letterSpacing: "0.22em", fontSize: 14, border: "none",
                 cursor: items.length === 0 ? "not-allowed" : "pointer",
                 boxShadow: items.length > 0 ? "0 8px 28px rgba(53,56,63,0.22)" : "none" }}>
-              {loading ? loadingMsg : "Jetzt bezahlen →"}
+              {loading ? loadingMsg : (grand === 0 ? "Gratis bestellen →" : "Jetzt bezahlen →")}
             </button>
           </form>
 
@@ -256,6 +344,17 @@ export default function CheckoutPage() {
                   {shipping === 0 ? "Gratis" : `${shipping.toFixed(2).replace(".", ",")} €`}
                 </span>
               </div>
+
+              {discountResult?.valid && (
+                <div className="flex justify-between items-center mb-3">
+                  <span className="font-ekstra" style={{ fontSize: "0.9rem", color: "#a0ba87" }}>
+                    Rabatt ({discountResult.label})
+                  </span>
+                  <span className="font-druk-wide" style={{ fontSize: "0.95rem", color: "#a0ba87" }}>
+                    −{discountResult.discount.toFixed(2).replace(".", ",")} €
+                  </span>
+                </div>
+              )}
 
               <div style={{ height: 1, background: "rgba(255,255,255,0.08)", marginBottom: 20 }} />
 
