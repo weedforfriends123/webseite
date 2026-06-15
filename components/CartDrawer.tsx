@@ -13,6 +13,7 @@ export function CartDrawer() {
   const { state, dispatch, total, count } = useCart()
 
   return (
+    <div className="md:hidden">
     <AnimatePresence>
       {state.open && (
         <>
@@ -137,6 +138,7 @@ export function CartDrawer() {
         </>
       )}
     </AnimatePresence>
+    </div>
   )
 }
 

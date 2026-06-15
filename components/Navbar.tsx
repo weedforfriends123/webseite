@@ -223,13 +223,53 @@ export function Navbar() {
             <IconUser color="rgba(255,255,255,0.8)" />
           </Link>
 
-          {/* Cart */}
+          {/* Cart — desktop: Seite */}
+          <Link
+            href="/cart"
+            aria-label="Warenkorb"
+            className="hidden md:inline-flex"
+            style={{
+              position: "relative",
+              alignItems: "center", justifyContent: "center",
+              background: BG, borderRadius: "50%",
+              width: "clamp(36px,3.2vw,52px)", height: "clamp(36px,3.2vw,52px)",
+              textDecoration: "none", flexShrink: 0, transition: "opacity .2s",
+            }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = "0.75"}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.opacity = "1"}
+          >
+            <IconCart color={TEXT} />
+            <AnimatePresence>
+              {count > 0 && (
+                <motion.span
+                  key="nav-badge-desk"
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 440, damping: 22 }}
+                  style={{
+                    position: "absolute", top: -4, right: -4,
+                    width: 18, height: 18, borderRadius: "50%",
+                    background: "#35383f", color: "#e8e4dc",
+                    fontSize: 9, fontFamily: "var(--font-space-mono)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    lineHeight: 1,
+                  }}
+                >
+                  {count}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </Link>
+
+          {/* Cart — mobil: Drawer */}
           <button
             onClick={() => dispatch({ type: "OPEN_CART" })}
             aria-label="Warenkorb"
+            className="md:hidden inline-flex"
             style={{
               position: "relative",
-              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              alignItems: "center", justifyContent: "center",
               background: BG, borderRadius: "50%",
               width: "clamp(36px,3.2vw,52px)", height: "clamp(36px,3.2vw,52px)",
               border: "none", flexShrink: 0, cursor: "pointer", transition: "opacity .2s",
@@ -241,7 +281,7 @@ export function Navbar() {
             <AnimatePresence>
               {count > 0 && (
                 <motion.span
-                  key="nav-badge"
+                  key="nav-badge-mob"
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0, opacity: 0 }}
