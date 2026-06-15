@@ -41,8 +41,8 @@ function emailBase(previewText: string, body: string) {
               <!--[if mso]><p style="font-family:Arial;font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:4px;color:#e8e4dc;text-align:center;margin:0;">WEEDFORFRIENDS</p><![endif]-->
               <!--[if !mso]><!-->
               <img src="${SITE}/branding/logo-email.png"
-                width="360" height="100" alt="WEEDFORFRIENDS"
-                style="display:block;margin:0 auto;width:240px;height:auto;max-width:240px;" />
+                width="200" height="200" alt="WEEDFORFRIENDS"
+                style="display:block;margin:0 auto;width:80px;height:80px;" />
               <!--<![endif]-->
             </td>
           </tr>
