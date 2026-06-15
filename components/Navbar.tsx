@@ -4,6 +4,7 @@ import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
+import { useCart } from "@/lib/cart"
 
 const BG   = "#bcc0ca"
 const TEXT = "#35383f"
@@ -132,6 +133,7 @@ function NavLink({ href, children }: { href: string; children: string }) {
 export function Navbar() {
   const [menuOpen, setMenuOpen]             = useState(false)
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null)
+  const { count, dispatch } = useCart()
 
   return (
     <header style={{
@@ -222,17 +224,42 @@ export function Navbar() {
           </Link>
 
           {/* Cart */}
-          <Link href="/cart" aria-label="Warenkorb" style={{
-            display: "inline-flex", alignItems: "center", justifyContent: "center",
-            background: BG, borderRadius: "50%",
-            width: "clamp(36px,3.2vw,52px)", height: "clamp(36px,3.2vw,52px)",
-            textDecoration: "none", flexShrink: 0, transition: "opacity .2s",
-          }}
+          <button
+            onClick={() => dispatch({ type: "OPEN_CART" })}
+            aria-label="Warenkorb"
+            style={{
+              position: "relative",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              background: BG, borderRadius: "50%",
+              width: "clamp(36px,3.2vw,52px)", height: "clamp(36px,3.2vw,52px)",
+              border: "none", flexShrink: 0, cursor: "pointer", transition: "opacity .2s",
+            }}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = "0.75"}
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.opacity = "1"}
           >
             <IconCart color={TEXT} />
-          </Link>
+            <AnimatePresence>
+              {count > 0 && (
+                <motion.span
+                  key="nav-badge"
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 440, damping: 22 }}
+                  style={{
+                    position: "absolute", top: -4, right: -4,
+                    width: 18, height: 18, borderRadius: "50%",
+                    background: "#35383f", color: "#e8e4dc",
+                    fontSize: 9, fontFamily: "var(--font-space-mono)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    lineHeight: 1,
+                  }}
+                >
+                  {count}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
 
           {/* Hamburger — mobile only */}
           <button

@@ -5,6 +5,10 @@ import { ShoppingBag } from "lucide-react"
 import Link from "next/link"
 import { useCart } from "@/lib/cart"
 
+const LIGHT     = "rgba(255,255,255,0.85)"
+const LIGHT_MUT = "rgba(255,255,255,0.35)"
+const LIGHT_DIM = "rgba(255,255,255,0.08)"
+
 export function CartDrawer() {
   const { state, dispatch, total, count } = useCart()
 
@@ -34,14 +38,14 @@ export function CartDrawer() {
           >
             {/* Top */}
             <div className="flex items-center justify-between px-8 pt-8 pb-6"
-              style={{ borderBottom: "1px solid rgba(53,56,63,0.06)" }}>
+              style={{ borderBottom: `1px solid ${LIGHT_DIM}` }}>
               <p className="font-adieu uppercase"
-                style={{ fontSize: "1.4rem", color: "#35383f", letterSpacing: "-0.02em" }}>
+                style={{ fontSize: "1.4rem", color: LIGHT, letterSpacing: "-0.02em" }}>
                 Warenkorb {count > 0 && <span style={{ color: "#a0ba87" }}>({count})</span>}
               </p>
               <button
                 onClick={() => dispatch({ type: "CLOSE_CART" })}
-                style={{ color: "rgba(53,56,63,0.35)", fontSize: 18, lineHeight: 1 }}
+                style={{ color: LIGHT_MUT, fontSize: 18, lineHeight: 1 }}
               >
                 ✕
               </button>
@@ -51,7 +55,7 @@ export function CartDrawer() {
             <div className="flex-1 overflow-y-auto px-8 py-6">
               {state.items.length === 0 ? (
                 <p className="font-mono text-[10px] tracking-[0.35em] uppercase"
-                  style={{ color: "rgba(53,56,63,0.18)", marginTop: 4 }}>
+                  style={{ color: "rgba(255,255,255,0.20)", marginTop: 4 }}>
                   Noch leer.
                 </p>
               ) : (
@@ -64,15 +68,15 @@ export function CartDrawer() {
                       exit={{ opacity: 0, height: 0, overflow: "hidden", paddingTop: 0, paddingBottom: 0 }}
                       transition={{ duration: 0.2 }}
                       className="flex items-center justify-between py-5"
-                      style={{ borderBottom: "1px solid rgba(53,56,63,0.05)" }}
+                      style={{ borderBottom: `1px solid ${LIGHT_DIM}` }}
                     >
                       <div className="flex-1 min-w-0 pr-6">
                         <p className="font-adieu uppercase leading-none mb-1"
-                          style={{ fontSize: "0.95rem", color: "#35383f", letterSpacing: "-0.01em" }}>
+                          style={{ fontSize: "0.95rem", color: LIGHT, letterSpacing: "-0.01em" }}>
                           {item.name}
                         </p>
                         <p className="font-mono text-[9px] tracking-wider"
-                          style={{ color: "rgba(53,56,63,0.25)" }}>
+                          style={{ color: "rgba(255,255,255,0.28)" }}>
                           {item.pack}
                         </p>
                       </div>
@@ -81,17 +85,17 @@ export function CartDrawer() {
                         <div className="flex items-center gap-3">
                           <button
                             onClick={() => dispatch({ type: "SET_QTY", id: item.id, pack: item.pack, qty: item.qty - 1 })}
-                            style={{ color: "rgba(53,56,63,0.3)", fontSize: 15, lineHeight: 1 }}
+                            style={{ color: LIGHT_MUT, fontSize: 15, lineHeight: 1 }}
                           >−</button>
-                          <span className="font-mono text-[11px]" style={{ color: "#35383f", minWidth: 12, textAlign: "center" }}>
+                          <span className="font-mono text-[11px]" style={{ color: LIGHT, minWidth: 12, textAlign: "center" }}>
                             {item.qty}
                           </span>
                           <button
                             onClick={() => dispatch({ type: "SET_QTY", id: item.id, pack: item.pack, qty: item.qty + 1 })}
-                            style={{ color: "rgba(53,56,63,0.3)", fontSize: 15, lineHeight: 1 }}
+                            style={{ color: LIGHT_MUT, fontSize: 15, lineHeight: 1 }}
                           >+</button>
                         </div>
-                        <span className="font-mono text-[10px]" style={{ color: "rgba(53,56,63,0.4)", minWidth: 48, textAlign: "right" }}>
+                        <span className="font-mono text-[10px]" style={{ color: "rgba(255,255,255,0.42)", minWidth: 48, textAlign: "right" }}>
                           €{(item.price * item.qty).toFixed(2)}
                         </span>
                       </div>
@@ -103,12 +107,12 @@ export function CartDrawer() {
 
             {/* Footer */}
             {state.items.length > 0 && (
-              <div className="px-8 py-7" style={{ borderTop: "1px solid rgba(53,56,63,0.06)" }}>
+              <div className="px-8 py-7" style={{ borderTop: `1px solid ${LIGHT_DIM}` }}>
                 <div className="flex justify-between items-baseline mb-6">
                   <span className="font-mono text-[9px] tracking-[0.35em] uppercase"
-                    style={{ color: "rgba(53,56,63,0.25)" }}>Gesamt</span>
+                    style={{ color: "rgba(255,255,255,0.30)" }}>Gesamt</span>
                   <span className="font-adieu text-[1.6rem]"
-                    style={{ color: "#35383f", letterSpacing: "-0.02em" }}>
+                    style={{ color: LIGHT, letterSpacing: "-0.02em" }}>
                     €{total.toFixed(2)}
                   </span>
                 </div>
@@ -116,14 +120,14 @@ export function CartDrawer() {
                   href="/checkout"
                   onClick={() => dispatch({ type: "CLOSE_CART" })}
                   className="block w-full py-4 font-mono text-[10px] tracking-[0.35em] uppercase text-center"
-                  style={{ background: "#35383f", color: "#1a1916", textDecoration: "none" }}
+                  style={{ background: "#e8e4dc", color: "#35383f", textDecoration: "none", borderRadius: 9999 }}
                 >
                   Zur Kasse →
                 </Link>
                 <button
                   onClick={() => dispatch({ type: "CLOSE_CART" })}
                   className="w-full mt-4 font-mono text-[9px] tracking-[0.3em] uppercase"
-                  style={{ color: "rgba(53,56,63,0.18)" }}
+                  style={{ color: "rgba(255,255,255,0.22)" }}
                 >
                   Weiter einkaufen
                 </button>
@@ -156,18 +160,17 @@ export function CartButton() {
         boxShadow:            "0 8px 40px rgba(14,12,9,0.12), 0 2px 8px rgba(14,12,9,0.06)",
       }}
     >
-      {/* Icon only on mobile, text on sm+ */}
       <ShoppingBag
         className="block sm:hidden shrink-0"
         size={16}
-        style={{ color: "rgba(53,56,63,0.45)" }}
+        style={{ color: "rgba(255,255,255,0.65)" }}
       />
       <span
         className="hidden sm:block font-adieu uppercase"
         style={{
           fontSize:      "clamp(0.82rem, 1.1vw, 1rem)",
           letterSpacing: "-0.01em",
-          color:         "rgba(53,56,63,0.40)",
+          color:         "rgba(255,255,255,0.65)",
           lineHeight:    1,
           whiteSpace:    "nowrap",
         }}
@@ -186,8 +189,8 @@ export function CartButton() {
             style={{
               width: 20, height: 20,
               borderRadius: "50%",
-              background:   "#35383f",
-              color:        "#35383f",
+              background:   "#a0ba87",
+              color:        "#2a3020",
             }}
           >
             {count}

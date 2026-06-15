@@ -1,8 +1,10 @@
 "use client"
 
-import { useState, FormEvent } from "react"
+import { useState, FormEvent, useEffect } from "react"
 import { motion } from "framer-motion"
 import { useCart } from "@/lib/cart"
+import { useUser } from "@/lib/hooks/useUser"
+import { createClient } from "@/lib/supabase/client"
 
 const TEXT  = "#35383f"
 const MUTED = "rgba(53,56,63,0.55)"
@@ -73,12 +75,37 @@ const inputStyle = (hasError: boolean): React.CSSProperties => ({
 
 export default function CheckoutPage() {
   const { state, total } = useCart()
+  const { user, profile } = useUser()
+  const supabase = createClient()
 
   const [form, setForm] = useState<Record<string, string>>({ country: "Österreich" })
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [loading, setLoading] = useState(false)
   const [loadingMsg, setLoadingMsg] = useState("Zahlung wird vorbereitet …")
   const [serverError, setServerError] = useState("")
+
+  // Pre-fill from saved profile + default address
+  useEffect(() => {
+    if (!user) return
+    const prefill: Record<string, string> = { country: "Österreich" }
+    if (profile?.first_name) prefill.first_name = profile.first_name
+    if (profile?.last_name)  prefill.last_name  = profile.last_name
+    if (user.email)          prefill.email      = user.email
+    if (profile?.phone)      prefill.phone      = profile.phone ?? ""
+
+    supabase
+      .from("addresses")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("is_default", true)
+      .single()
+      .then(({ data }) => {
+        if (data?.street) prefill.address1 = data.street
+        if (data?.city)   prefill.city     = data.city
+        if (data?.zip)    prefill.zip      = data.zip
+        setForm(prev => ({ ...prev, ...prefill }))
+      })
+  }, [user, profile])
 
   const items = state.items
   const shipping = total >= 50 ? 0 : 4.99
