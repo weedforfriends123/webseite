@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 500">
+  <rect width="780" height="500" rx="40" fill="#003189"/>
+  <g transform="translate(390,250)">
+    <g id="star2"><polygon points="0,-18 4.2,-5.8 17.1,-5.8 6.9,2.2 11.1,14.4 0,6.4 -11.1,14.4 -6.9,2.2 -17.1,-5.8 -4.2,-5.8" fill="#FFCC00"/></g>
+    <use href="#star2" transform="rotate(0)  translate(0,-78)"/>
+    <use href="#star2" transform="rotate(30) translate(0,-78)"/>
+    <use href="#star2" transform="rotate(60) translate(0,-78)"/>
+    <use href="#star2" transform="rotate(90) translate(0,-78)"/>
+    <use href="#star2" transform="rotate(120) translate(0,-78)"/>
+    <use href="#star2" transform="rotate(150) translate(0,-78)"/>
+    <use href="#star2" transform="rotate(180) translate(0,-78)"/>
+    <use href="#star2" transform="rotate(210) translate(0,-78)"/>
+    <use href="#star2" transform="rotate(240) translate(0,-78)"/>
+    <use href="#star2" transform="rotate(270) translate(0,-78)"/>
+    <use href="#star2" transform="rotate(300) translate(0,-78)"/>
+    <use href="#star2" transform="rotate(330) translate(0,-78)"/>
+  </g>
+  <text x="390" y="248" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="82" font-weight="900" fill="white">SEPA</text>
+  <text x="390" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="400" fill="rgba(255,255,255,0.75)" letter-spacing="4">Lastschrift</text>
+</svg>

@@ -85,7 +85,8 @@ const PAYMENT_LOGOS: { src: string; alt: string }[] = [
   { src: "/pay-eps.svg",        alt: "eps"         },
   { src: "/pay-mobilepay.svg",  alt: "MobilePay"   },
   { src: "/pay-billie.svg",     alt: "Billie"      },
-  { src: "/pay-sepa.svg",       alt: "SEPA"        },
+  { src: "/pay-sepa.svg",       alt: "SEPA"          },
+  { src: "/pay-sepa-debit.svg", alt: "SEPA-Lastschrift" },
 ]
 
 export default function CheckoutPage() {
