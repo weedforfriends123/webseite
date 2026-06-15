@@ -328,31 +328,33 @@ export default function CheckoutPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.12, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="lg:sticky w-full"
-            style={{ top: "calc(64px + 24px)" }}
+            style={{ top: "calc(72px + 28px)" }}
           >
             <div style={{
-              background: "rgba(255,255,255,0.48)",
-              borderRadius: 20,
-              border: "1px solid rgba(255,255,255,0.72)",
-              padding: "clamp(22px,3vh,32px)",
+              background: "rgba(255,255,255,0.50)",
+              borderRadius: 24,
+              border: "1px solid rgba(255,255,255,0.80)",
+              padding: "clamp(24px,3.5vh,40px)",
             }}>
-              <p className="font-ekstra uppercase mb-2" style={{ fontSize: 10, letterSpacing: "0.28em", color: MUTED }}>
+              <p className="font-ekstra uppercase mb-5" style={{ fontSize: 11, letterSpacing: "0.28em", color: MUTED }}>
                 Bestellübersicht
               </p>
-              <div style={{ height: 1, background: DIM, marginBottom: 16, marginTop: 8 }} />
 
               {items.length === 0 ? (
-                <p className="font-ekstra" style={{ fontSize: "0.88rem", color: MUTED }}>Warenkorb ist leer.</p>
+                <p className="font-ekstra" style={{ fontSize: "0.95rem", color: MUTED }}>Warenkorb ist leer.</p>
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 20 }}>
                   {items.map(item => (
-                    <div key={`${item.id}__${item.pack}`} className="flex justify-between">
-                      <span className="font-ekstra" style={{ fontSize: "0.85rem", color: MUTED }}>
-                        {item.name} <span style={{ opacity: 0.6 }}>×{item.qty}</span>
-                        <br />
-                        <span style={{ fontSize: 10, letterSpacing: "0.12em", opacity: 0.55 }}>{item.pack}</span>
-                      </span>
-                      <span className="font-druk-wide" style={{ fontSize: "0.88rem", color: TEXT, whiteSpace: "nowrap", marginLeft: 12 }}>
+                    <div key={`${item.id}__${item.pack}`} className="flex justify-between items-start gap-3">
+                      <div>
+                        <p className="font-ekstra" style={{ fontSize: "0.95rem", color: TEXT, lineHeight: 1.4 }}>
+                          {item.name} <span style={{ opacity: 0.55 }}>×{item.qty}</span>
+                        </p>
+                        <p className="font-ekstra uppercase" style={{ fontSize: 10, letterSpacing: "0.14em", color: MUTED }}>
+                          {item.pack}
+                        </p>
+                      </div>
+                      <span className="font-druk-wide shrink-0" style={{ fontSize: "0.98rem", color: TEXT }}>
                         {(item.price * item.qty).toFixed(2).replace(".", ",")} €
                       </span>
                     </div>
@@ -360,21 +362,21 @@ export default function CheckoutPage() {
                 </div>
               )}
 
-              <div style={{ height: 1, background: DIM, marginBottom: 12 }} />
-              <div className="flex justify-between mb-2">
-                <span className="font-ekstra" style={{ fontSize: "0.88rem", color: MUTED }}>Versand</span>
-                <span className="font-druk-wide" style={{ fontSize: "0.88rem", color: TEXT }}>
+              <div style={{ height: 1.5, background: DIM, marginBottom: 16 }} />
+              <div className="flex justify-between items-center mb-3">
+                <span className="font-ekstra" style={{ fontSize: "0.95rem", color: MUTED }}>Versand</span>
+                <span className="font-druk-wide" style={{ fontSize: "1rem", color: shipping === 0 ? "#a0ba87" : TEXT }}>
                   {shipping === 0 ? "Gratis" : `${shipping.toFixed(2).replace(".", ",")} €`}
                 </span>
               </div>
-              <div style={{ height: 1, background: DIM, marginBottom: 12 }} />
-              <div className="flex justify-between items-baseline">
-                <span className="font-ekstra" style={{ fontSize: "0.9rem", color: TEXT }}>Gesamt</span>
-                <span className="font-druk-wide" style={{ fontSize: "clamp(1.2rem,2vw,1.5rem)", color: TEXT }}>
+              <div style={{ height: 1.5, background: DIM, marginBottom: 16 }} />
+              <div className="flex justify-between items-baseline mb-1">
+                <span className="font-ekstra uppercase" style={{ fontSize: "0.95rem", color: TEXT, letterSpacing: "0.06em" }}>Gesamt</span>
+                <span className="font-druk-wide" style={{ fontSize: "clamp(1.6rem,2.8vw,2rem)", color: TEXT, letterSpacing: "-0.02em" }}>
                   {grand.toFixed(2).replace(".", ",")} €
                 </span>
               </div>
-              <p className="font-ekstra mt-1" style={{ fontSize: 9, letterSpacing: "0.16em", color: "rgba(53,56,63,0.32)", textTransform: "uppercase" }}>
+              <p className="font-ekstra" style={{ fontSize: 10, letterSpacing: "0.16em", color: "rgba(53,56,63,0.30)", textTransform: "uppercase" }}>
                 inkl. MwSt.
               </p>
             </div>
