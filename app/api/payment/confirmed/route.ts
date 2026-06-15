@@ -1,46 +1,30 @@
 import { NextRequest, NextResponse } from "next/server"
-import Stripe from "stripe"
 import { createClient } from "@supabase/supabase-js"
 import { createShopifyOrder } from "@/lib/shopify.server"
-
-// Stripe erwartet den RAW body für Signaturprüfung — kein bodyParser
-export const config = { api: { bodyParser: false } }
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-05-27.dahlia" })
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 )
 
+// Zapier ruft diesen Endpunkt auf wenn Stripe checkout.session.completed feuert.
+// Body: { order_number: string, stripe_session_id?: string }
 export async function POST(req: NextRequest) {
-  const rawBody = await req.text()
-  const sig     = req.headers.get("stripe-signature") ?? ""
-  const secret  = process.env.STRIPE_WEBHOOK_SECRET!
+  // Shared secret prüfen (in Zapier als Header gesetzt)
+  const secret = req.headers.get("x-webhook-secret") ?? ""
+  if (secret !== process.env.ZAPIER_CONFIRMED_SECRET) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
 
-  let event: Stripe.Event
+  let body: { order_number?: string; stripe_session_id?: string }
   try {
-    event = stripe.webhooks.constructEvent(rawBody, sig, secret)
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "Webhook-Signatur ungültig"
-    console.error("[stripe/webhook] signature error:", msg)
-    return NextResponse.json({ error: msg }, { status: 400 })
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: "Ungültiger Body" }, { status: 400 })
   }
 
-  if (event.type !== "checkout.session.completed") {
-    return NextResponse.json({ ok: true, skipped: true })
-  }
-
-  const session = event.data.object as Stripe.Checkout.Session
-
-  // order_number kommt entweder aus client_reference_id oder metadata
-  const orderNumber =
-    session.client_reference_id ??
-    (session.metadata?.order_number as string | undefined) ??
-    null
-
+  const orderNumber = body.order_number
   if (!orderNumber) {
-    console.error("[stripe/webhook] keine order_number in session:", session.id)
     return NextResponse.json({ error: "order_number fehlt" }, { status: 400 })
   }
 
@@ -52,12 +36,12 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (fetchErr || !order) {
-    console.error("[stripe/webhook] order nicht gefunden:", orderNumber, fetchErr)
+    console.error("[payment/confirmed] order nicht gefunden:", orderNumber)
     return NextResponse.json({ error: "Order nicht gefunden" }, { status: 404 })
   }
 
+  // Idempotenz: bereits verarbeitet
   if (order.status === "paid") {
-    // Idempotenz: bereits verarbeitet
     return NextResponse.json({ ok: true, already_processed: true })
   }
 
@@ -71,7 +55,7 @@ export async function POST(req: NextRequest) {
     const shopifyOrder = await createShopifyOrder({
       email:            order.email,
       phone:            order.phone ?? undefined,
-      note:             `Stripe Session: ${session.id}`,
+      note:             body.stripe_session_id ? `Stripe: ${body.stripe_session_id}` : undefined,
       financial_status: "paid",
       line_items:       order.line_items,
       shipping_address: {
@@ -88,18 +72,21 @@ export async function POST(req: NextRequest) {
       amount_cents:   order.amount_cents,
     })
 
-    // Status auf "paid" setzen + Shopify Order ID speichern
     await supabase
       .from("pending_orders")
-      .update({ status: "paid", shopify_order_id: shopifyOrder.id })
+      .update({
+        status:          "paid",
+        shopify_order_id: shopifyOrder.id,
+        ...(body.stripe_session_id ? { stripe_session_id: body.stripe_session_id } : {}),
+      })
       .eq("id", orderNumber)
 
-    console.log(`[stripe/webhook] Shopify Order #${shopifyOrder.order_number} erstellt für ${order.email}`)
+    console.log(`[payment/confirmed] Shopify Order #${shopifyOrder.order_number} für ${order.email}`)
     return NextResponse.json({ ok: true, shopify_order_number: shopifyOrder.order_number })
 
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unbekannter Fehler"
-    console.error("[stripe/webhook] Shopify Fehler:", msg)
+    console.error("[payment/confirmed] Shopify Fehler:", msg)
     await supabase
       .from("pending_orders")
       .update({ status: "failed" })
