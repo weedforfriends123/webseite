@@ -75,10 +75,37 @@ const inputStyle = (hasError: boolean): React.CSSProperties => ({
 
 type PaymentMethod = "card" | "apple_pay" | "bank_transfer"
 
-const PAYMENT_METHODS: { id: PaymentMethod; label: string; sublabel: string; icon: string }[] = [
-  { id: "card",          label: "Kreditkarte",      sublabel: "Visa, Mastercard, Amex",    icon: "💳" },
-  { id: "apple_pay",     label: "Apple Pay",        sublabel: "Safari & iOS",              icon: "" },
-  { id: "bank_transfer", label: "Banküberweisung",  sublabel: "SEPA, dauert 1–3 Werktage", icon: "🏦" },
+const PAYMENT_METHODS: {
+  id: PaymentMethod
+  label: string
+  sublabel: string
+  logos: { src: string; alt: string; w?: number }[]
+}[] = [
+  {
+    id: "card",
+    label: "Kreditkarte",
+    sublabel: "Visa, Mastercard & mehr",
+    logos: [
+      { src: "/pay-visa.svg",       alt: "Visa",       w: 44 },
+      { src: "/pay-mastercard.svg", alt: "Mastercard", w: 34 },
+    ],
+  },
+  {
+    id: "apple_pay",
+    label: "Apple Pay",
+    sublabel: "Safari & iOS",
+    logos: [
+      { src: "/pay-applepay.svg", alt: "Apple Pay", w: 58 },
+    ],
+  },
+  {
+    id: "bank_transfer",
+    label: "Banküberweisung",
+    sublabel: "SEPA, dauert 1–3 Werktage",
+    logos: [
+      { src: "/pay-sepa.svg", alt: "SEPA", w: 52 },
+    ],
+  },
 ]
 
 export default function CheckoutPage() {
@@ -292,7 +319,18 @@ export default function CheckoutPage() {
                       transition: "all 0.18s ease",
                     }}
                   >
-                    <span style={{ fontSize: 20, lineHeight: 1, flexShrink: 0 }}>{m.icon}</span>
+                    {/* Logos */}
+                    <div className="flex items-center gap-1.5" style={{ flexShrink: 0 }}>
+                      {m.logos.map(logo => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          key={logo.alt}
+                          src={logo.src}
+                          alt={logo.alt}
+                          style={{ height: 24, width: "auto", maxWidth: logo.w ?? 44, objectFit: "contain", borderRadius: 4 }}
+                        />
+                      ))}
+                    </div>
                     <div style={{ flex: 1 }}>
                       <p className="font-ekstra uppercase" style={{ fontSize: 11, letterSpacing: "0.18em", color: TEXT, marginBottom: 2 }}>
                         {m.label}
