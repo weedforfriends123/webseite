@@ -48,6 +48,7 @@ export default function CheckoutPage() {
   const [form, setForm] = useState<Record<string, string>>({ country: "Österreich" })
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [loading, setLoading] = useState(false)
+  const [loadingMsg, setLoadingMsg] = useState("Zahlung wird vorbereitet …")
   const [serverError, setServerError] = useState("")
 
   const items = state.items
@@ -68,9 +69,11 @@ export default function CheckoutPage() {
     if (!validate()) return
 
     setLoading(true)
+    setLoadingMsg("Bestellung wird übermittelt …")
     setServerError("")
 
     try {
+      // 1. Bestellung an Zapier schicken — bekommt sofort den order_token zurück
       const res = await fetch("/api/checkout/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -100,8 +103,25 @@ export default function CheckoutPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? "Fehler")
 
-      // Weiterleitung zur Stripe Bezahlseite
-      window.location.href = data.url
+      const { order_token } = data
+
+      // 2. Auf Stripe-URL warten — Zapier schickt sie async per POST an /api/checkout/callback
+      setLoadingMsg("Zahlung wird vorbereitet …")
+      let paymentUrl: string | null = null
+
+      for (let i = 0; i < 30; i++) {
+        await new Promise(r => setTimeout(r, 1500))
+        const statusRes = await fetch(`/api/checkout/status?token=${order_token}`)
+        const statusData = await statusRes.json()
+        if (statusData.ready && statusData.url) {
+          paymentUrl = statusData.url
+          break
+        }
+      }
+
+      if (!paymentUrl) throw new Error("Zeitüberschreitung — bitte nochmal versuchen.")
+
+      window.location.href = paymentUrl
     } catch (err) {
       setServerError(err instanceof Error ? err.message : "Unbekannter Fehler")
       setLoading(false)
@@ -179,7 +199,7 @@ export default function CheckoutPage() {
                 cursor: items.length === 0 ? "not-allowed" : "pointer",
               }}
             >
-              {loading ? "Zahlung wird vorbereitet …" : "Jetzt bezahlen"}
+              {loading ? loadingMsg : "Jetzt bezahlen"}
             </button>
           </form>
 

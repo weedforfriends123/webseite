@@ -39,44 +39,37 @@ export async function POST(req: NextRequest) {
     if (!hookUrl) throw new Error("ZAPIER_PAYMENT_HOOK_URL nicht konfiguriert")
 
     const origin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? ""
-    const orderToken = randomUUID()
+    const orderNumber = randomUUID()
 
     const grandTotal = (
       body.line_items.reduce((s, i) => s + parseFloat(i.price) * i.quantity, 0) +
       parseFloat(body.shipping_price ?? "0")
     ).toFixed(2)
 
-    // Alle Bestelldaten + Token an Zapier schicken.
-    // Zapier speichert sie (Storage by Zapier) und erstellt die Stripe Session.
-    // Nach erfolgreicher Zahlung holt Zapier die Daten und legt die Shopify Order an.
-    const hookRes = await fetch(hookUrl, {
+    const amountCents = Math.round(parseFloat(grandTotal) * 100)
+
+    // Alle Bestelldaten an Zapier. Zapier speichert sie, erstellt die Stripe Session
+    // und schickt die URL async zurück an callback_url.
+    await fetch(hookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        order_token:      orderToken,
-        customer_email:   body.email,
+        order_number:     orderNumber,
+        order_price:      amountCents,
+        email:            body.email,
         phone:            body.phone ?? "",
-        amount_eur:       grandTotal,
-        // Betrag in Cent für Stripe (z.B. 29.99 → 2999)
-        amount_cents:     Math.round(parseFloat(grandTotal) * 100),
         currency:         "eur",
         line_items:       body.line_items,
         shipping_address: body.shipping_address,
         shipping_price:   body.shipping_price,
-        success_url:      `${origin}/checkout/success?token=${orderToken}`,
+        success_url:      `${origin}/checkout/success?token=${orderNumber}`,
         cancel_url:       `${origin}/checkout/cancel`,
+        callback_url:     `${origin}/api/checkout/callback`,
       }),
     })
 
-    if (!hookRes.ok) throw new Error(`Zapier Webhook Fehler: ${hookRes.status}`)
-
-    const hookData = await hookRes.json()
-    const paymentUrl: string | undefined =
-      hookData.url ?? hookData.payment_url ?? hookData.checkout_url
-
-    if (!paymentUrl) throw new Error("Keine Zahlungs-URL von Zapier erhalten")
-
-    return NextResponse.json({ ok: true, url: paymentUrl })
+    // Sofort mit dem Token antworten — Frontend pollt /api/checkout/status
+    return NextResponse.json({ ok: true, order_token: orderNumber })
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unbekannter Fehler"
     console.error("[checkout/start]", msg)
