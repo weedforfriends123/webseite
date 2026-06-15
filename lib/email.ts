@@ -37,20 +37,13 @@ function emailBase(previewText: string, body: string) {
 
           <!-- ── HEADER ── -->
           <tr>
-            <td style="background:#35383f;padding:32px 40px 24px;border-radius:20px 20px 0 0;text-align:center;">
+            <td style="background:#35383f;padding:36px 40px 36px;border-radius:20px 20px 0 0;text-align:center;">
               <!--[if mso]><p style="font-family:Arial;font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:4px;color:#e8e4dc;text-align:center;margin:0;">WEEDFORFRIENDS</p><![endif]-->
               <!--[if !mso]><!-->
               <img src="${SITE}/branding/logo-email.png"
                 width="120" height="120" alt="WEEDFORFRIENDS"
-                style="display:block;margin:0 auto;width:58px;height:58px;" />
+                style="display:block;margin:0 auto;width:64px;height:64px;" />
               <!--<![endif]-->
-            </td>
-          </tr>
-
-          <!-- Yellow accent line -->
-          <tr>
-            <td style="background:#35383f;padding:0 40px 28px;">
-              <div style="height:2px;background:#eddc8c;border-radius:2px;"></div>
             </td>
           </tr>
 
