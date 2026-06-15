@@ -6,65 +6,38 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 )
 
+// Zapier sendet plaintext in diesem Format:
+// "Stripe Checkout URL: https://checkout.stripe.com/...\nOrder: <order_number>\nSession ID: <id>"
+
 export async function POST(req: NextRequest) {
   try {
     const rawText = await req.text()
-    console.log("[checkout/callback] raw body:", rawText)
 
-    let body: Record<string, string> = {}
+    let paymentUrl = ""
+    let orderNumber = ""
 
-    // 1. JSON versuchen
-    try {
-      body = JSON.parse(rawText)
-    } catch {
-      // 2. URL-encoded versuchen
-      try {
-        body = Object.fromEntries(new URLSearchParams(rawText))
-      } catch {
-        body = {}
+    const contentType = req.headers.get("content-type") ?? ""
+
+    if (contentType.includes("application/json")) {
+      // JSON-Format (Fallback)
+      const body = JSON.parse(rawText) as Record<string, string>
+      paymentUrl = body.url ?? body.payment_url ?? body.checkout_url ?? body["Stripe Checkout URL"] ?? ""
+      orderNumber = body.order_number ?? body.order ?? body.Order ?? ""
+    } else {
+      // Zapier plaintext-Format: Zeile für Zeile parsen
+      for (const line of rawText.split("\n")) {
+        const trimmed = line.trim()
+        if (trimmed.startsWith("Stripe Checkout URL:")) {
+          paymentUrl = trimmed.replace("Stripe Checkout URL:", "").trim()
+        } else if (trimmed.startsWith("Order:")) {
+          orderNumber = trimmed.replace("Order:", "").trim()
+        }
       }
     }
 
-    console.log("[checkout/callback] parsed body:", body)
-
-    // Stripe URL aus allen bekannten Feldnamen extrahieren
-    let paymentUrl =
-      body.url ??
-      body.payment_url ??
-      body.checkout_url ??
-      body["Stripe Checkout URL"] ??
-      body.stripe_url ??
-      body.session_url ??
-      ""
-
-    // Fallback: URL mit Regex aus dem gesamten Text suchen
-    if (!paymentUrl) {
-      const match = rawText.match(/https:\/\/checkout\.stripe\.com\/[^\s"']+/)
-      paymentUrl = match?.[0] ?? ""
-    }
-
-    // Order-Token aus allen bekannten Feldnamen
-    let orderNumber =
-      body.order_number ??
-      body.order ??
-      body.Order ??
-      body.token ??
-      body.reference ??
-      body.client_reference_id ??
-      ""
-
-    // Fallback: order_number mit Regex suchen
-    if (!orderNumber) {
-      const match = rawText.match(/order[_\s]?(?:number)?[:\s]+([a-zA-Z0-9_-]+)/i)
-      orderNumber = match?.[1] ?? ""
-    }
-
     if (!paymentUrl || !orderNumber) {
-      console.error("[checkout/callback] fehlende Felder. body:", body, "raw:", rawText)
-      return NextResponse.json(
-        { error: "order_number oder URL fehlen", received: body },
-        { status: 400 },
-      )
+      console.error("[checkout/callback] fehlende Felder. raw:", rawText)
+      return NextResponse.json({ error: "order_number oder URL fehlen", raw: rawText }, { status: 400 })
     }
 
     const { error } = await supabase
@@ -76,7 +49,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Speicherfehler" }, { status: 500 })
     }
 
-    console.log("[checkout/callback] gespeichert:", orderNumber, paymentUrl)
     return NextResponse.json({ ok: true })
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unbekannter Fehler"
