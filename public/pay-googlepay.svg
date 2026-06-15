@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 500">
+  <rect width="780" height="500" rx="40" fill="white"/>
+  <rect x="2" y="2" width="776" height="496" rx="38" fill="none" stroke="#E0E0E0" stroke-width="3"/>
+  <!-- G letter in Google colors -->
+  <text x="170" y="320" font-family="Arial, sans-serif" font-size="230" font-weight="700" fill="#4285F4">G</text>
+  <!-- Overlay right half of G in gradient colors - simplified as multicolor -->
+  <text x="388" y="320" font-family="Arial, sans-serif" font-size="230" font-weight="400" fill="#3C4043">Pay</text>
+</svg>

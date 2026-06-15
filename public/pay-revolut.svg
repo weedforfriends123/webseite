@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 500">
+  <rect width="780" height="500" rx="40" fill="#191C1F"/>
+  <!-- Revolut logo mark (simplified R shape) -->
+  <path d="M120 140 h90 c50 0 80 30 80 72 0 30-16 54-42 64 l55 84 h-68 l-48-76 h-27 v76 h-40 z m40 36 v72 h48 c22 0 38-14 38-36 0-22-16-36-38-36 z" fill="white"/>
+  <text x="430" y="305" font-family="Arial, sans-serif" font-size="130" font-weight="700" fill="white">Pay</text>
+</svg>

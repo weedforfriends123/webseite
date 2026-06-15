@@ -73,39 +73,19 @@ const inputStyle = (hasError: boolean): React.CSSProperties => ({
   boxSizing: "border-box",
 })
 
-type PaymentMethod = "card" | "apple_pay" | "bank_transfer"
-
-const PAYMENT_METHODS: {
-  id: PaymentMethod
-  label: string
-  sublabel: string
-  logos: { src: string; alt: string; w?: number }[]
-}[] = [
-  {
-    id: "card",
-    label: "Kreditkarte",
-    sublabel: "Visa, Mastercard & mehr",
-    logos: [
-      { src: "/pay-visa.svg",       alt: "Visa",       w: 44 },
-      { src: "/pay-mastercard.svg", alt: "Mastercard", w: 34 },
-    ],
-  },
-  {
-    id: "apple_pay",
-    label: "Apple Pay",
-    sublabel: "Safari & iOS",
-    logos: [
-      { src: "/pay-applepay.svg", alt: "Apple Pay", w: 58 },
-    ],
-  },
-  {
-    id: "bank_transfer",
-    label: "Banküberweisung",
-    sublabel: "SEPA, dauert 1–3 Werktage",
-    logos: [
-      { src: "/pay-sepa.svg", alt: "SEPA", w: 52 },
-    ],
-  },
+const PAYMENT_LOGOS: { src: string; alt: string }[] = [
+  { src: "/pay-visa.svg",       alt: "Visa"        },
+  { src: "/pay-mastercard.svg", alt: "Mastercard"  },
+  { src: "/pay-applepay.svg",   alt: "Apple Pay"   },
+  { src: "/pay-googlepay.svg",  alt: "Google Pay"  },
+  { src: "/pay-amazonpay.svg",  alt: "Amazon Pay"  },
+  { src: "/pay-revolut.svg",    alt: "Revolut Pay" },
+  { src: "/pay-ideal.svg",      alt: "iDEAL"       },
+  { src: "/pay-wero.svg",       alt: "Wero"        },
+  { src: "/pay-eps.svg",        alt: "eps"         },
+  { src: "/pay-mobilepay.svg",  alt: "MobilePay"   },
+  { src: "/pay-billie.svg",     alt: "Billie"      },
+  { src: "/pay-sepa.svg",       alt: "SEPA"        },
 ]
 
 export default function CheckoutPage() {
@@ -118,7 +98,6 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false)
   const [loadingMsg, setLoadingMsg] = useState("Zahlung wird vorbereitet …")
   const [serverError, setServerError] = useState("")
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card")
 
   // Pre-fill from saved profile + default address
   useEffect(() => {
@@ -296,60 +275,30 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* ── PAYMENT METHOD ── */}
-            <p className="font-ekstra uppercase mt-8 mb-4" style={{ fontSize: 10, letterSpacing: "0.28em", color: MUTED }}>
-              Zahlungsmethode
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {PAYMENT_METHODS.map(m => {
-                const active = paymentMethod === m.id
-                return (
-                  <motion.button
-                    key={m.id}
-                    type="button"
-                    onClick={() => setPaymentMethod(m.id)}
-                    whileTap={{ scale: 0.985 }}
-                    className="flex items-center gap-4 text-left w-full"
+            {/* ── ACCEPTED PAYMENTS ── */}
+            <div className="mt-8">
+              <p className="font-ekstra uppercase mb-3" style={{ fontSize: 9, letterSpacing: "0.28em", color: MUTED }}>
+                Akzeptierte Zahlungsmethoden
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {PAYMENT_LOGOS.map(logo => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={logo.alt}
+                    src={logo.src}
+                    alt={logo.alt}
+                    title={logo.alt}
                     style={{
-                      padding: "14px 18px",
-                      borderRadius: 14,
-                      border: `1.5px solid ${active ? TEXT : "rgba(53,56,63,0.18)"}`,
-                      background: active ? "rgba(53,56,63,0.07)" : "rgba(255,255,255,0.55)",
-                      cursor: "pointer",
-                      transition: "all 0.18s ease",
+                      height: 28,
+                      width: "auto",
+                      maxWidth: 54,
+                      objectFit: "contain",
+                      borderRadius: 6,
+                      opacity: 0.85,
                     }}
-                  >
-                    {/* Logos */}
-                    <div className="flex items-center gap-1.5" style={{ flexShrink: 0 }}>
-                      {m.logos.map(logo => (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          key={logo.alt}
-                          src={logo.src}
-                          alt={logo.alt}
-                          style={{ height: 24, width: "auto", maxWidth: logo.w ?? 44, objectFit: "contain", borderRadius: 4 }}
-                        />
-                      ))}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <p className="font-ekstra uppercase" style={{ fontSize: 11, letterSpacing: "0.18em", color: TEXT, marginBottom: 2 }}>
-                        {m.label}
-                      </p>
-                      <p className="font-ekstra" style={{ fontSize: 9, color: MUTED, letterSpacing: "0.10em" }}>
-                        {m.sublabel}
-                      </p>
-                    </div>
-                    <div style={{
-                      width: 18, height: 18, borderRadius: "50%",
-                      border: `1.5px solid ${active ? TEXT : "rgba(53,56,63,0.25)"}`,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      flexShrink: 0,
-                    }}>
-                      {active && <div style={{ width: 9, height: 9, borderRadius: "50%", background: TEXT }} />}
-                    </div>
-                  </motion.button>
-                )
-              })}
+                  />
+                ))}
+              </div>
             </div>
 
             {serverError && (
