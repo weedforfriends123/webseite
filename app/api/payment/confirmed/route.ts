@@ -10,8 +10,11 @@ const supabase = createClient(
 // Zapier ruft diesen Endpunkt auf wenn Stripe checkout.session.completed feuert.
 // Body: { order_number: string, stripe_session_id?: string }
 export async function POST(req: NextRequest) {
-  // Shared secret prüfen (in Zapier als Header gesetzt)
-  const secret = req.headers.get("x-webhook-secret") ?? ""
+  // Secret akzeptieren: URL-Parameter (?secret=...) oder Header (x-webhook-secret)
+  const secret =
+    req.nextUrl.searchParams.get("secret") ??
+    req.headers.get("x-webhook-secret") ??
+    ""
   if (secret !== process.env.ZAPIER_CONFIRMED_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
