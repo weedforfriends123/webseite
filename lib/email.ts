@@ -104,7 +104,7 @@ function emailBase(previewText: string, body: string) {
 }
 
 function card(content: string, noPad = false) {
-  return `<div style="background:rgba(255,255,255,0.55);border-radius:16px;border:1px solid rgba(255,255,255,0.75);${noPad ? "" : "padding:24px 28px;"}overflow:hidden;">
+  return `<div style="background:#e2e5ea;border-radius:16px;border:1px solid #eaecef;${noPad ? "" : "padding:24px 28px;"}overflow:hidden;">
     ${content}
   </div>`
 }
@@ -234,27 +234,42 @@ export async function sendOrderConfirmation(params: {
   return getResend().emails.send({
     from: FROM,
     to: [email],
-    subject: `Bestellung erhalten #${orderRef} — WEEDFORFRIENDS`,
+    subject: `Bestellung eingegangen #${orderRef} — WEEDFORFRIENDS`,
     html: emailBase(
       `Danke ${firstName}, wir haben deine Bestellung erhalten.`,
       `
-      <h1 style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:28px;font-weight:900;text-transform:uppercase;letter-spacing:-0.03em;color:#35383f;margin:0 0 8px;line-height:1.05;">
-        Bestellung<br/>erhalten.
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="display:inline-block;width:64px;height:64px;border-radius:50%;background:#eddc8c;line-height:64px;text-align:center;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#35383f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-top:-2px;">
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
+          </svg>
+        </div>
+      </div>
+
+      <h1 style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:28px;font-weight:900;text-transform:uppercase;letter-spacing:-0.03em;color:#35383f;margin:0 0 8px;line-height:1.05;text-align:center;">
+        Bestellung<br/>eingegangen.
       </h1>
-      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;color:rgba(53,56,63,0.65);line-height:1.75;margin:14px 0 28px;">
-        Hey ${firstName}, wir haben deine Bestellung erhalten und bereiten die Zahlung vor. Du erhältst eine weitere E-Mail sobald deine Zahlung bestätigt wurde.
+      <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;color:rgba(53,56,63,0.65);line-height:1.75;margin:14px 0 28px;text-align:center;">
+        Hey ${firstName}, deine Bestellung ist bei uns eingegangen. Sobald deine Zahlung bestätigt wurde, bearbeiten wir sie sofort.
       </p>
 
-      ${label("Bestellreferenz")}
-      <p style="font-family:'Courier New',Courier,monospace;font-size:15px;font-weight:700;letter-spacing:0.1em;color:#35383f;margin:0 0 24px;background:rgba(53,56,63,0.07);display:inline-block;padding:8px 14px;border-radius:8px;">#${orderRef}</p>
+      <!-- Order reference — dark card -->
+      <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+        <tr>
+          <td style="background:#35383f;border-radius:14px;padding:20px 28px;text-align:center;">
+            <p style="margin:0 0 6px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(232,228,220,0.45);">Bestellreferenz</p>
+            <p style="margin:0;font-family:'Courier New',Courier,monospace;font-size:20px;font-weight:700;letter-spacing:0.12em;color:#eddc8c;">#${orderRef}</p>
+          </td>
+        </tr>
+      </table>
 
       <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(53,56,63,0.45);margin:0 0 8px;">Deine Artikel</p>
       ${lineItemsTable(lineItems, shippingPrice, grandTotal)}
 
       <div style="margin-top:20px;">
         ${card(`
-          ${label("Lieferadresse")}
-          <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:14px;color:#35383f;line-height:1.8;margin:6px 0 0;">
+          <p style="margin:0 0 6px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(53,56,63,0.45);">Lieferadresse</p>
+          <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:14px;color:#35383f;line-height:1.85;margin:6px 0 0;">
             ${addr.first_name} ${addr.last_name}<br/>
             ${addr.address1}${addr.address2 ? "<br/>" + addr.address2 : ""}<br/>
             ${addr.zip} ${addr.city}<br/>
@@ -326,12 +341,18 @@ export async function sendPaymentConfirmation(params: {
       ${lineItemsTable(lineItems, shippingPrice, grandTotal)}
 
       ${card(`
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div style="width:36px;height:36px;border-radius:50%;background:rgba(160,186,135,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;text-align:center;line-height:36px;">📦</div>
-          <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:13px;color:rgba(53,56,63,0.65);line-height:1.65;">
-            Du erhältst eine <strong style="color:#35383f;">Versandbenachrichtigung</strong> per E-Mail sobald dein Paket unterwegs ist.
-          </p>
-        </div>
+        <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+          <tr>
+            <td width="44" style="vertical-align:middle;padding-right:14px;">
+              <div style="width:36px;height:36px;border-radius:50%;background:#d4e0cc;text-align:center;line-height:36px;font-size:18px;">📦</div>
+            </td>
+            <td style="vertical-align:middle;">
+              <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:13px;color:rgba(53,56,63,0.65);line-height:1.65;">
+                Du erhältst eine <strong style="color:#35383f;">Versandbenachrichtigung</strong> per E-Mail sobald dein Paket unterwegs ist.
+              </p>
+            </td>
+          </tr>
+        </table>
       `)}
 
       ${ctaBtn("Zum Shop", `${SITE}/`)}

@@ -188,12 +188,12 @@ export async function createShopifyOrder(payload: CreateOrderPayload) {
   const financialStatus = payload.financial_status ?? "pending"
 
   // Bei "paid": Transaktion mitliefern damit Shopify die Order als bezahlt markiert
-  const transactions = financialStatus === "paid" && payload.amount_cents
+  const transactions = financialStatus === "paid" && payload.amount_cents !== undefined
     ? [{
         kind:    "sale",
         status:  "success",
         amount:  (payload.amount_cents / 100).toFixed(2),
-        gateway: "Stripe",
+        gateway: payload.amount_cents === 0 ? "manual" : "Stripe",
       }]
     : undefined
 
