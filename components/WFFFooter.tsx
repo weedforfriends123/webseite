@@ -4,6 +4,19 @@ import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
 
+const PAYMENT_LOGOS = [
+  { src: "/pay-visa.svg",       alt: "Visa"        },
+  { src: "/pay-mastercard.svg", alt: "Mastercard"  },
+  { src: "/pay-applepay.svg",   alt: "Apple Pay"   },
+  { src: "/pay-googlepay.svg",  alt: "Google Pay"  },
+  { src: "/pay-amazonpay.svg",  alt: "Amazon Pay"  },
+  { src: "/pay-revolut.svg",    alt: "Revolut Pay" },
+  { src: "/pay-eps.svg",        alt: "eps"         },
+  { src: "/pay-billie.svg",     alt: "Billie"      },
+  { src: "/pay-sepa.svg",       alt: "SEPA"        },
+  { src: "/pay-sepa-debit.svg", alt: "SEPA-Lastschrift" },
+]
+
 const BG      = "#1e2025"
 const TEXT    = "#e8e4dc"
 const MUTED   = "rgba(232,228,220,0.32)"
@@ -241,6 +254,27 @@ export function WFFFooter() {
             <FooterCol title="Unternehmen"  links={COMPANY_LINKS} />
             <FooterCol title="Rechtliches"  links={LEGAL_LINKS}   />
           </motion.div>
+        </div>
+
+        {/* ── Payment logos ── */}
+        <div style={{
+          margin: "0 clamp(20px,5vw,80px)",
+          paddingBottom: "clamp(28px,4vh,44px)",
+          borderBottom: `1px solid ${DIVIDER}`,
+          marginBottom: "clamp(28px,4vh,40px)",
+        }}>
+          <p className="font-ekstra uppercase mb-5"
+            style={{ fontSize: 9, letterSpacing: "0.28em", color: "rgba(232,228,220,0.22)" }}>
+            Zahlungsmethoden
+          </p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}>
+            {PAYMENT_LOGOS.map(logo => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img key={logo.alt} src={logo.src} alt={logo.alt} title={logo.alt}
+                style={{ height: 38, width: "auto", maxWidth: 74,
+                  objectFit: "contain", borderRadius: 7, opacity: 0.80 }} />
+            ))}
+          </div>
         </div>
 
         {/* ── Age warning banner ── */}
