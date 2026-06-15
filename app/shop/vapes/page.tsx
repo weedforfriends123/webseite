@@ -115,26 +115,12 @@ function HeroBuy() {
   return (
     <section style={{ background: BG, minHeight: "100dvh", position: "relative", overflow: "hidden" }}>
 
-      {/* Glow */}
-      <AnimatePresence mode="wait">
-        <motion.div key={`glow-${sel}`}
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          transition={{ duration: 1 }} aria-hidden
-          style={{
-            position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
-            background: `radial-gradient(ellipse 60% 70% at 38% 50%, ${vape.accent}44 0%, transparent 68%)`,
-            filter: "blur(48px)",
-          }}
-        />
-      </AnimatePresence>
-
       <div style={{
         position: "relative", zIndex: 1,
-        maxWidth: 1280, margin: "0 auto",
+        maxWidth: 1400, margin: "0 auto",
         minHeight: "100dvh",
         display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        padding: "0 clamp(24px,5vw,80px)",
+        gridTemplateColumns: "55% 45%",
       }} className="vapes-grid">
 
         {/* ══ LEFT — fruit bg + vape ══ */}
@@ -184,29 +170,32 @@ function HeroBuy() {
           </div>
         </div>
 
-        {/* ══ RIGHT — info ══ */}
+        {/* ══ RIGHT — glassmorphism info panel ══ */}
         <div style={{
           display: "flex", flexDirection: "column", justifyContent: "center",
-          padding: "clamp(90px,12vh,130px) 0 clamp(60px,8vh,90px) clamp(40px,4vw,64px)",
-          borderLeft: "1px solid rgba(53,56,63,0.09)",
+          padding: "clamp(80px,10vh,120px) clamp(32px,4vw,72px) clamp(60px,8vh,90px) clamp(32px,4vw,64px)",
+          background: "rgba(232,228,220,0.28)",
+          backdropFilter: "blur(32px) saturate(140%)",
+          WebkitBackdropFilter: "blur(32px) saturate(140%)",
+          borderLeft: "1px solid rgba(255,255,255,0.45)",
         }}>
 
           {/* Eyebrow */}
-          <p className="font-ekstra uppercase" style={{ fontSize: 9, letterSpacing: "0.5em", color: MUTED, marginBottom: "clamp(10px,1.4vh,16px)" }}>
-            Disposable Vape · HC 96% · 1 ML
+          <p className="font-ekstra uppercase" style={{ fontSize: 8, letterSpacing: "0.55em", color: MUTED, marginBottom: "clamp(12px,1.8vh,20px)" }}>
+            HC Disposable Vape · 96% · 1 ML · 600 Puffs
           </p>
 
-          {/* Name */}
+          {/* Name — large */}
           <AnimatePresence mode="wait">
             <motion.h1 key={`name-${sel}`}
-              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.3, ease: [0.16,1,0.3,1] }}
+              initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.28, ease: [0.16,1,0.3,1] }}
               className="font-druk-wide uppercase"
               style={{
-                fontSize: "clamp(2.2rem,4.2vw,6rem)",
-                lineHeight: 0.86, letterSpacing: "-0.03em",
-                color: TEXT, margin: 0,
+                fontSize: "clamp(2.4rem,4.8vw,7rem)",
+                lineHeight: 0.84, letterSpacing: "-0.03em",
+                color: TEXT, margin: "0 0 clamp(12px,1.8vh,20px)",
               }}>
               {vape.lineA && <span style={{ display: "block" }}>{vape.lineA}</span>}
               <span style={{ display: "block" }}>{vape.lineB}</span>
@@ -217,76 +206,79 @@ function HeroBuy() {
           <AnimatePresence mode="wait">
             <motion.p key={`desc-${sel}`}
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.28 }}
-              style={{ fontSize: "clamp(12px,0.9vw,14px)", color: MUTED, lineHeight: 1.8, margin: "clamp(14px,2vh,20px) 0 0" }}>
+              transition={{ duration: 0.24 }}
+              style={{ fontSize: "clamp(11px,0.88vw,13px)", color: MUTED, lineHeight: 1.85, margin: 0 }}>
               {vape.desc}
             </motion.p>
           </AnimatePresence>
 
-          {/* Divider */}
-          <div style={{ height: 1, background: "rgba(53,56,63,0.09)", margin: "clamp(20px,3vh,32px) 0" }} />
+          <div style={{ height: 1, background: "rgba(53,56,63,0.10)", margin: "clamp(18px,2.8vh,28px) 0" }} />
 
-          {/* Flavor list */}
-          <p className="font-ekstra uppercase" style={{ fontSize: 8, letterSpacing: "0.48em", color: MUTED, marginBottom: 10 }}>Sorte</p>
-          <div style={{ display: "flex", flexDirection: "column", marginBottom: "clamp(20px,3vh,28px)" }}>
+          {/* Flavor selector — glass chips */}
+          <p className="font-ekstra uppercase" style={{ fontSize: 8, letterSpacing: "0.5em", color: MUTED, marginBottom: 10 }}>Sorte</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 2, marginBottom: "clamp(18px,2.8vh,28px)" }}>
             {VAPES.map((v, i) => {
               const active = sel === i
               const label = v.lineA ? `${v.lineA} ${v.lineB}` : v.lineB
               return (
                 <button key={v.key} onClick={() => { setSel(i); setPack(0) }} style={{
-                  background: "none", border: "none", cursor: "pointer",
-                  textAlign: "left", padding: "8px 0",
-                  borderBottom: "1px solid rgba(53,56,63,0.07)",
-                  display: "flex", alignItems: "center", gap: 12,
+                  background: active ? "rgba(255,255,255,0.40)" : "transparent",
+                  backdropFilter: active ? "blur(12px)" : "none",
+                  WebkitBackdropFilter: active ? "blur(12px)" : "none",
+                  border: active ? "1px solid rgba(255,255,255,0.60)" : "1px solid transparent",
+                  borderRadius: 8, cursor: "pointer",
+                  textAlign: "left", padding: "7px 12px",
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  transition: "all 0.18s",
                 }}>
-                  <motion.span
-                    animate={{ width: active ? 18 : 8, background: active ? TEXT : "rgba(53,56,63,0.20)" }}
-                    style={{ height: 1.5, borderRadius: 99, flexShrink: 0, display: "block" }}
-                    transition={{ duration: 0.22 }}
-                  />
                   <span className="font-druk-wide uppercase" style={{
-                    fontSize: "clamp(10px,0.82vw,12px)",
-                    letterSpacing: "0.04em",
-                    color: active ? TEXT : "rgba(53,56,63,0.28)",
-                    transition: "color 0.2s",
+                    fontSize: "clamp(9px,0.75vw,11px)",
+                    letterSpacing: "0.06em",
+                    color: active ? TEXT : "rgba(53,56,63,0.30)",
+                    transition: "color 0.18s",
                   }}>{label}</span>
+                  {active && (
+                    <motion.div layoutId="flavor-active-dot"
+                      style={{ width: 5, height: 5, borderRadius: "50%", background: TEXT }} />
+                  )}
                 </button>
               )
             })}
           </div>
 
-          {/* Divider */}
-          <div style={{ height: 1, background: "rgba(53,56,63,0.09)", marginBottom: "clamp(20px,3vh,28px)" }} />
+          <div style={{ height: 1, background: "rgba(53,56,63,0.10)", marginBottom: "clamp(18px,2.8vh,28px)" }} />
 
-          {/* Pack */}
-          <p className="font-ekstra uppercase" style={{ fontSize: 8, letterSpacing: "0.48em", color: MUTED, marginBottom: 10 }}>Menge</p>
-          <div style={{ display: "flex", gap: 8, marginBottom: "clamp(20px,3vh,28px)" }}>
+          {/* Pack — glass chips */}
+          <p className="font-ekstra uppercase" style={{ fontSize: 8, letterSpacing: "0.5em", color: MUTED, marginBottom: 10 }}>Menge</p>
+          <div style={{ display: "flex", gap: 8, marginBottom: "clamp(18px,2.8vh,28px)" }}>
             {PACKS.map((pk, i) => (
               <button key={pk.label} onClick={() => setPack(i)} style={{
                 display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
-                padding: "9px 18px",
-                border: `1.5px solid ${pack === i ? TEXT : "rgba(53,56,63,0.15)"}`,
-                background: pack === i ? TEXT : "transparent",
-                borderRadius: 8, cursor: "pointer", transition: "all 0.14s",
+                padding: "10px 20px",
+                background: pack === i ? TEXT : "rgba(255,255,255,0.35)",
+                backdropFilter: pack === i ? "none" : "blur(8px)",
+                WebkitBackdropFilter: pack === i ? "none" : "blur(8px)",
+                border: `1px solid ${pack === i ? "transparent" : "rgba(255,255,255,0.55)"}`,
+                borderRadius: 10, cursor: "pointer", transition: "all 0.16s",
               }}>
-                <span className="font-druk-wide uppercase" style={{ fontSize: 13, color: pack === i ? LIGHT : TEXT, lineHeight: 1 }}>
+                <span className="font-druk-wide uppercase" style={{ fontSize: 14, color: pack === i ? LIGHT : TEXT, lineHeight: 1 }}>
                   {pk.label}
                 </span>
                 {pk.savings && (
-                  <span style={{ fontSize: 9, color: pack === i ? "#b0d498" : "#6fa05e" }} className="font-druk">{pk.savings}</span>
+                  <span style={{ fontSize: 9, color: pack === i ? "#b8d8a0" : "#5a9a4a" }} className="font-druk">{pk.savings}</span>
                 )}
               </button>
             ))}
           </div>
 
-          {/* Price row */}
-          <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: "clamp(14px,2vh,20px)" }}>
+          {/* Price */}
+          <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: "clamp(14px,2vh,18px)" }}>
             <AnimatePresence mode="wait">
               <motion.span key={`p-${pack}`}
-                initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.13 }}
+                initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.14 }}
                 className="font-druk"
-                style={{ fontSize: "clamp(2.2rem,3.4vw,4.2rem)", color: TEXT, lineHeight: 1 }}>
+                style={{ fontSize: "clamp(2.4rem,3.8vw,5rem)", color: TEXT, lineHeight: 1 }}>
                 €{PACKS[pack].price.toFixed(2)}
               </motion.span>
             </AnimatePresence>
@@ -301,8 +293,9 @@ function HeroBuy() {
             background: added ? "#a0ba87" : TEXT,
             color: LIGHT, borderRadius: 9999,
             border: "none", cursor: "pointer",
-            fontSize: 11, letterSpacing: "0.22em",
-            transition: "background 0.28s",
+            fontSize: 11, letterSpacing: "0.24em",
+            transition: "all 0.28s",
+            boxShadow: added ? "none" : "0 8px 32px rgba(53,56,63,0.22)",
           }} className="font-druk-wide uppercase">
             <AnimatePresence mode="wait" initial={false}>
               <motion.span key={added ? "a" : "b"}
@@ -313,16 +306,16 @@ function HeroBuy() {
             </AnimatePresence>
           </button>
 
-          {/* Trust badges */}
-          <div style={{ display: "flex", gap: 20, marginTop: "clamp(18px,2.5vh,26px)", flexWrap: "wrap" }}>
-            {["Lab Tested", "EU Zertifiziert", "0% Nikotin", "600 Puffs"].map(t => (
-              <div key={t} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <div style={{ width: 14, height: 14, borderRadius: "50%", background: "rgba(160,186,135,0.25)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-                    <path d="M1.5 4l2 2 3-3" stroke="#6fa05e" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+          {/* Trust */}
+          <div style={{ display: "flex", gap: 16, marginTop: "clamp(16px,2.2vh,22px)", flexWrap: "wrap" }}>
+            {["Lab Tested", "EU Zertifiziert", "0% Nikotin"].map(t => (
+              <div key={t} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <div style={{ width: 13, height: 13, borderRadius: "50%", background: "rgba(160,186,135,0.30)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="7" height="7" viewBox="0 0 8 8" fill="none">
+                    <path d="M1.5 4l2 2 3-3" stroke="#5a9a4a" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </div>
-                <span className="font-ekstra" style={{ fontSize: 10, color: "rgba(53,56,63,0.40)" }}>{t}</span>
+                <span className="font-ekstra" style={{ fontSize: 9, color: "rgba(53,56,63,0.38)" }}>{t}</span>
               </div>
             ))}
           </div>
