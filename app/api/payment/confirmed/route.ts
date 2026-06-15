@@ -2,11 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { createShopifyOrder } from "@/lib/shopify.server"
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-)
-
 // Zapier ruft diesen Endpunkt auf wenn Stripe checkout.session.completed feuert.
 // Body: { order_number: string, stripe_session_id?: string }
 export async function POST(req: NextRequest) {
@@ -18,6 +13,11 @@ export async function POST(req: NextRequest) {
   if (secret !== process.env.ZAPIER_CONFIRMED_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
 
   let body: { order_number?: string; stripe_session_id?: string }
   try {

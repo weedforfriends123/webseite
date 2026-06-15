@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-)
-
 // Zapier sendet plaintext in diesem Format:
 // "Stripe Checkout URL: https://checkout.stripe.com/...\nOrder: <order_number>\nSession ID: cs_live_..."
 
 export async function POST(req: NextRequest) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
   try {
     const rawText = await req.text()
 
