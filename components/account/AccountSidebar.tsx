@@ -208,11 +208,6 @@ export function AccountSidebar({ active, setActive, onSignOut, user, profile }: 
           className="mb-6"
           style={{ padding: "clamp(20px,2.8vh,28px)", borderRadius: 18, background: "rgba(255,255,255,0.48)", border: "1px solid rgba(255,255,255,0.70)" }}
         >
-          <div className="flex justify-center mb-6">
-            <Image src="/logo.webp" alt="WEEDFORFRIENDS" width={56} height={56}
-              style={{ height: 56, width: 56, filter: "brightness(0)", opacity: 0.72, borderRadius: "50%" }} />
-          </div>
-
           <div className="flex items-center gap-3">
             <Avatar initials={initials} size={44} />
             <div className="min-w-0">
