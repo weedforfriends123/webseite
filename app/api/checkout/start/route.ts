@@ -41,6 +41,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Pflichtfelder fehlen" }, { status: 400 })
     }
 
+    const grandTotalCheck = (
+      body.line_items.reduce((s, i) => s + parseFloat(i.price) * i.quantity, 0) +
+      parseFloat(body.shipping_price ?? "0")
+    )
+    if (grandTotalCheck < 0.50) {
+      return NextResponse.json({ error: "Mindestbestellwert ist €0.50 (Stripe-Minimum)" }, { status: 400 })
+    }
+
     const hookUrl = process.env.ZAPIER_PAYMENT_HOOK_URL
     if (!hookUrl) throw new Error("ZAPIER_PAYMENT_HOOK_URL nicht konfiguriert")
 
