@@ -1,13 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 500">
-  <rect width="780" height="500" rx="48" fill="white"/>
-  <rect x="1.5" y="1.5" width="777" height="497" rx="47" fill="none" stroke="rgba(0,0,0,0.07)" stroke-width="3"/>
-  <!-- Apple logo mark (simplified accurate path, scaled to ~90px tall centered left) -->
-  <g transform="translate(148,100) scale(5.2)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 480">
+  <rect width="750" height="480" rx="44" fill="black"/>
+  <!-- Apple logo mark built from basic shapes -->
+  <g transform="translate(78, 60)">
     <!-- Leaf -->
-    <path d="M17.05,2.4c1.5-1.8,2.5-4.3,2.2-6.8c-2.1,0.1-4.7,1.4-6.2,3.2c-1.4,1.6-2.5,4.1-2.2,6.5C13.1,5.5,15.6,4.2,17.05,2.4z" fill="black"/>
+    <ellipse cx="145" cy="52" rx="28" ry="52" transform="rotate(-18 145 52)" fill="white"/>
+    <ellipse cx="145" cy="52" rx="18" ry="42" transform="rotate(-18 145 52)" fill="black"/>
     <!-- Apple body -->
-    <path d="M18.2,5.9c-3.4-0.2-6.4,1.9-8,1.9c-1.6,0-4.1-1.8-6.8-1.8c-3.5,0.1-6.8,2-8.6,5.2C-9,18.4-6.5,28.4-2,34.7c2.2,3.2,4.8,6.7,8.2,6.6c3.2-0.1,4.5-2.1,8.4-2.1c3.9,0,5,2.1,8.4,2c3.5-0.1,5.7-3.2,7.9-6.4c2.5-3.6,3.5-7.2,3.5-7.4c-0.1,0-6.8-2.6-6.8-10.3c-0.1-6.5,5.3-9.6,5.5-9.8C30.3,3.3,22.5,5.7,18.2,5.9z" fill="black"/>
+    <rect x="55" y="88" width="180" height="220" rx="88" fill="white"/>
+    <!-- Bite removed from upper right -->
+    <circle cx="238" cy="118" r="72" fill="black"/>
+    <!-- Top flat indent -->
+    <rect x="95" y="68" width="100" height="50" fill="black"/>
   </g>
-  <!-- Pay text -->
-  <text x="430" y="328" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', Arial, sans-serif" font-size="180" font-weight="500" fill="black">Pay</text>
+  <text x="500" y="320" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, Arial, sans-serif" font-size="168" font-weight="400" fill="white">Pay</text>
 </svg>

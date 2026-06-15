@@ -1,17 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 500">
-  <rect width="780" height="500" rx="48" fill="white"/>
-  <rect x="1.5" y="1.5" width="777" height="497" rx="47" fill="none" stroke="rgba(0,0,0,0.07)" stroke-width="3"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 480">
+  <rect width="750" height="480" rx="44" fill="white" stroke="rgba(0,0,0,0.09)" stroke-width="3"/>
   <defs>
-    <clipPath id="mc-left-clip">
-      <circle cx="295" cy="218" r="148"/>
-    </clipPath>
+    <clipPath id="lc"><circle cx="280" cy="220" r="148"/></clipPath>
   </defs>
-  <!-- Red left circle -->
-  <circle cx="295" cy="218" r="148" fill="#EB001B"/>
-  <!-- Orange right circle -->
-  <circle cx="485" cy="218" r="148" fill="#F79E1B"/>
-  <!-- Overlap area in blend orange -->
-  <circle cx="485" cy="218" r="148" fill="#FF5F00" clip-path="url(#mc-left-clip)"/>
-  <!-- mastercard text -->
-  <text x="390" y="428" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="400" fill="#231F20" letter-spacing="-1">mastercard</text>
+  <circle cx="280" cy="220" r="148" fill="#EB001B"/>
+  <circle cx="470" cy="220" r="148" fill="#F79E1B"/>
+  <circle cx="470" cy="220" r="148" fill="#FF5F00" clip-path="url(#lc)"/>
+  <text x="375" y="420" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="46" fill="#231F20">mastercard</text>
 </svg>
