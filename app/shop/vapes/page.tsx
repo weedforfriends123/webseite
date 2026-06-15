@@ -137,29 +137,51 @@ function HeroBuy() {
         padding: "0 clamp(24px,5vw,80px)",
       }} className="vapes-grid">
 
-        {/* ══ LEFT — image ══ */}
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "center",
-          padding: "clamp(90px,12vh,130px) clamp(24px,3vw,56px) clamp(60px,8vh,90px) 0",
-          position: "relative",
-        }}>
+        {/* ══ LEFT — fruit bg + vape ══ */}
+        <div style={{ position: "relative", overflow: "hidden" }}>
+          {/* Fruit image — full bleed, animates on flavor change */}
           <AnimatePresence mode="wait">
-            <motion.div key={`img-${sel}`}
-              initial={{ opacity: 0, scale: 0.94, y: 20 }}
-              animate={{ opacity: 1, scale: 1,    y: 0  }}
-              exit={{ opacity: 0, scale: 0.97, y: -14 }}
-              transition={{ duration: 0.48, ease: [0.16,1,0.3,1] }}
-              style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+            <motion.div key={`fruit-${sel}`}
+              initial={{ opacity: 0, scale: 1.04 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.97 }}
+              transition={{ duration: 0.6, ease: [0.16,1,0.3,1] }}
+              style={{ position: "absolute", inset: 0, zIndex: 0 }}
             >
-              <Image src={vape.img} alt={vape.name} width={360} height={360} priority
-                style={{
-                  height: "clamp(200px,32vh,360px)", width: "auto",
-                  objectFit: "contain", display: "block",
-                  filter: "drop-shadow(0 32px 64px rgba(53,56,63,0.22)) drop-shadow(0 8px 20px rgba(53,56,63,0.12))",
-                }}
+              <Image
+                src={`/fruits/${vape.key}.webp`}
+                alt=""
+                fill
+                sizes="50vw"
+                style={{ objectFit: "cover", objectPosition: "center" }}
               />
             </motion.div>
           </AnimatePresence>
+
+          {/* Vape device — centered on top */}
+          <div style={{
+            position: "relative", zIndex: 1,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            minHeight: "100dvh",
+            padding: "clamp(90px,12vh,130px) clamp(24px,3vw,56px)",
+          }}>
+            <AnimatePresence mode="wait">
+              <motion.div key={`img-${sel}`}
+                initial={{ opacity: 0, scale: 0.88, y: 24 }}
+                animate={{ opacity: 1, scale: 1,    y: 0  }}
+                exit={{ opacity: 0, scale: 0.94, y: -18 }}
+                transition={{ duration: 0.5, ease: [0.16,1,0.3,1] }}
+              >
+                <Image src={vape.img} alt={vape.name} width={320} height={320} priority
+                  style={{
+                    height: "clamp(180px,28vh,320px)", width: "auto",
+                    objectFit: "contain", display: "block",
+                    filter: "drop-shadow(0 40px 80px rgba(53,56,63,0.35)) drop-shadow(0 12px 28px rgba(53,56,63,0.20))",
+                  }}
+                />
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
 
         {/* ══ RIGHT — info ══ */}
