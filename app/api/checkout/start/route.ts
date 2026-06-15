@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import { randomUUID } from "crypto"
+import { createClient } from "@supabase/supabase-js"
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+)
 
 type LineItem = {
   title: string
@@ -48,8 +54,24 @@ export async function POST(req: NextRequest) {
 
     const amountCents = Math.round(parseFloat(grandTotal) * 100)
 
-    // Alle Bestelldaten an Zapier. Zapier speichert sie, erstellt die Stripe Session
-    // und schickt die URL async zurück an callback_url.
+    // Bestelldaten in Supabase speichern — werden beim Stripe-Webhook abgerufen
+    const { error: dbErr } = await supabase.from("pending_orders").insert({
+      id:               orderNumber,
+      status:           "pending",
+      email:            body.email,
+      phone:            body.phone ?? null,
+      line_items:       body.line_items,
+      shipping_address: body.shipping_address,
+      shipping_price:   body.shipping_price ?? "0.00",
+      amount_cents:     amountCents,
+    })
+
+    if (dbErr) {
+      console.error("[checkout/start] supabase insert error:", dbErr)
+      return NextResponse.json({ error: "Datenbankfehler" }, { status: 500 })
+    }
+
+    // Zapier: Stripe Checkout Session erstellen
     await fetch(hookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -68,7 +90,6 @@ export async function POST(req: NextRequest) {
       }),
     })
 
-    // Sofort mit dem Token antworten — Frontend pollt /api/checkout/status
     return NextResponse.json({ ok: true, order_token: orderNumber })
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unbekannter Fehler"

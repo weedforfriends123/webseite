@@ -27,6 +27,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "resend": "^6.12.4",
+    "stripe": "^22.2.1",
     "tailwind-merge": "^2.5.4",
     "three": "^0.169.0"
   },

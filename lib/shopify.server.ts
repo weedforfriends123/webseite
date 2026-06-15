@@ -163,14 +163,15 @@ export type CreateOrderPayload = {
   email: string
   phone?: string
   note?: string
+  financial_status?: "pending" | "paid"
   line_items: ShopifyLineItem[]
   shipping_address: ShopifyAddress
   billing_address?: ShopifyAddress
   shipping_price?: string
+  amount_cents?: number
 }
 
 export async function createShopifyOrder(payload: CreateOrderPayload) {
-  // Ensure customer exists in Shopify first
   const customerId = await syncShopifyCustomer({
     email:      payload.email,
     first_name: payload.shipping_address.first_name,
@@ -184,16 +185,29 @@ export async function createShopifyOrder(payload: CreateOrderPayload) {
     code:  "STANDARD",
   }
 
+  const financialStatus = payload.financial_status ?? "pending"
+
+  // Bei "paid": Transaktion mitliefern damit Shopify die Order als bezahlt markiert
+  const transactions = financialStatus === "paid" && payload.amount_cents
+    ? [{
+        kind:    "sale",
+        status:  "success",
+        amount:  (payload.amount_cents / 100).toFixed(2),
+        gateway: "Stripe",
+      }]
+    : undefined
+
   const order = {
     email:            payload.email,
     phone:            payload.phone,
     note:             payload.note,
-    financial_status: "pending",
+    financial_status: financialStatus,
     line_items:       payload.line_items,
     billing_address:  payload.billing_address ?? payload.shipping_address,
     shipping_address: payload.shipping_address,
     shipping_lines:   [shippingLine],
-    ...(customerId ? { customer: { id: customerId } } : {}),
+    ...(transactions ? { transactions } : {}),
+    ...(customerId   ? { customer: { id: customerId } } : {}),
   }
 
   const res = await shopifyRequest("/orders.json", {
