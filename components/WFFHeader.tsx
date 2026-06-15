@@ -64,7 +64,7 @@ export function WFFHeader() {
   const pathname = usePathname()
   const [menuOpen,     setMenuOpen]     = useState(false)
   const [expandedItem, setExpandedItem] = useState<string | null>(null)
-  const [atHero,       setAtHero]       = useState(true)
+  const [atHero,       setAtHero]       = useState(false)
   const { dispatch, count } = useCart()
 
   useEffect(() => {
@@ -88,9 +88,6 @@ export function WFFHeader() {
   if (pathname === "/") return null
 
   const closeMenu = () => { setMenuOpen(false); setExpandedItem(null) }
-
-  // Hero section has its own integrated nav — hide header until user scrolls
-  if (atHero) return null
 
   return (
     <>
