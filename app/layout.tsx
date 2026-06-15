@@ -3,7 +3,7 @@ import { Syne, Space_Grotesk, Space_Mono } from "next/font/google"
 import "./globals.css"
 import { CartProvider } from "@/lib/cart"
 import { CartDrawer } from "@/components/CartDrawer"
-import { WFFHeader } from "@/components/WFFHeader"
+import { Navbar } from "@/components/Navbar"
 import { WFFFooter } from "@/components/WFFFooter"
 import { PageTransition } from "@/components/PageTransition"
 import { SmoothScroll } from "@/components/SmoothScroll"
@@ -56,7 +56,7 @@ export default function RootLayout({
         <SmoothScroll />
         <CartProvider>
           <PageTransition>
-            <WFFHeader />
+            <Navbar />
             {children}
             <WFFFooter />
             <CartDrawer />

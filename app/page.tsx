@@ -1,4 +1,3 @@
-import { Navbar }              from "@/components/Navbar"
 import { Section01_Hero }      from "@/components/sections/Section01_Hero"
 import { ScrollBand }          from "@/components/sections/ScrollBand"
 import { Section03_UGC }       from "@/components/sections/Section03_UGC"
@@ -9,7 +8,6 @@ import { Section06_Reviews }   from "@/components/sections/Section06_Reviews"
 export default function Home() {
   return (
     <>
-      <Navbar />
       <main style={{ background: "#bcc0ca" }}>
         <Section01_Hero />
         <ScrollBand />
