@@ -80,9 +80,7 @@ const PAYMENT_LOGOS: { src: string; alt: string }[] = [
   { src: "/pay-googlepay.svg",  alt: "Google Pay"  },
   { src: "/pay-amazonpay.svg",  alt: "Amazon Pay"  },
   { src: "/pay-revolut.svg",    alt: "Revolut Pay" },
-  { src: "/pay-wero.svg",       alt: "Wero"        },
   { src: "/pay-eps.svg",        alt: "eps"         },
-  { src: "/pay-mobilepay.svg",  alt: "MobilePay"   },
   { src: "/pay-billie.svg",     alt: "Billie"      },
   { src: "/pay-sepa.svg",       alt: "SEPA"          },
   { src: "/pay-sepa-debit.svg", alt: "SEPA-Lastschrift" },
@@ -289,12 +287,12 @@ export default function CheckoutPage() {
                     alt={logo.alt}
                     title={logo.alt}
                     style={{
-                      height: 28,
+                      height: 44,
                       width: "auto",
-                      maxWidth: 54,
+                      maxWidth: 80,
                       objectFit: "contain",
-                      borderRadius: 6,
-                      opacity: 0.85,
+                      borderRadius: 8,
+                      opacity: 0.90,
                     }}
                   />
                 ))}
