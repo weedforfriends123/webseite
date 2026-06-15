@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { createShopifyOrder } from "@/lib/shopify.server"
+import { sendPaymentConfirmation } from "@/lib/email"
 
 // Zapier ruft diesen Endpunkt auf wenn Stripe checkout.session.completed feuert.
 // Body: { order_number: string, stripe_session_id?: string }
@@ -83,6 +84,16 @@ export async function POST(req: NextRequest) {
         ...(body.stripe_session_id ? { stripe_session_id: body.stripe_session_id } : {}),
       })
       .eq("id", orderNumber)
+
+    // Zahlungsbestätigung per E-Mail (fire & forget)
+    sendPaymentConfirmation({
+      email:              order.email,
+      firstName:          (order.shipping_address as { first_name?: string }).first_name ?? "",
+      shopifyOrderNumber: shopifyOrder.order_number,
+      lineItems:          order.line_items,
+      shippingPrice:      order.shipping_price,
+      grandTotal:         (order.amount_cents / 100).toFixed(2),
+    }).catch(e => console.error("[payment/confirmed] email error:", e))
 
     console.log(`[payment/confirmed] Shopify Order #${shopifyOrder.order_number} für ${order.email}`)
     return NextResponse.json({ ok: true, shopify_order_number: shopifyOrder.order_number })
