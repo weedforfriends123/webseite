@@ -73,6 +73,14 @@ const inputStyle = (hasError: boolean): React.CSSProperties => ({
   boxSizing: "border-box",
 })
 
+type PaymentMethod = "card" | "apple_pay" | "bank_transfer"
+
+const PAYMENT_METHODS: { id: PaymentMethod; label: string; sublabel: string; icon: string }[] = [
+  { id: "card",          label: "Kreditkarte",      sublabel: "Visa, Mastercard, Amex",    icon: "💳" },
+  { id: "apple_pay",     label: "Apple Pay",        sublabel: "Safari & iOS",              icon: "" },
+  { id: "bank_transfer", label: "Banküberweisung",  sublabel: "SEPA, dauert 1–3 Werktage", icon: "🏦" },
+]
+
 export default function CheckoutPage() {
   const { state, total } = useCart()
   const { user, profile } = useUser()
@@ -83,6 +91,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false)
   const [loadingMsg, setLoadingMsg] = useState("Zahlung wird vorbereitet …")
   const [serverError, setServerError] = useState("")
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card")
 
   // Pre-fill from saved profile + default address
   useEffect(() => {
@@ -120,64 +129,87 @@ export default function CheckoutPage() {
     return Object.keys(next).length === 0
   }
 
+  const orderPayload = () => ({
+    email: form.email,
+    phone: form.phone,
+    line_items: items.map(item => ({
+      title: item.name,
+      variant_title: item.pack,
+      price: item.price.toFixed(2),
+      quantity: item.qty,
+    })),
+    shipping_address: {
+      first_name: form.first_name,
+      last_name:  form.last_name,
+      address1:   form.address1,
+      address2:   form.address2,
+      city:       form.city,
+      zip:        form.zip,
+      country:    form.country,
+      phone:      form.phone,
+    },
+    shipping_price: shipping.toFixed(2),
+  })
+
+  async function handleBankTransfer() {
+    setLoadingMsg("Bestellung wird angelegt …")
+    const res = await fetch("/api/checkout/bank-transfer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orderPayload()),
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error ?? "Fehler")
+    const params = new URLSearchParams({
+      ref:    data.reference,
+      amount: data.amount,
+      iban:   data.bank.iban,
+      bic:    data.bank.bic,
+      owner:  data.bank.owner,
+      bank:   data.bank.name,
+    })
+    window.location.href = `/checkout/pending?${params.toString()}`
+  }
+
+  async function handleCardPayment() {
+    setLoadingMsg("Bestellung wird übermittelt …")
+    const res = await fetch("/api/checkout/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orderPayload()),
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error ?? "Fehler")
+    const { order_token } = data
+
+    setLoadingMsg("Zahlung wird vorbereitet …")
+    let paymentUrl: string | null = null
+    for (let i = 0; i < 30; i++) {
+      await new Promise(r => setTimeout(r, 1500))
+      const statusRes = await fetch(`/api/checkout/status?token=${order_token}`)
+      const statusData = await statusRes.json()
+      if (statusData.ready && statusData.url) {
+        paymentUrl = statusData.url
+        break
+      }
+    }
+    if (!paymentUrl) throw new Error("Zeitüberschreitung — bitte nochmal versuchen.")
+    window.location.href = paymentUrl
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!validate()) return
 
     setLoading(true)
-    setLoadingMsg("Bestellung wird übermittelt …")
     setServerError("")
 
     try {
-      // 1. Bestellung an Zapier schicken — bekommt sofort den order_token zurück
-      const res = await fetch("/api/checkout/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: form.email,
-          phone: form.phone,
-          line_items: items.map(item => ({
-            title: item.name,
-            variant_title: item.pack,
-            price: item.price.toFixed(2),
-            quantity: item.qty,
-          })),
-          shipping_address: {
-            first_name: form.first_name,
-            last_name:  form.last_name,
-            address1:   form.address1,
-            address2:   form.address2,
-            city:       form.city,
-            zip:        form.zip,
-            country:    form.country,
-            phone:      form.phone,
-          },
-          shipping_price: shipping.toFixed(2),
-        }),
-      })
-
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? "Fehler")
-
-      const { order_token } = data
-
-      // 2. Auf Stripe-URL warten — Zapier schickt sie async per POST an /api/checkout/callback
-      setLoadingMsg("Zahlung wird vorbereitet …")
-      let paymentUrl: string | null = null
-
-      for (let i = 0; i < 30; i++) {
-        await new Promise(r => setTimeout(r, 1500))
-        const statusRes = await fetch(`/api/checkout/status?token=${order_token}`)
-        const statusData = await statusRes.json()
-        if (statusData.ready && statusData.url) {
-          paymentUrl = statusData.url
-          break
-        }
+      if (paymentMethod === "bank_transfer") {
+        await handleBankTransfer()
+      } else {
+        await handleCardPayment()
       }
-
-      if (!paymentUrl) throw new Error("Zeitüberschreitung — bitte nochmal versuchen.")
-
-      window.location.href = paymentUrl
     } catch (err) {
       setServerError(err instanceof Error ? err.message : "Unbekannter Fehler")
       setLoading(false)
@@ -261,6 +293,51 @@ export default function CheckoutPage() {
               </div>
             </div>
 
+            {/* ── PAYMENT METHOD ── */}
+            <p className="font-ekstra uppercase mt-8 mb-4" style={{ fontSize: 10, letterSpacing: "0.28em", color: MUTED }}>
+              Zahlungsmethode
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {PAYMENT_METHODS.map(m => {
+                const active = paymentMethod === m.id
+                return (
+                  <motion.button
+                    key={m.id}
+                    type="button"
+                    onClick={() => setPaymentMethod(m.id)}
+                    whileTap={{ scale: 0.985 }}
+                    className="flex items-center gap-4 text-left w-full"
+                    style={{
+                      padding: "14px 18px",
+                      borderRadius: 14,
+                      border: `1.5px solid ${active ? TEXT : "rgba(53,56,63,0.18)"}`,
+                      background: active ? "rgba(53,56,63,0.07)" : "rgba(255,255,255,0.55)",
+                      cursor: "pointer",
+                      transition: "all 0.18s ease",
+                    }}
+                  >
+                    <span style={{ fontSize: 20, lineHeight: 1, flexShrink: 0 }}>{m.icon}</span>
+                    <div style={{ flex: 1 }}>
+                      <p className="font-ekstra uppercase" style={{ fontSize: 11, letterSpacing: "0.18em", color: TEXT, marginBottom: 2 }}>
+                        {m.label}
+                      </p>
+                      <p className="font-ekstra" style={{ fontSize: 9, color: MUTED, letterSpacing: "0.10em" }}>
+                        {m.sublabel}
+                      </p>
+                    </div>
+                    <div style={{
+                      width: 18, height: 18, borderRadius: "50%",
+                      border: `1.5px solid ${active ? TEXT : "rgba(53,56,63,0.25)"}`,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      flexShrink: 0,
+                    }}>
+                      {active && <div style={{ width: 9, height: 9, borderRadius: "50%", background: TEXT }} />}
+                    </div>
+                  </motion.button>
+                )
+              })}
+            </div>
+
             {serverError && (
               <p className="font-ekstra mt-4 p-3 rounded-xl" style={{ fontSize: "0.88rem", color: "#e85c5c", background: "rgba(232,92,92,0.08)", border: "1px solid rgba(232,92,92,0.18)" }}>
                 {serverError}
@@ -280,7 +357,7 @@ export default function CheckoutPage() {
                 cursor: items.length === 0 ? "not-allowed" : "pointer",
               }}
             >
-              {loading ? loadingMsg : "Jetzt bezahlen"}
+              {loading ? loadingMsg : paymentMethod === "bank_transfer" ? "Jetzt bestellen" : "Jetzt bezahlen"}
             </button>
           </form>
 
