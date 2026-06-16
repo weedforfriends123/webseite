@@ -55,7 +55,7 @@ async function awardLoyaltyPoints(
 }
 
 // Zapier ruft diesen Endpunkt auf wenn Stripe checkout.session.completed feuert.
-// Body: { order_number: string, stripe_session_id?: string }
+// Body: { order_number: string, stripe_session_id?: string, payment_status?: string }
 export async function POST(req: NextRequest) {
   // Secret akzeptieren: URL-Parameter (?secret=...) oder Header (x-webhook-secret)
   const secret =
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   )
 
-  let body: { order_number?: string; stripe_session_id?: string }
+  let body: { order_number?: string; stripe_session_id?: string; payment_status?: string }
   try {
     body = await req.json()
   } catch {
@@ -81,6 +81,14 @@ export async function POST(req: NextRequest) {
   const orderNumber = body.order_number
   if (!orderNumber) {
     return NextResponse.json({ error: "order_number fehlt" }, { status: 400 })
+  }
+
+  // Zweite Absicherung: Wenn Zapier payment_status mitschickt, muss es "paid" sein.
+  // Verhindert dass eine abgeschlossene aber unbezahlte Session (status=complete, payment_status=unpaid)
+  // als bezahlt durchrutscht.
+  if (body.payment_status && body.payment_status !== "paid") {
+    console.warn(`[payment/confirmed] Abgelehnt — payment_status="${body.payment_status}" für Order ${orderNumber.slice(0, 8).toUpperCase()}`)
+    return NextResponse.json({ error: "Zahlung nicht abgeschlossen", payment_status: body.payment_status }, { status: 400 })
   }
 
   // Bestelldaten aus Supabase holen
