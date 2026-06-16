@@ -3,21 +3,30 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js"
 import { createShopifyOrder } from "@/lib/shopify.server"
 import { sendOrderConfirmation, sendPaymentConfirmation } from "@/lib/email"
 
-// 1 Punkt pro €1 — atomisch via read+write (race condition unwahrscheinlich da 1 User = 1 Order)
+// 1 Punkt pro €1 — lookup via E-Mail da pending_orders kein user_id hat
 async function awardLoyaltyPoints(
   supabase: SupabaseClient,
-  userId: string,
+  orderEmail: string,
   orderId: string,
   amountCents: number,
 ) {
   const points = Math.floor(amountCents / 100)
   if (points <= 0) return
 
+  // User per E-Mail aus Auth suchen
+  const authResp = await fetch(
+    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/admin/users?filter=${encodeURIComponent(orderEmail)}&per_page=5`,
+    { headers: { apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!, Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}` } }
+  )
+  const { users } = await authResp.json() as { users?: { id: string; email: string }[] }
+  const userId = users?.find(u => u.email === orderEmail)?.id
+  if (!userId) return  // Gast-Checkout oder unbekannte E-Mail
+
   // Idempotenz: bereits gutgeschrieben?
   const { count } = await supabase
     .from("loyalty_events")
     .select("id", { count: "exact", head: true })
-    .eq("order_id", orderId)
+    .eq("ref_id", orderId)
     .eq("type", "order")
   if ((count ?? 0) > 0) return
 
@@ -27,7 +36,7 @@ async function awardLoyaltyPoints(
     type:        "order",
     points,
     description: `Bestellung #${orderId.slice(0, 8).toUpperCase()} — ${(amountCents / 100).toFixed(2).replace(".", ",")} €`,
-    order_id:    orderId,
+    ref_id:      orderId,
   })
 
   // Punkte-Kontostand aktualisieren
@@ -42,7 +51,7 @@ async function awardLoyaltyPoints(
     .update({ loyalty_points: (profile?.loyalty_points ?? 0) + points })
     .eq("id", userId)
 
-  console.log(`[loyalty] +${points} WFF Punkte für User ${userId} (Order ${orderId.slice(0, 8).toUpperCase()})`)
+  console.log(`[loyalty] +${points} WFF Punkte für ${orderEmail} (Order ${orderId.slice(0, 8).toUpperCase()})`)
 }
 
 // Zapier ruft diesen Endpunkt auf wenn Stripe checkout.session.completed feuert.
@@ -148,11 +157,9 @@ export async function POST(req: NextRequest) {
       grandTotal:         (order.amount_cents / 100).toFixed(2),
     }).catch(e => console.error("[payment/confirmed] email error:", e))
 
-    // Treuepunkte gutschreiben: 1 Punkt pro €1 (nur wenn Bestellung einem Konto zugeordnet)
-    if (order.user_id) {
-      awardLoyaltyPoints(supabase, order.user_id, orderNumber, order.amount_cents)
-        .catch(e => console.error("[payment/confirmed] loyalty error:", e))
-    }
+    // Treuepunkte gutschreiben: 1 Punkt pro €1 (fire & forget — Gäste werden übersprungen)
+    awardLoyaltyPoints(supabase, order.email, orderNumber, order.amount_cents)
+      .catch(e => console.error("[payment/confirmed] loyalty error:", e))
 
     console.log(`[payment/confirmed] Shopify Order #${shopifyOrder.order_number} für ${order.email}`)
     return NextResponse.json({ ok: true, shopify_order_number: shopifyOrder.order_number })
