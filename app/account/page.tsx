@@ -11,7 +11,6 @@ import { Dashboard } from "@/components/account/Dashboard"
 import { Orders } from "@/components/account/Orders"
 import { Profile } from "@/components/account/Profile"
 import { Password } from "@/components/account/Password"
-import { Payments } from "@/components/account/Payments"
 import { Notifications } from "@/components/account/Notifications"
 import { Loyalty } from "@/components/account/Loyalty"
 import { AgeVerification } from "@/components/account/AgeVerification"
@@ -22,7 +21,6 @@ export type Section =
   | "orders"
   | "profile"
   | "password"
-  | "payments"
   | "notifications"
   | "loyalty"
   | "ageverification"
@@ -32,16 +30,12 @@ export default function AccountPage() {
   const { user, profile, loading, signOut } = useUser()
   const [active, setActive] = useState<Section>("dashboard")
 
-  // Redirect to home when signed out — useEffect prevents the synchronous
-  // router.push from racing with the onSignOut callback's own push to "/"
   useEffect(() => {
     if (!loading && !user) {
       router.push("/")
     }
   }, [loading, user, router])
 
-  // Show branded loading screen during auth check AND during sign-out transition.
-  // Never return null — that causes the browser default (dark) background to flash.
   if (loading || !user) {
     return (
       <div style={{ background: "#bcc0ca", minHeight: "100vh" }} className="flex items-center justify-center">
@@ -55,7 +49,6 @@ export default function AccountPage() {
     orders:          Orders,
     profile:         Profile,
     password:        Password,
-    payments:        Payments,
     notifications:   Notifications,
     loyalty:         Loyalty,
     ageverification: AgeVerification,

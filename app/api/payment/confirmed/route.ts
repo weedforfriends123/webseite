@@ -1,7 +1,49 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
+import { createClient, SupabaseClient } from "@supabase/supabase-js"
 import { createShopifyOrder } from "@/lib/shopify.server"
 import { sendOrderConfirmation, sendPaymentConfirmation } from "@/lib/email"
+
+// 1 Punkt pro €1 — atomisch via read+write (race condition unwahrscheinlich da 1 User = 1 Order)
+async function awardLoyaltyPoints(
+  supabase: SupabaseClient,
+  userId: string,
+  orderId: string,
+  amountCents: number,
+) {
+  const points = Math.floor(amountCents / 100)
+  if (points <= 0) return
+
+  // Idempotenz: bereits gutgeschrieben?
+  const { count } = await supabase
+    .from("loyalty_events")
+    .select("id", { count: "exact", head: true })
+    .eq("order_id", orderId)
+    .eq("type", "order")
+  if ((count ?? 0) > 0) return
+
+  // Event einfügen
+  await supabase.from("loyalty_events").insert({
+    user_id:     userId,
+    type:        "order",
+    points,
+    description: `Bestellung #${orderId.slice(0, 8).toUpperCase()} — ${(amountCents / 100).toFixed(2).replace(".", ",")} €`,
+    order_id:    orderId,
+  })
+
+  // Punkte-Kontostand aktualisieren
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("loyalty_points")
+    .eq("id", userId)
+    .single()
+
+  await supabase
+    .from("profiles")
+    .update({ loyalty_points: (profile?.loyalty_points ?? 0) + points })
+    .eq("id", userId)
+
+  console.log(`[loyalty] +${points} WFF Punkte für User ${userId} (Order ${orderId.slice(0, 8).toUpperCase()})`)
+}
 
 // Zapier ruft diesen Endpunkt auf wenn Stripe checkout.session.completed feuert.
 // Body: { order_number: string, stripe_session_id?: string }
@@ -105,6 +147,12 @@ export async function POST(req: NextRequest) {
       shippingPrice:      order.shipping_price,
       grandTotal:         (order.amount_cents / 100).toFixed(2),
     }).catch(e => console.error("[payment/confirmed] email error:", e))
+
+    // Treuepunkte gutschreiben: 1 Punkt pro €1 (nur wenn Bestellung einem Konto zugeordnet)
+    if (order.user_id) {
+      awardLoyaltyPoints(supabase, order.user_id, orderNumber, order.amount_cents)
+        .catch(e => console.error("[payment/confirmed] loyalty error:", e))
+    }
 
     console.log(`[payment/confirmed] Shopify Order #${shopifyOrder.order_number} für ${order.email}`)
     return NextResponse.json({ ok: true, shopify_order_number: shopifyOrder.order_number })

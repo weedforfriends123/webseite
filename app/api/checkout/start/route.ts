@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { randomUUID } from "crypto"
 import { createClient } from "@supabase/supabase-js"
+import { createClient as createSessionClient } from "@/lib/supabase/server"
 import { createShopifyOrder } from "@/lib/shopify.server"
 import { sendPaymentConfirmation } from "@/lib/email"
 
@@ -43,6 +44,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Pflichtfelder fehlen" }, { status: 400 })
     }
 
+    // Get authenticated user ID to link order to account (for loyalty points etc.)
+    let userId: string | null = null
+    try {
+      const sessionSb = await createSessionClient()
+      const { data: { user: authUser } } = await sessionSb.auth.getUser()
+      userId = authUser?.id ?? null
+    } catch { /* non-critical — guest checkout still works */ }
+
     const origin      = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? ""
     const orderNumber = randomUUID()
 
@@ -56,6 +65,7 @@ export async function POST(req: NextRequest) {
     const { error: dbErr } = await supabase.from("pending_orders").insert({
       id:               orderNumber,
       status:           "pending",
+      user_id:          userId,
       email:            body.email,
       phone:            body.phone ?? null,
       line_items:       body.line_items,

@@ -12,19 +12,21 @@ const DIM    = "rgba(53,56,63,0.10)"
 const ACCENT = "#eddc8c"
 
 const REWARDS = [
-  { name: "5€ Rabatt",    points: 100 },
-  { name: "10€ Rabatt",   points: 200 },
-  { name: "Gratis Pre-Roll", points: 300 },
-  { name: "Gratis Vape",  points: 500 },
+  { name: "5€ Rabatt",       points: 100, code: "5EUR"      },
+  { name: "10€ Rabatt",      points: 200, code: "10EUR"     },
+  { name: "Gratis Pre-Roll", points: 300, code: "PREROLL"   },
+  { name: "Gratis Vape",     points: 500, code: "FREEVAPE"  },
 ]
 
-type LoyaltyEvent = { id: string; type: string; points: number; description: string | null; created_at: string }
+type LoyaltyEventRow = { id: string; type: string; points: number; description: string | null; created_at: string }
 
 interface Props { user: User | null; profile: Profile | null; signOut: () => void }
 
 export function Loyalty({ user, profile }: Props) {
   const supabase = createClient()
-  const [events, setEvents] = useState<LoyaltyEvent[]>([])
+  const [events,    setEvents]    = useState<LoyaltyEventRow[]>([])
+  const [redeeming, setRedeeming] = useState<string | null>(null)   // reward code being redeemed
+  const [redeemed,  setRedeemed]  = useState<string | null>(null)   // last redeemed reward name
   const balance = profile?.loyalty_points ?? 0
   const nextTier = 500
   const progress = Math.min((balance / nextTier) * 100, 100)
@@ -35,6 +37,20 @@ export function Loyalty({ user, profile }: Props) {
       .order("created_at", { ascending: false }).limit(20)
       .then(({ data }) => setEvents(data ?? []))
   }, [user])
+
+  async function handleRedeem(reward: typeof REWARDS[0]) {
+    if (balance < reward.points || !user) return
+    setRedeeming(reward.code)
+    try {
+      await fetch("/api/loyalty/redeem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reward_name: reward.name, reward_points: reward.points }),
+      })
+      setRedeemed(reward.name)
+    } catch { /* silently fail */ }
+    setRedeeming(null)
+  }
 
   return (
     <div className="space-y-8">
@@ -76,9 +92,17 @@ export function Loyalty({ user, profile }: Props) {
         {/* Rewards */}
         <div style={{ padding: "clamp(20px,3vh,28px)", borderRadius: 16, background: "rgba(255,255,255,0.42)", border: "1px solid rgba(255,255,255,0.68)" }}>
           <p className="font-ekstra uppercase mb-5" style={{ fontSize: 10, letterSpacing: "0.28em", color: MUTED }}>Prämien einlösen</p>
+          {redeemed && (
+            <div className="mb-3 px-4 py-3 rounded-xl" style={{ background: "rgba(110,125,106,0.18)", border: "1px solid rgba(110,125,106,0.30)" }}>
+              <p className="font-ekstra" style={{ fontSize: "0.88rem", color: "#3d6639" }}>
+                ✓ Einlösung beantragt — wir melden uns per E-Mail mit deinem Rabattcode für „{redeemed}".
+              </p>
+            </div>
+          )}
           <div className="space-y-3">
             {REWARDS.map((r) => {
-              const ok = balance >= r.points
+              const ok      = balance >= r.points
+              const loading = redeeming === r.code
               return (
                 <div
                   key={r.name}
@@ -90,16 +114,18 @@ export function Loyalty({ user, profile }: Props) {
                     <p className="font-ekstra uppercase mt-0.5" style={{ fontSize: 9, letterSpacing: "0.18em", color: MUTED }}>{r.points} Punkte</p>
                   </div>
                   <button
-                    disabled={!ok}
+                    onClick={() => handleRedeem(r)}
+                    disabled={!ok || !!redeeming}
                     className="font-ekstra uppercase rounded-full transition-all duration-150"
                     style={{
                       padding: "8px 18px", fontSize: 11, letterSpacing: "0.18em",
                       background: ok ? TEXT : "rgba(53,56,63,0.10)",
                       color: ok ? "#e8e4dc" : MUTED,
-                      cursor: ok ? "pointer" : "not-allowed",
+                      cursor: ok && !redeeming ? "pointer" : "not-allowed",
+                      opacity: loading ? 0.6 : 1,
                     }}
                   >
-                    {ok ? "Einlösen" : "Bald"}
+                    {loading ? "…" : ok ? "Einlösen" : `${r.points - balance} fehlen`}
                   </button>
                 </div>
               )
