@@ -13,16 +13,15 @@ export async function GET() {
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
     )
 
-    // Pending orders (checkout flow) — query by email
-    const { data: pendingOrders } = await serviceSb
+    // All orders for this user (all statuses)
+    const { data: orders } = await serviceSb
       .from("pending_orders")
       .select("id, status, email, line_items, shipping_address, shipping_price, amount_cents, created_at, shopify_order_id")
       .eq("email", user.email!)
-      .in("status", ["pending", "cancelled", "failed"])
       .order("created_at", { ascending: false })
-      .limit(20)
+      .limit(50)
 
-    return NextResponse.json({ pending: pendingOrders ?? [] })
+    return NextResponse.json({ orders: orders ?? [] })
   } catch (err) {
     console.error("[account/orders]", err)
     return NextResponse.json({ pending: [] })

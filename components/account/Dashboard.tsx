@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
 import type { Profile } from "@/lib/hooks/useUser"
 
@@ -11,36 +10,35 @@ const MUTED  = "rgba(53,56,63,0.55)"
 const DIM    = "rgba(53,56,63,0.10)"
 
 const STATUS_STYLE: Record<string, React.CSSProperties> = {
-  pending:    { background: "rgba(53,56,63,0.08)", color: MUTED },
+  pending:    { background: "rgba(237,220,140,0.22)", color: "#8a7b2a" },
+  paid:       { background: "rgba(110,125,106,0.18)", color: "#3d6639" },
   processing: { background: "rgba(237,220,140,0.22)", color: "#8a7b2a" },
   shipped:    { background: "rgba(53,56,63,0.12)", color: TEXT },
   delivered:  { background: "rgba(110,125,106,0.18)", color: "#4a5f46" },
   cancelled:  { background: "rgba(192,57,43,0.10)", color: "#c0392b" },
+  failed:     { background: "rgba(192,57,43,0.10)", color: "#c0392b" },
 }
 const STATUS_LABEL: Record<string, string> = {
-  pending: "Neu", processing: "In Bearbeitung", shipped: "Unterwegs", delivered: "Zugestellt", cancelled: "Storniert",
+  pending: "Ausstehend", paid: "Bezahlt", processing: "In Bearbeitung",
+  shipped: "Unterwegs", delivered: "Zugestellt", cancelled: "Fehlgeschlagen", failed: "Fehlgeschlagen",
 }
 
 type Order = {
-  id: string; status: string; total: number; created_at: string
-  order_items: { name: string; qty: number }[]
+  id: string; status: string; amount_cents: number; created_at: string
+  line_items: { title: string; quantity: number }[]
 }
 
 interface Props { user: User | null; profile: Profile | null; signOut: () => void }
 
 export function Dashboard({ user, profile }: Props) {
-  const supabase = createClient()
   const [orders, setOrders] = useState<Order[]>([])
 
   useEffect(() => {
     if (!user) return
-    supabase
-      .from("orders")
-      .select("id, status, total, created_at, order_items(name, qty)")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(5)
-      .then(({ data }) => setOrders(data ?? []))
+    fetch("/api/account/orders")
+      .then(r => r.json())
+      .then(data => setOrders((data?.orders ?? []).slice(0, 5)))
+      .catch(() => {})
   }, [user])
 
   const firstName = profile?.first_name || user?.email?.split("@")[0] || "zurück"
@@ -111,7 +109,7 @@ export function Dashboard({ user, profile }: Props) {
         ) : (
           <div className="space-y-3">
             {orders.map((o) => {
-              const itemSummary = o.order_items?.map(i => `${i.name}${i.qty > 1 ? ` ×${i.qty}` : ""}`).join(", ") || "—"
+              const itemSummary = o.line_items?.map(i => i.quantity > 1 ? `${i.title} ×${i.quantity}` : i.title).join(", ") || "—"
               const style = STATUS_STYLE[o.status] ?? STATUS_STYLE.pending
               return (
                 <div
@@ -121,17 +119,17 @@ export function Dashboard({ user, profile }: Props) {
                 >
                   <div className="flex-1 min-w-0">
                     <p className="font-druk-wide uppercase" style={{ fontSize: "0.82rem", color: TEXT }}>
-                      {o.id.slice(0, 8).toUpperCase()}
+                      #{o.id.slice(0, 6).toUpperCase()}
                     </p>
                     <p className="font-ekstra mt-0.5 truncate" style={{ fontSize: "0.82rem", color: MUTED }}>
                       {itemSummary}
                     </p>
                   </div>
                   <p className="font-druk-wide shrink-0" style={{ fontSize: "0.92rem", color: TEXT }}>
-                    {Number(o.total).toFixed(2).replace(".", ",")} €
+                    {(o.amount_cents / 100).toFixed(2).replace(".", ",")} €
                   </p>
                   <span
-                    className="font-ekstra uppercase shrink-0 px-3 py-1 rounded-full"
+                    className="font-ekstra uppercase shrink-0 hidden sm:inline-block px-3 py-1 rounded-full"
                     style={{ fontSize: 9, letterSpacing: "0.18em", ...style }}
                   >
                     {STATUS_LABEL[o.status] ?? o.status}

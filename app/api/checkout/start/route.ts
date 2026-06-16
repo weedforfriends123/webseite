@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { randomUUID } from "crypto"
 import { createClient } from "@supabase/supabase-js"
 import { createShopifyOrder } from "@/lib/shopify.server"
-import { sendOrderConfirmation, sendPaymentConfirmation } from "@/lib/email"
+import { sendPaymentConfirmation } from "@/lib/email"
 
 type LineItem = {
   title: string
@@ -68,17 +68,6 @@ export async function POST(req: NextRequest) {
       console.error("[checkout/start] supabase insert error:", dbErr)
       return NextResponse.json({ error: "Datenbankfehler" }, { status: 500 })
     }
-
-    // Bestellbestätigung (fire & forget)
-    sendOrderConfirmation({
-      email:           body.email,
-      firstName:       body.shipping_address.first_name,
-      orderRef:        orderNumber.slice(0, 8).toUpperCase(),
-      lineItems:       body.line_items,
-      shippingAddress: body.shipping_address,
-      shippingPrice:   body.shipping_price ?? "0.00",
-      grandTotal,
-    }).catch(e => console.error("[checkout/start] order-email error:", e))
 
     // ── Gratis-Order: Stripe überspringen ────────────────────────────────────
     if (amountCents === 0) {
