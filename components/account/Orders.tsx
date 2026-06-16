@@ -11,7 +11,7 @@ const DIM    = "rgba(53,56,63,0.10)"
 const ACCENT = "#eddc8c"
 
 const STATUS_STYLE: Record<string, React.CSSProperties> = {
-  pending:    { background: "rgba(237,220,140,0.22)", color: "#8a7b2a" },
+  pending:    { background: "rgba(232,172,50,0.18)", color: "#7a5e10" },
   paid:       { background: "rgba(110,125,106,0.18)", color: "#3d6639" },
   processing: { background: "rgba(237,220,140,0.22)", color: "#8a7b2a" },
   shipped:    { background: "rgba(53,56,63,0.12)", color: TEXT },
@@ -20,7 +20,7 @@ const STATUS_STYLE: Record<string, React.CSSProperties> = {
   failed:     { background: "rgba(192,57,43,0.10)", color: "#c0392b" },
 }
 const STATUS_LABEL: Record<string, string> = {
-  pending:    "Ausstehend",
+  pending:    "Zahlung offen",
   paid:       "Bezahlt",
   processing: "In Bearbeitung",
   shipped:    "Unterwegs",
@@ -65,7 +65,7 @@ function OrderDetail({
   retryState: RetryState
   onRetry: () => void
 }) {
-  const isFailed = order.status === "cancelled" || order.status === "failed"
+  const isFailed = order.status === "cancelled" || order.status === "failed" || order.status === "pending"
   const addr = order.shipping_address
   const subtotalCents = order.line_items.reduce(
     (sum, i) => sum + Math.round(parseFloat(i.price) * 100 * i.quantity), 0
@@ -212,7 +212,19 @@ function OrderDetail({
           </div>
         </div>
 
-        {/* Failed — retry */}
+        {/* Pending notice */}
+        {order.status === "pending" && (
+          <div
+            className="px-4 py-3 rounded-xl"
+            style={{ background: "rgba(232,172,50,0.12)", border: "1px solid rgba(232,172,50,0.30)" }}
+          >
+            <p className="font-ekstra" style={{ fontSize: "0.88rem", color: "#7a5e10", lineHeight: 1.6 }}>
+              Deine Zahlung wurde noch nicht abgeschlossen. Starte die Zahlung erneut, um die Bestellung abzuschließen.
+            </p>
+          </div>
+        )}
+
+        {/* Failed / pending — retry */}
         {isFailed && (
           <div className="space-y-2 pt-1">
             {retryState.status === "error" && (
@@ -232,7 +244,9 @@ function OrderDetail({
                 cursor: retryState.status === "loading" ? "not-allowed" : "pointer",
               }}
             >
-              {retryState.status === "loading" ? retryState.msg : "Erneut bezahlen →"}
+              {retryState.status === "loading"
+                ? retryState.msg
+                : order.status === "pending" ? "Jetzt bezahlen →" : "Erneut bezahlen →"}
             </button>
           </div>
         )}
@@ -243,7 +257,7 @@ function OrderDetail({
 
 // ── Order Row (list item) ──────────────────────────────────────────────────
 function OrderRow({ order, onClick }: { order: Order; onClick: () => void }) {
-  const isFailed = order.status === "cancelled" || order.status === "failed"
+  const isFailed = order.status === "cancelled" || order.status === "failed" || order.status === "pending"
   const productSummary = order.line_items?.map(i =>
     i.quantity > 1 ? `${i.title} ×${i.quantity}` : i.title
   ).join(", ") || "—"

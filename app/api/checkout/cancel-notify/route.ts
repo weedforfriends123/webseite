@@ -20,8 +20,9 @@ export async function POST(req: NextRequest) {
 
     if (!order) return NextResponse.json({ ok: true })
 
-    // Only mark as cancelled if still pending (don't overwrite paid/failed)
-    if (order.status === "pending") {
+    // Mark as cancelled unless already paid (idempotent — safe to call multiple times)
+    const wasActive = order.status === "pending"
+    if (order.status !== "paid") {
       await supabase
         .from("pending_orders")
         .update({ status: "cancelled" })
@@ -31,9 +32,13 @@ export async function POST(req: NextRequest) {
     const firstName = (order.shipping_address as { first_name?: string })?.first_name
     const orderRef  = token.slice(0, 8).toUpperCase()
 
-    sendPaymentFailed({ email: order.email, firstName, orderRef }).catch(
-      e => console.error("[cancel-notify] email error:", e),
-    )
+    // Only send failure email on first failure / first retry failure (was pending → now cancelled)
+    // Avoids duplicate emails when called multiple times in rapid succession
+    if (wasActive) {
+      sendPaymentFailed({ email: order.email, firstName, orderRef }).catch(
+        e => console.error("[cancel-notify] email error:", e),
+      )
+    }
 
     return NextResponse.json({ ok: true })
   } catch (err) {
