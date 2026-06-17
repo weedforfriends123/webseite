@@ -210,21 +210,6 @@ function ProductSection({
           />
         </motion.div>
 
-        {/* Fruit / flavor image (blurred background accent) */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ zIndex: 1 }}
-        >
-          <Image
-            src={t.fruitImg}
-            alt=""
-            fill
-            className="object-cover opacity-[0.07] mix-blend-luminosity"
-            sizes="50vw"
-            aria-hidden
-          />
-        </div>
-
         {/* Floating flavor terms */}
         {flavorTerms.map((term, i) => (
           <motion.span
