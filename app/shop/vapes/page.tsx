@@ -1,9 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
+import dynamic from "next/dynamic"
 import { motion, AnimatePresence } from "framer-motion"
 import { useCart } from "@/lib/cart"
+
+const Vape3D = dynamic(
+  () => import("@/components/shop/Vape3D").then(m => ({ default: m.Vape3D })),
+  { ssr: false },
+)
 
 const BG    = "#bcc0ca"
 const TEXT  = "#35383f"
@@ -123,50 +128,41 @@ function HeroBuy() {
         gridTemplateColumns: "55% 45%",
       }} className="vapes-grid">
 
-        {/* ══ LEFT — fruit bg + vape ══ */}
-        <div style={{ position: "relative", overflow: "hidden" }}>
-          {/* Fruit image — full bleed, animates on flavor change */}
-          <AnimatePresence mode="wait">
-            <motion.div key={`fruit-${sel}`}
-              initial={{ opacity: 0, scale: 1.04 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.97 }}
-              transition={{ duration: 0.6, ease: [0.16,1,0.3,1] }}
-              style={{ position: "absolute", inset: 0, zIndex: 0 }}
-            >
-              <Image
-                src={`/fruits/${vape.key}.webp`}
-                alt=""
-                fill
-                sizes="50vw"
-                style={{ objectFit: "cover", objectPosition: "center" }}
-              />
-            </motion.div>
-          </AnimatePresence>
+        {/* ══ LEFT — 3D product viewer ══ */}
+        <div style={{ position: "relative", overflow: "hidden", minHeight: "100dvh" }}>
+          {/* Accent gradient backdrop — transitions with flavor */}
+          <motion.div
+            key={`bg-${sel}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.7 }}
+            style={{
+              position: "absolute", inset: 0,
+              background: [
+                `radial-gradient(ellipse 70% 60% at 50% 42%, ${vape.accent}40, transparent 68%)`,
+                `radial-gradient(ellipse 40% 35% at 20% 80%, ${vape.accent}18, transparent 55%)`,
+                `linear-gradient(160deg, ${BG} 0%, #c8ccd4 100%)`,
+              ].join(","),
+            }}
+          />
 
-          {/* Vape device — centered on top */}
-          <div style={{
-            position: "relative", zIndex: 1,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            minHeight: "100dvh",
-            padding: "clamp(90px,12vh,130px) clamp(24px,3vw,56px)",
-          }}>
-            <AnimatePresence mode="wait">
-              <motion.div key={`img-${sel}`}
-                initial={{ opacity: 0, scale: 0.88, y: 24 }}
-                animate={{ opacity: 1, scale: 1,    y: 0  }}
-                exit={{ opacity: 0, scale: 0.94, y: -18 }}
-                transition={{ duration: 0.5, ease: [0.16,1,0.3,1] }}
-              >
-                <Image src={vape.img} alt={vape.name} width={320} height={320} priority
-                  style={{
-                    height: "clamp(180px,28vh,320px)", width: "auto",
-                    objectFit: "contain", display: "block",
-                    filter: "drop-shadow(0 40px 80px rgba(53,56,63,0.35)) drop-shadow(0 12px 28px rgba(53,56,63,0.20))",
-                  }}
-                />
-              </motion.div>
-            </AnimatePresence>
+          {/* "Drag to rotate" hint */}
+          <p
+            className="font-ekstra uppercase"
+            style={{
+              position: "absolute", bottom: 20, left: "50%",
+              transform: "translateX(-50%)",
+              fontSize: 8, letterSpacing: "0.40em",
+              color: "rgba(53,56,63,0.28)", zIndex: 10,
+              pointerEvents: "none", whiteSpace: "nowrap",
+            }}
+          >
+            ↺ Drag to rotate
+          </p>
+
+          {/* 3D canvas — fills entire panel */}
+          <div style={{ position: "absolute", inset: 0, zIndex: 1 }}>
+            <Vape3D accent={vape.accent} />
           </div>
         </div>
 
