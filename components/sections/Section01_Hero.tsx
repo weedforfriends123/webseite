@@ -284,9 +284,13 @@ export function Section01_Hero() {
                 width: "100%", height: "100%",
                 objectFit: "contain",
                 display: "block",
+                background: "transparent",
               }}
             >
-              <source src="/video/hero.mp4" type="video/mp4" />
+              {/* VP9 WebM with alpha — Chrome / Firefox / Edge */}
+              <source src="/video/hero.webm" type="video/webm" />
+              {/* HEVC with alpha — Safari */}
+              <source src="/video/hero-safari.mp4" type='video/mp4; codecs="hvc1"' />
             </video>
           </div>
 
