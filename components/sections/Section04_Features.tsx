@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState } from "react"
 import { motion, useScroll, useTransform, MotionValue } from "framer-motion"
+import { cdn } from "@/lib/cdn"
 
 const BG    = "#bcc0ca"
 const TEXT  = "#35383f"
@@ -200,7 +201,7 @@ export function Section04_Features() {
           <video
             autoPlay muted loop playsInline
             style={{ width: "100%", display: "block", position: "relative", zIndex: 1 }}
-            src="/product-anim.mp4"
+            src={cdn("/product-anim.mp4")}
           />
         </motion.div>
 

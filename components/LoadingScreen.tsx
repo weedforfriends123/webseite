@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react"
 import { motion } from "framer-motion"
+import { cdn } from "@/lib/cdn"
 
 const WORD    = "WEEDFORFRIENDS"
 const LETTERS = WORD.split("")
@@ -98,7 +99,7 @@ export function LoadingScreen() {
               objectFit: "cover",
             }}
           >
-            <source src={isMobileRef.current ? "/loading-bg-mobile.mp4" : "/loading-bg.mp4"} type="video/mp4" />
+            <source src={isMobileRef.current ? cdn("/loading-bg-mobile.mp4") : cdn("/loading-bg.mp4")} type="video/mp4" />
           </video>
         )}
 

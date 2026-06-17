@@ -5,14 +5,15 @@ import { Canvas, useFrame } from "@react-three/fiber"
 import { useGLTF, Environment } from "@react-three/drei"
 import { motion, useScroll, useTransform, useMotionValue, useSpring, useReducedMotion } from "framer-motion"
 import * as THREE from "three"
+import { cdn } from "@/lib/cdn"
 
 const FLAVOR_MODELS = [
-  "/amnesia-haze.glb",
-  "/purple-haze.glb",
-  "/northern-lights.glb",
-  "/ice-cream-cookies.glb",
-  "/girl-scout-cookies.glb",
-  "/gelato.glb",
+  cdn("/amnesia-haze.glb"),
+  cdn("/purple-haze.glb"),
+  cdn("/northern-lights.glb"),
+  cdn("/ice-cream-cookies.glb"),
+  cdn("/girl-scout-cookies.glb"),
+  cdn("/gelato.glb"),
 ]
 
 // ── 3D model ─────────────────────────────────────────────────────────────────
@@ -229,9 +230,9 @@ export function FloatingProduct({ alwaysVisible = false }: { alwaysVisible?: boo
 }
 
 // Preload all flavour models
-useGLTF.preload("/amnesia-haze.glb")
-useGLTF.preload("/purple-haze.glb")
-useGLTF.preload("/northern-lights.glb")
-useGLTF.preload("/ice-cream-cookies.glb")
-useGLTF.preload("/girl-scout-cookies.glb")
-useGLTF.preload("/gelato.glb")
+useGLTF.preload(cdn("/amnesia-haze.glb"))
+useGLTF.preload(cdn("/purple-haze.glb"))
+useGLTF.preload(cdn("/northern-lights.glb"))
+useGLTF.preload(cdn("/ice-cream-cookies.glb"))
+useGLTF.preload(cdn("/girl-scout-cookies.glb"))
+useGLTF.preload(cdn("/gelato.glb"))

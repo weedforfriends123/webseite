@@ -4,11 +4,12 @@ import { useRef, useEffect, Suspense } from "react"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { useGLTF, Environment, Center } from "@react-three/drei"
 import * as THREE from "three"
+import { cdn } from "@/lib/cdn"
 
 const TEXT_COLOR = new THREE.Color("#35383f")
 
 function GoodVibesModel() {
-  const { scene } = useGLTF("/good-vibes.glb")
+  const { scene } = useGLTF(cdn("/good-vibes.glb"))
   const groupRef   = useRef<THREE.Group>(null)
 
   useEffect(() => {
@@ -50,7 +51,7 @@ function GoodVibesModel() {
   )
 }
 
-useGLTF.preload("/good-vibes.glb")
+useGLTF.preload(cdn("/good-vibes.glb"))
 
 export function GoodVibesCanvas() {
   return (

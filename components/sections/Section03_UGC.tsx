@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState } from "react"
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion"
+import { cdn } from "@/lib/cdn"
 
 const BG    = "#bcc0ca"
 const TEXT  = "#35383f"
@@ -183,10 +184,10 @@ export function Section03_UGC() {
             }}
           >
             {[
-              { src: "/ugc1-mobile.mp4", rotate: -8,  delay: 0    },
-              { src: "/ugc3-mobile.mp4", rotate: -2,  delay: 0.1  },
-              { src: "/ugc4-mobile.mp4", rotate: 5,   delay: 0.2  },
-              { src: "/ugc2-mobile.mp4", rotate: 10,  delay: 0.3  },
+              { src: cdn("/ugc1-mobile.mp4"), rotate: -8,  delay: 0    },
+              { src: cdn("/ugc3-mobile.mp4"), rotate: -2,  delay: 0.1  },
+              { src: cdn("/ugc4-mobile.mp4"), rotate: 5,   delay: 0.2  },
+              { src: cdn("/ugc2-mobile.mp4"), rotate: 10,  delay: 0.3  },
             ].map(({ src, rotate, delay }) => (
               <motion.div
                 key={src}
@@ -254,16 +255,16 @@ export function Section03_UGC() {
         {/* Left: Polaroid stack */}
         <div style={{ position: "relative", minHeight: "clamp(380px,50vw,680px)" }}>
           <div style={{ position: "absolute", left: "2%",  bottom: "2%"  }}>
-            <PolaroidVideo src="/ugc1-desktop.mp4" rotate={-12} zIndex={1} delay={0.10} width="clamp(160px,18vw,300px)" />
+            <PolaroidVideo src={cdn("/ugc1-desktop.mp4")} rotate={-12} zIndex={1} delay={0.10} width="clamp(160px,18vw,300px)" />
           </div>
           <div style={{ position: "absolute", left: "18%", bottom: "10%" }}>
-            <PolaroidVideo src="/ugc3-desktop.mp4" rotate={-3}  zIndex={2} delay={0.22} width="clamp(160px,18vw,300px)" />
+            <PolaroidVideo src={cdn("/ugc3-desktop.mp4")} rotate={-3}  zIndex={2} delay={0.22} width="clamp(160px,18vw,300px)" />
           </div>
           <div style={{ position: "absolute", left: "32%", bottom: "5%"  }}>
-            <PolaroidVideo src="/ugc4-desktop.mp4" rotate={6}   zIndex={3} delay={0.34} width="clamp(160px,18vw,300px)" />
+            <PolaroidVideo src={cdn("/ugc4-desktop.mp4")} rotate={6}   zIndex={3} delay={0.34} width="clamp(160px,18vw,300px)" />
           </div>
           <div style={{ position: "absolute", left: "44%", bottom: "0%"  }}>
-            <PolaroidVideo src="/ugc2-desktop.mp4" rotate={11}  zIndex={4} delay={0.46} width="clamp(160px,18vw,300px)" />
+            <PolaroidVideo src={cdn("/ugc2-desktop.mp4")} rotate={11}  zIndex={4} delay={0.46} width="clamp(160px,18vw,300px)" />
           </div>
         </div>
 

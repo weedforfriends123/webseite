@@ -6,13 +6,14 @@ import {
   useGLTF, Environment, Float, ContactShadows, OrbitControls,
 } from "@react-three/drei"
 import * as THREE from "three"
+import { cdn } from "@/lib/cdn"
 
-useGLTF.preload("/meshy-product.glb")
+useGLTF.preload(cdn("/meshy-product.glb"))
 
 // ── Clone the loaded model so multiple instances don't share the same scene ──
 
 function Model({ scale = 2.0 }: { scale?: number }) {
-  const { scene } = useGLTF("/meshy-product.glb")
+  const { scene } = useGLTF(cdn("/meshy-product.glb"))
   const clone = useMemo(() => {
     const c = scene.clone(true)
     c.traverse((obj) => {

@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from "react"
 import { motion, useScroll, useTransform, useMotionValueEvent, type MotionValue } from "framer-motion"
+import { cdn } from "@/lib/cdn"
 
 const BG    = "#bcc0ca"
 const TEXT  = "#35383f"
@@ -9,11 +10,11 @@ const MUTED = "rgba(53,56,63,0.52)"
 const N     = 6
 
 const STRAINS = [
-  { key: "nl",  number: "01", line1: "NORTHERN",   line2: "LIGHTS",   img: "/pouches/northern-lights.webp",    flavor: "Kiefer · Erde · Süße" },
-  { key: "ph",  number: "02", line1: "PURPLE",      line2: "HAZE",     img: "/pouches/purple-haze.webp",        flavor: "Beere · Blüte · Süße" },
+  { key: "gel", number: "01", line1: "GEL",         line2: "ATO",      img: "/pouches/gelato.webp",             flavor: "Beere · Sahne · Süße" },
+  { key: "nl",  number: "02", line1: "NORTHERN",    line2: "LIGHTS",   img: "/pouches/northern-lights.webp",    flavor: "Kiefer · Erde · Süße" },
   { key: "icc", number: "03", line1: "ICE CREAM",   line2: "COOKIES",  img: "/pouches/ice-cream-cookies.webp",  flavor: "Vanille · Cookie · Crème" },
-  { key: "ah",  number: "04", line1: "AMNESIA",     line2: "HAZE",     img: "/pouches/amnesia-haze.webp",       flavor: "Zitrus · Erde · Würze" },
-  { key: "gel", number: "05", line1: "GEL",         line2: "ATO",      img: "/pouches/gelato.webp",             flavor: "Beere · Sahne · Süße" },
+  { key: "ph",  number: "04", line1: "PURPLE",      line2: "HAZE",     img: "/pouches/purple-haze.webp",        flavor: "Beere · Blüte · Süße" },
+  { key: "ah",  number: "05", line1: "AMNESIA",     line2: "HAZE",     img: "/pouches/amnesia-haze.webp",       flavor: "Zitrus · Erde · Würze" },
   { key: "gsc", number: "06", line1: "GIRL SCOUT",  line2: "COOKIES",  img: "/pouches/girl-scout-cookies.webp", flavor: "Minze · Erde · Süße" },
 ]
 
@@ -257,57 +258,69 @@ export function Section01_Hero() {
           background: "radial-gradient(ellipse 60% 55% at 50% 52%, rgba(122,107,145,0.26) 0%, transparent 68%)",
         }} />
 
-        {/* Navbar spacer */}
-        <div style={{ height: "clamp(72px,10vh,112px)", flexShrink: 0 }} />
+        {/* Navbar spacer — mobile only (desktop uses absolute positioning below) */}
+        <div className="block md:hidden" style={{ height: "clamp(72px,10vh,112px)", flexShrink: 0 }} />
 
-        {/* ── DESKTOP: 3-COLUMN ─────────────────────────────────────────────── */}
+        {/* ── DESKTOP: FULL-WIDTH VIDEO + SIDE OVERLAYS ─────────────────────── */}
+
+        {/* Video fills the full viewport (minus navbar top + dots bottom) */}
         <div
-          className="hidden md:grid"
+          className="hidden md:block"
           style={{
-            gridTemplateColumns: "1fr 1.8fr 1fr",
-            height: "calc(100svh - clamp(72px,10vh,112px) - clamp(40px,6vh,72px))",
-            position: "relative", zIndex: 5,
+            position: "absolute",
+            top: "clamp(72px,10vh,112px)",
+            bottom: "clamp(40px,6vh,72px)",
+            left: 0, right: 0,
+            zIndex: 1, pointerEvents: "none",
           }}
         >
-          {/* LEFT column */}
-          <div style={{ position: "relative", overflow: "hidden" }}>
-            {STRAINS.map((s, i) => (
-              <LeftPanel key={s.key} strain={s} index={i} scrollY={scrollYProgress} />
-            ))}
-          </div>
+          <video
+            ref={videoRef}
+            muted
+            playsInline
+            preload="metadata"
+            style={{
+              width: "100%", height: "100%",
+              objectFit: "contain",
+              display: "block",
+              background: "transparent",
+            }}
+          >
+            <source src={cdn("/video/hero.webm")} type="video/webm" />
+            <source src={cdn("/video/hero-safari.mp4")} type='video/mp4; codecs="hvc1"' />
+          </video>
+        </div>
 
-          {/* CENTER: scroll-scrubbed video */}
-          <div style={{
-            position: "relative",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            overflow: "hidden",
-          }}>
-            <video
-              ref={videoRef}
-              muted
-              playsInline
-              preload="metadata"
-              style={{
-                width: "100%", height: "100%",
-                objectFit: "contain",
-                display: "block",
-                background: "transparent",
-                pointerEvents: "none",
-              }}
-            >
-              {/* VP9 WebM with alpha — Chrome / Firefox / Edge */}
-              <source src="/video/hero.webm" type="video/webm" />
-              {/* HEVC with alpha — Safari */}
-              <source src="/video/hero-safari.mp4" type='video/mp4; codecs="hvc1"' />
-            </video>
-          </div>
+        {/* LEFT overlay */}
+        <div
+          className="hidden md:block"
+          style={{
+            position: "absolute",
+            top: "clamp(72px,10vh,112px)",
+            bottom: "clamp(40px,6vh,72px)",
+            left: 0, width: "22vw",
+            zIndex: 5,
+          }}
+        >
+          {STRAINS.map((s, i) => (
+            <LeftPanel key={s.key} strain={s} index={i} scrollY={scrollYProgress} />
+          ))}
+        </div>
 
-          {/* RIGHT column */}
-          <div style={{ position: "relative", overflow: "hidden" }}>
-            {STRAINS.map((s, i) => (
-              <RightPanel key={s.key} strain={s} index={i} scrollY={scrollYProgress} />
-            ))}
-          </div>
+        {/* RIGHT overlay */}
+        <div
+          className="hidden md:block"
+          style={{
+            position: "absolute",
+            top: "clamp(72px,10vh,112px)",
+            bottom: "clamp(40px,6vh,72px)",
+            right: 0, width: "22vw",
+            zIndex: 5,
+          }}
+        >
+          {STRAINS.map((s, i) => (
+            <RightPanel key={s.key} strain={s} index={i} scrollY={scrollYProgress} />
+          ))}
         </div>
 
         {/* ── MOBILE: STACKED ───────────────────────────────────────────────── */}

@@ -2,3 +2,24 @@ node_modules
 .next
 .git
 test-results
+
+# Large binary assets — served via Supabase Storage CDN (NEXT_PUBLIC_CDN_URL)
+public/video
+public/*.glb
+public/ugc1-mobile.mp4
+public/ugc2-mobile.mp4
+public/ugc3-mobile.mp4
+public/ugc4-mobile.mp4
+public/ugc1-desktop.mp4
+public/ugc2-desktop.mp4
+public/ugc3-desktop.mp4
+public/ugc4-desktop.mp4
+public/loading-bg.mp4
+public/loading-bg-mobile.mp4
+public/product-anim.mp4
+public/product-scroll.mp4
+public/frames2
+public/frames3
+public/gvo
+public/product-frames
+public/3d

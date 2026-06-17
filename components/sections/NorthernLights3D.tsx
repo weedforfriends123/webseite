@@ -4,13 +4,14 @@ import { Suspense, useRef, useEffect } from "react"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { useGLTF, Float, Environment } from "@react-three/drei"
 import * as THREE from "three"
+import { cdn } from "@/lib/cdn"
 
 function NLModel({
   mouseRef,
 }: {
   mouseRef: { current: { x: number; y: number } }
 }) {
-  const { scene } = useGLTF("/northern-lights.glb")
+  const { scene } = useGLTF(cdn("/northern-lights.glb"))
   const groupRef = useRef<THREE.Group>(null)
   const rotYRef = useRef(0)
   const tiltXRef = useRef(0)
@@ -104,4 +105,4 @@ export function NorthernLights3D() {
   )
 }
 
-useGLTF.preload("/northern-lights.glb")
+useGLTF.preload(cdn("/northern-lights.glb"))

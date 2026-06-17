@@ -4,9 +4,10 @@ import { Suspense, useRef, useEffect } from "react"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { useGLTF, Float, Environment } from "@react-three/drei"
 import * as THREE from "three"
+import { cdn } from "@/lib/cdn"
 
 function Mesh({ mouseRef }: { mouseRef: React.RefObject<{ x: number; y: number }> }) {
-  const { scene } = useGLTF("/product.glb")
+  const { scene } = useGLTF(cdn("/product.glb"))
   const groupRef  = useRef<THREE.Group>(null!)
 
   useEffect(() => {
@@ -76,4 +77,4 @@ export function Product3D() {
   )
 }
 
-useGLTF.preload("/product.glb")
+useGLTF.preload(cdn("/product.glb"))
