@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import { motion, useScroll, useTransform, useMotionValueEvent, type MotionValue } from "framer-motion"
 
 const BG    = "#bcc0ca"
@@ -185,7 +185,14 @@ export function Section01_Hero() {
   const swipeX    = useRef<number | null>(null)
   const [activeIndex, setActiveIndex] = useState(0)
 
-  const { scrollYProgress } = useScroll({ target: outerRef, offset: ["start start", "end end"] })
+  // Start buffering video after page load so it doesn't delay the loading screen
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+    video.load()
+  }, [])
+
+  const { scrollYProgress } = useScroll({ target: outerRef, offset: ["start start", "end start"] })
 
   useMotionValueEvent(scrollYProgress, "change", (v) => {
     // Scroll-scrub video on desktop
@@ -279,12 +286,13 @@ export function Section01_Hero() {
               ref={videoRef}
               muted
               playsInline
-              preload="auto"
+              preload="metadata"
               style={{
                 width: "100%", height: "100%",
                 objectFit: "contain",
                 display: "block",
                 background: "transparent",
+                pointerEvents: "none",
               }}
             >
               {/* VP9 WebM with alpha — Chrome / Firefox / Edge */}
