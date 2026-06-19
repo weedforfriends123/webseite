@@ -257,6 +257,7 @@ export function Section01_Hero() {
             bottom: "clamp(40px,6vh,72px)",
             left: "22vw", right: "22vw",
             zIndex: 1, pointerEvents: "none",
+            background: BG,
           }}
         >
           <video
@@ -270,7 +271,7 @@ export function Section01_Hero() {
               width: "100%", height: "100%",
               objectFit: "contain",
               display: "block",
-              background: "transparent",
+              background: BG,
             }}
           >
             <source src="/video/section1-hero.mp4" type="video/mp4" />
