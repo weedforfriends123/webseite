@@ -1,8 +1,7 @@
 "use client"
 
-import { useRef, useState, useEffect } from "react"
+import { useRef, useState } from "react"
 import { motion, useScroll, useTransform, useMotionValueEvent, type MotionValue } from "framer-motion"
-import { cdn } from "@/lib/cdn"
 
 const BG    = "#bcc0ca"
 const TEXT  = "#35383f"
@@ -186,24 +185,10 @@ export function Section01_Hero() {
   const swipeX    = useRef<number | null>(null)
   const [activeIndex, setActiveIndex] = useState(0)
 
-  // Start buffering video after page load so it doesn't delay the loading screen
-  useEffect(() => {
-    const video = videoRef.current
-    if (!video) return
-    video.load()
-  }, [])
-
   const { scrollYProgress } = useScroll({ target: outerRef, offset: ["start start", "end start"] })
 
   useMotionValueEvent(scrollYProgress, "change", (v) => {
-    // Scroll-scrub video on desktop
-    if (typeof window !== "undefined" && window.innerWidth >= 768) {
-      const video = videoRef.current
-      if (video && video.readyState >= 1 && video.duration) {
-        video.currentTime = v * video.duration
-      }
-    }
-    // Update active dot
+    // Update active dot / text panels via scroll
     const idx = Math.min(Math.floor(v * N), N - 1)
     if (idx !== activeRef.current) {
       activeRef.current = idx
@@ -261,24 +246,26 @@ export function Section01_Hero() {
         {/* Navbar spacer — mobile only (desktop uses absolute positioning below) */}
         <div className="block md:hidden" style={{ height: "clamp(72px,10vh,112px)", flexShrink: 0 }} />
 
-        {/* ── DESKTOP: FULL-WIDTH VIDEO + SIDE OVERLAYS ─────────────────────── */}
+        {/* ── DESKTOP: CENTER VIDEO + SIDE OVERLAYS ─────────────────────────── */}
 
-        {/* Video fills the full viewport (minus navbar top + dots bottom) */}
+        {/* Video sits between the two 22 vw text panels */}
         <div
           className="hidden md:block"
           style={{
             position: "absolute",
             top: "clamp(72px,10vh,112px)",
             bottom: "clamp(40px,6vh,72px)",
-            left: 0, right: 0,
+            left: "22vw", right: "22vw",
             zIndex: 1, pointerEvents: "none",
           }}
         >
           <video
             ref={videoRef}
+            autoPlay
+            loop
             muted
             playsInline
-            preload="metadata"
+            preload="auto"
             style={{
               width: "100%", height: "100%",
               objectFit: "contain",
@@ -286,8 +273,7 @@ export function Section01_Hero() {
               background: "transparent",
             }}
           >
-            <source src={cdn("/video/hero.webm")} type="video/webm" />
-            <source src={cdn("/video/hero-safari.mp4")} type='video/mp4; codecs="hvc1"' />
+            <source src="/video/section1-hero.mp4" type="video/mp4" />
           </video>
         </div>
 
