@@ -3,9 +3,9 @@
 import { useRef, useState } from "react"
 import { motion, useScroll, useTransform, useMotionValueEvent, type MotionValue } from "framer-motion"
 
-const BG    = "#0e0f11"
-const TEXT  = "#bcc0ca"
-const MUTED = "rgba(188,192,202,0.52)"
+const BG    = "#bcc0ca"
+const TEXT  = "#35383f"
+const MUTED = "rgba(53,56,63,0.52)"
 const N     = 6
 
 const STRAINS = [
@@ -30,7 +30,7 @@ function StatStrip() {
           display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
           paddingLeft: i > 0 ? "clamp(10px,1.6vw,22px)" : 0,
           marginLeft:  i > 0 ? "clamp(10px,1.6vw,22px)" : 0,
-          borderLeft:  i > 0 ? "1px solid rgba(188,192,202,0.22)" : "none",
+          borderLeft:  i > 0 ? "1px solid rgba(53,56,63,0.22)" : "none",
         }}>
           <span className="font-druk" style={{ fontSize: "clamp(16px,2.2vw,38px)", color: TEXT, lineHeight: 1, letterSpacing: "-0.03em" }}>
             {value}
@@ -97,7 +97,7 @@ function LeftPanel({
       </div>
 
       {/* Divider */}
-      <div style={{ width: 32, height: 1, background: "rgba(188,192,202,0.18)", marginBottom: "clamp(16px,2.4vh,30px)" }} />
+      <div style={{ width: 32, height: 1, background: "rgba(53,56,63,0.18)", marginBottom: "clamp(16px,2.4vh,30px)" }} />
 
       {/* Stats */}
       <StatStrip />
