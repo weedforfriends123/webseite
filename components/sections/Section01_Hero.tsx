@@ -275,6 +275,7 @@ export function Section01_Hero() {
               display: "block",
             }}
           >
+            <source src="/video/section1-hero.webm" type="video/webm" />
             <source src="/video/section1-hero.mp4" type="video/mp4" />
           </video>
         </div>
