@@ -248,16 +248,15 @@ export function Section01_Hero() {
 
         {/* ── DESKTOP: CENTER VIDEO + SIDE OVERLAYS ─────────────────────────── */}
 
-        {/* Video sits between the two 22 vw text panels */}
+        {/* Video fills full width behind the text panels */}
         <div
           className="hidden md:block"
           style={{
             position: "absolute",
             top: "clamp(72px,10vh,112px)",
             bottom: "clamp(40px,6vh,72px)",
-            left: "22vw", right: "22vw",
+            left: 0, right: 0,
             zIndex: 1, pointerEvents: "none",
-            background: BG,
           }}
         >
           <video
@@ -269,9 +268,8 @@ export function Section01_Hero() {
             preload="auto"
             style={{
               width: "100%", height: "100%",
-              objectFit: "contain",
+              objectFit: "cover",
               display: "block",
-              background: BG,
             }}
           >
             <source src="/video/section1-hero.mp4" type="video/mp4" />
