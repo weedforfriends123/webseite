@@ -36,7 +36,9 @@ yarn-error.log*
 test-results/
 
 # Large binary assets — served via Supabase Storage CDN, not committed to git
-public/video/
+public/video/*.webm
+public/video/hero*.mp4
+public/video/hero*.mov
 public/*.glb
 public/ugc*-mobile.mp4
 public/ugc*-desktop.mp4
