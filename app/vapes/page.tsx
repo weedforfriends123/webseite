@@ -9,7 +9,11 @@ import {
   useReducedMotion,
   AnimatePresence,
 } from "framer-motion"
-import { FloatingProduct } from "@/components/FloatingProduct"
+import dynamic from "next/dynamic"
+const FloatingProduct = dynamic(
+  () => import("@/components/FloatingProduct").then(m => m.FloatingProduct),
+  { ssr: false }
+)
 import { useCart } from "@/lib/cart"
 import { MetalButton } from "@/components/ui/metal-button"
 import { HEADER_H } from "@/components/WFFHeader"
