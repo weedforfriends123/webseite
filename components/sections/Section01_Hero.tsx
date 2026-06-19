@@ -248,14 +248,17 @@ export function Section01_Hero() {
 
         {/* ── DESKTOP: CENTER VIDEO + SIDE OVERLAYS ─────────────────────────── */}
 
-        {/* Video fills full width behind the text panels */}
+        {/* Video — 16:9 container centred between the two text panels.
+            Aspect-ratio container = no letterbox = no black bars. */}
         <div
           className="hidden md:block"
           style={{
             position: "absolute",
-            top: "clamp(72px,10vh,112px)",
-            bottom: "clamp(40px,6vh,72px)",
-            left: 0, right: 0,
+            top: "50%",
+            transform: "translateY(-50%)",
+            left: "22vw", right: "22vw",
+            aspectRatio: "16 / 9",
+            maxHeight: "calc(100svh - clamp(72px,10vh,112px) - clamp(40px,6vh,72px))",
             zIndex: 1, pointerEvents: "none",
           }}
         >
@@ -268,7 +271,7 @@ export function Section01_Hero() {
             preload="auto"
             style={{
               width: "100%", height: "100%",
-              objectFit: "cover",
+              objectFit: "fill",
               display: "block",
             }}
           >
