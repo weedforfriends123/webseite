@@ -1,12 +1,14 @@
 "use client"
 
-import { useRef, useState } from "react"
-import { motion, useScroll, useTransform, useMotionValueEvent, type MotionValue } from "framer-motion"
+import { useRef, useState, useEffect } from "react"
+import { motion, useScroll, useTransform, useMotionValueEvent, useSpring, type MotionValue } from "framer-motion"
+import { cdn } from "@/lib/cdn"
 
 const BG    = "#bcc0ca"
 const TEXT  = "#35383f"
 const MUTED = "rgba(53,56,63,0.52)"
-const N     = 6
+const N        = 6
+const ANIM_END = 350 / 430  // animation runs over first 350vh; last 80vh holds GSC
 
 const STRAINS = [
   { key: "gel", number: "01", line1: "GEL",         line2: "ATO",      img: "/pouches/gelato.webp",             flavor: "Beere · Sahne · Süße" },
@@ -49,7 +51,7 @@ function LeftPanel({
   strain, index, scrollY,
 }: { strain: (typeof STRAINS)[0]; index: number; scrollY: MotionValue<number> }) {
   const chW  = 1 / N
-  const fade = chW * 0.12
+  const fade = chW * 0.20
   const s    = index * chW
   const e    = s + chW
 
@@ -59,7 +61,7 @@ function LeftPanel({
   )
   const y = useTransform(scrollY,
     [Math.max(0, s - fade), s + fade, e - fade, Math.min(1, e)],
-    [index === 0 ? 0 : 28, 0, 0, -28],
+    [index === 0 ? 0 : 18, 0, 0, -18],
   )
 
   return (
@@ -120,7 +122,7 @@ function RightPanel({
   strain, index, scrollY,
 }: { strain: (typeof STRAINS)[0]; index: number; scrollY: MotionValue<number> }) {
   const chW  = 1 / N
-  const fade = chW * 0.12
+  const fade = chW * 0.20
   const s    = index * chW
   const e    = s + chW
 
@@ -130,7 +132,7 @@ function RightPanel({
   )
   const y = useTransform(scrollY,
     [Math.max(0, s - fade), s + fade, e - fade, Math.min(1, e)],
-    [index === 0 ? 0 : 28, 0, 0, -28],
+    [index === 0 ? 0 : 18, 0, 0, -18],
   )
 
   return (
@@ -139,26 +141,27 @@ function RightPanel({
         opacity, y,
         position: "absolute", inset: 0,
         display: "flex", flexDirection: "column", justifyContent: "center",
-        padding: "0 clamp(24px,3.5vw,64px)",
+        padding: "0 clamp(12px,1.8vw,28px)",
         pointerEvents: "none",
+        textAlign: "right",
       }}
     >
-      {/* Strain name */}
+      {/* Strain name — right-aligned so text grows leftward, never clips at right edge */}
       <h1
         className="font-druk-wide uppercase"
         style={{ lineHeight: 0.88, letterSpacing: "-0.02em", marginBottom: "clamp(14px,2vh,22px)" }}
       >
         <span style={{
           display: "block",
-          fontSize: "clamp(22px,3.6vw,58px)",
+          fontSize: "clamp(20px,3vw,50px)",
           color: "transparent",
-          WebkitTextStroke: `clamp(1.5px,0.12vw,2px) ${TEXT}`,
+          WebkitTextStroke: `clamp(1.2px,0.10vw,1.8px) ${TEXT}`,
         }}>
           {strain.line1}
         </span>
         <span style={{
           display: "block",
-          fontSize: "clamp(22px,3.6vw,58px)",
+          fontSize: "clamp(20px,3vw,50px)",
           color: TEXT,
         }}>
           {strain.line2}
@@ -182,13 +185,48 @@ export function Section01_Hero() {
   const outerRef  = useRef<HTMLDivElement>(null)
   const videoRef  = useRef<HTMLVideoElement>(null)
   const activeRef = useRef(0)
-  const swipeX    = useRef<number | null>(null)
+  const swipeX        = useRef<number | null>(null)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [hasInteracted, setHasInteracted] = useState(false)
+  const [autoKey, setAutoKey] = useState(0)
+
+  // Start buffering video after page load so it doesn't delay the loading screen
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+    video.load()
+  }, [])
+
+  // Mobile: auto-advance carousel every 2.5s until user interacts
+  useEffect(() => {
+    if (typeof window === "undefined" || window.innerWidth >= 768) return
+    if (hasInteracted) return
+    const id = setInterval(() => {
+      const cur = activeRef.current
+      if (cur >= N - 1) return
+      const next = cur + 1
+      activeRef.current = next
+      setActiveIndex(next)
+      setAutoKey(k => k + 1)
+    }, 2500)
+    return () => clearInterval(id)
+  }, [hasInteracted])
 
   const { scrollYProgress } = useScroll({ target: outerRef, offset: ["start start", "end start"] })
+  // Compress animation into first ANIM_END of scroll; last portion holds on final strain
+  const animProgress   = useTransform(scrollYProgress, [0, ANIM_END], [0, 1], { clamp: true })
+  const springProgress = useSpring(animProgress, { stiffness: 220, damping: 32, restDelta: 0.0001 })
 
-  useMotionValueEvent(scrollYProgress, "change", (v) => {
-    // Update active dot / text panels via scroll
+  useMotionValueEvent(springProgress, "change", (v) => {
+    // Scroll-scrub video on desktop — spring keeps seeking smooth
+    if (typeof window !== "undefined" && window.innerWidth >= 768) {
+      const video = videoRef.current
+      if (video && video.readyState >= 2 && isFinite(video.duration) && video.duration > 0) {
+        const t = v * video.duration
+        if (isFinite(t)) video.currentTime = Math.max(0, Math.min(video.duration, t))
+      }
+    }
+    // Update active dot
     const idx = Math.min(Math.floor(v * N), N - 1)
     if (idx !== activeRef.current) {
       activeRef.current = idx
@@ -202,6 +240,8 @@ export function Section01_Hero() {
     if (i === activeRef.current) return
     activeRef.current = i
     setActiveIndex(i)
+    setHasInteracted(true)
+    setAutoKey(k => k + 1)
   }
 
   const dotClick = (idx: number) => {
@@ -210,7 +250,8 @@ export function Section01_Hero() {
     } else {
       const el = outerRef.current
       if (!el) return
-      window.scrollTo({ top: el.offsetTop + (idx / N) * el.offsetHeight, behavior: "smooth" })
+      // Offset by ANIM_END so clicking dot N lands at the right scroll position
+      window.scrollTo({ top: el.offsetTop + (idx / N) * ANIM_END * el.offsetHeight, behavior: "smooth" })
     }
   }
 
@@ -226,7 +267,7 @@ export function Section01_Hero() {
 
   return (
     // Mobile: 100svh (no extra scroll) | Desktop: 600vh scroll container
-    <div ref={outerRef} className="h-[100svh] md:h-[600vh] relative">
+    <div ref={outerRef} className="h-[100svh] md:h-[430vh] relative">
       <section
         id="hero"
         onTouchStart={onTouchStart}
@@ -246,37 +287,33 @@ export function Section01_Hero() {
         {/* Navbar spacer — mobile only (desktop uses absolute positioning below) */}
         <div className="block md:hidden" style={{ height: "clamp(72px,10vh,112px)", flexShrink: 0 }} />
 
-        {/* ── DESKTOP: CENTER VIDEO + SIDE OVERLAYS ─────────────────────────── */}
+        {/* ── DESKTOP: FULL-WIDTH VIDEO + SIDE OVERLAYS ─────────────────────── */}
 
-        {/* Video — 16:9 container centred between the two text panels.
-            Aspect-ratio container = no letterbox = no black bars. */}
+        {/* Video fills the full viewport (minus navbar top + dots bottom) */}
         <div
           className="hidden md:block"
           style={{
             position: "absolute",
-            top: "50%",
-            transform: "translateY(-50%)",
-            left: "22vw", right: "22vw",
-            aspectRatio: "16 / 9",
-            maxHeight: "calc(100svh - clamp(72px,10vh,112px) - clamp(40px,6vh,72px))",
+            top: "clamp(72px,10vh,112px)",
+            bottom: "clamp(40px,6vh,72px)",
+            left: 0, right: 0,
             zIndex: 1, pointerEvents: "none",
           }}
         >
           <video
             ref={videoRef}
-            autoPlay
-            loop
             muted
             playsInline
             preload="auto"
             style={{
               width: "100%", height: "100%",
-              objectFit: "fill",
+              objectFit: "contain",
               display: "block",
+              transform: "scale(0.86)",
             }}
           >
-            <source src="/video/section1-hero.webm" type="video/webm" />
-            <source src="/video/section1-hero.mp4" type="video/mp4" />
+            <source src={cdn("/video/hero.webm")} type="video/webm" />
+            <source src={cdn("/video/hero-safari.mp4")} type='video/mp4; codecs="hvc1"' />
           </video>
         </div>
 
@@ -292,7 +329,7 @@ export function Section01_Hero() {
           }}
         >
           {STRAINS.map((s, i) => (
-            <LeftPanel key={s.key} strain={s} index={i} scrollY={scrollYProgress} />
+            <LeftPanel key={s.key} strain={s} index={i} scrollY={springProgress} />
           ))}
         </div>
 
@@ -303,12 +340,12 @@ export function Section01_Hero() {
             position: "absolute",
             top: "clamp(72px,10vh,112px)",
             bottom: "clamp(40px,6vh,72px)",
-            right: 0, width: "22vw",
+            right: 0, width: "24vw",
             zIndex: 5,
           }}
         >
           {STRAINS.map((s, i) => (
-            <RightPanel key={s.key} strain={s} index={i} scrollY={scrollYProgress} />
+            <RightPanel key={s.key} strain={s} index={i} scrollY={springProgress} />
           ))}
         </div>
 
@@ -331,8 +368,12 @@ export function Section01_Hero() {
                 animate={{
                   opacity: i === activeIndex ? 1 : 0,
                   x: i === activeIndex ? 0 : i < activeIndex ? -64 : 64,
+                  scale: i === activeIndex ? 1.045 : 1,
                 }}
-                transition={{ duration: 0.30, ease: [0.16, 1, 0.3, 1] as const }}
+                transition={{
+                  duration: 0.30, ease: [0.16, 1, 0.3, 1] as const,
+                  scale: { duration: 3, ease: "easeInOut" },
+                }}
                 style={{
                   position: "absolute", inset: 0,
                   display: "flex", alignItems: "center", justifyContent: "center",
@@ -343,7 +384,7 @@ export function Section01_Hero() {
                   src={s.img}
                   alt={`${s.line1} ${s.line2}`}
                   fetchPriority={i === 0 ? "high" : "low"}
-                  style={{ height: "100%", maxHeight: "42vh", width: "auto", objectFit: "contain",
+                  style={{ height: "100%", maxHeight: "44vh", width: "auto", objectFit: "contain",
                     userSelect: "none", pointerEvents: "none", display: "block" }}
                   draggable={false}
                 />
@@ -400,6 +441,12 @@ export function Section01_Hero() {
                   textAlign: "center",
                 }}
               >
+                <p className="font-ekstra" style={{
+                  fontSize: "clamp(9px,2.4vw,11px)", color: MUTED,
+                  letterSpacing: "0.22em", marginBottom: "clamp(5px,0.9vh,10px)",
+                }}>
+                  {String(i + 1).padStart(2, "0")} / {String(N).padStart(2, "0")}
+                </p>
                 <h1 className="font-druk-wide uppercase" style={{ lineHeight: 0.88, letterSpacing: "-0.02em", marginBottom: "clamp(6px,1vh,12px)" }}>
                   <span className="block text-[9.5vw]"
                     style={{ color: "transparent", WebkitTextStroke: `clamp(1.5px,0.14vw,2px) ${TEXT}` }}>
@@ -417,7 +464,71 @@ export function Section01_Hero() {
               </motion.div>
             ))}
           </div>
+          {/* Mobile: total progress bar across all 6 strains */}
+          <div style={{
+            width: "100%", height: 2,
+            background: "rgba(53,56,63,0.12)",
+            borderRadius: 99, overflow: "hidden",
+            flexShrink: 0, position: "relative",
+          }}>
+            <style>{`@keyframes segFill { from { width: 0% } to { width: ${(100 / N).toFixed(2)}% } }`}</style>
+            {/* Completed strains */}
+            <div style={{
+              position: "absolute", top: 0, left: 0,
+              height: "100%", borderRadius: 99,
+              width: `${(activeIndex / N) * 100}%`,
+              background: TEXT, transition: "width 0.28s ease",
+            }} />
+            {/* Current strain filling in */}
+            {!hasInteracted && (
+              <div
+                key={`seg-${autoKey}`}
+                style={{
+                  position: "absolute", top: 0,
+                  left: `${(activeIndex / N) * 100}%`,
+                  height: "100%", background: TEXT,
+                  animation: "segFill 2.5s linear forwards",
+                }}
+              />
+            )}
+          </div>
         </div>
+
+        {/* Mobile: swipe hint — fades in then out, disappears after first interaction */}
+        {!hasInteracted && (
+          <motion.div
+            className="flex md:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 0, 0.7, 0.7, 0] }}
+            transition={{ duration: 5, times: [0, 0.15, 0.3, 0.75, 1], ease: "easeInOut", delay: 1.2 }}
+            style={{
+              position: "absolute",
+              bottom: "clamp(52px,9vh,76px)",
+              left: 0, right: 0,
+              justifyContent: "center", alignItems: "center",
+              pointerEvents: "none", zIndex: 30,
+            }}
+          >
+            <span className="font-ekstra" style={{
+              fontSize: "clamp(9px,2.6vw,12px)", color: TEXT,
+              letterSpacing: "0.22em", textTransform: "uppercase",
+            }}>← swipe →</span>
+          </motion.div>
+        )}
+
+        {/* ── DESKTOP VIGNETTE: frames the video, blends edges into section background ── */}
+        <div
+          className="hidden md:block"
+          aria-hidden
+          style={{
+            position: "absolute",
+            top: "clamp(72px,10vh,112px)",
+            bottom: "clamp(40px,6vh,72px)",
+            left: 0, right: 0,
+            zIndex: 3, pointerEvents: "none",
+            background: `radial-gradient(ellipse 62% 72% at 50% 50%, transparent 44%, ${BG} 82%)`,
+          }}
+        />
 
         {/* ── NAVIGATION DOTS ───────────────────────────────────────────────── */}
         <div style={{
@@ -450,8 +561,8 @@ export function Section01_Hero() {
           transition={{ duration: 0.9, delay: 0.6 }} aria-hidden
           style={{
             position: "absolute",
-            top: "clamp(72px,13vh,210px)",
-            left: "clamp(16px,14vw,240px)",
+            top: "clamp(80px,14vh,200px)",
+            left: "clamp(16px,32vw,580px)",
             transform: "rotate(-4deg)",
             zIndex: 10, pointerEvents: "none", userSelect: "none",
           }}
